@@ -6,41 +6,42 @@ namespace GeometryWars;
 
 public static class EnemySpawner
 {
-    private static Random rand = new();
-    private static float inverseSpawnChance = 60;
-    private static readonly float inverseBlackHoleChance = 600;
+    private static readonly Random rand = new();
+    private static float _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 
     // playerPosition is null when the player is dead; no dependency on PlayerShip.
     public static void Update(Vector2? playerPosition)
     {
-        if (playerPosition.HasValue && EntityManager.Count < 200)
+        if (playerPosition.HasValue && EntityManager.Count < GameSettings.MaxActiveEntities)
         {
             Vector2 playerPos = playerPosition.Value;
 
-            if (rand.Next((int)inverseSpawnChance) == 0)
+            if (rand.Next((int)_inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), () => playerPosition.Value));
 
-            if (rand.Next((int)inverseSpawnChance) == 0)
+            if (rand.Next((int)_inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
 
-            if (EntityManager.BlackHoleCount < 2 && rand.Next((int)inverseBlackHoleChance) == 0)
+            if (EntityManager.BlackHoleCount < GameSettings.MaxBlackHoles &&
+                rand.Next((int)GameSettings.BlackHoleSpawnChance) == 0)
                 EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
         }
 
-        if (inverseSpawnChance > 20)
-            inverseSpawnChance -= 0.005f;
+        if (_inverseSpawnChance > GameSettings.EnemySpawnChanceMin)
+            _inverseSpawnChance -= GameSettings.EnemySpawnChanceDecay;
     }
 
     private static Vector2 GetSpawnPosition(Vector2 playerPosition)
     {
+        float minDistSq = GameSettings.SpawnMinPlayerDistance * GameSettings.SpawnMinPlayerDistance;
         Vector2 pos;
         do
         {
             pos = new Vector2(rand.Next((int)GameServices.ScreenSize.X), rand.Next((int)GameServices.ScreenSize.Y));
         }
-        while (Vector2.DistanceSquared(pos, playerPosition) < 250 * 250);
+        while (Vector2.DistanceSquared(pos, playerPosition) < minDistSq);
         return pos;
     }
 
-    public static void Reset() => inverseSpawnChance = 60;
+    public static void Reset() => _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 }

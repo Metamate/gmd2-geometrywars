@@ -13,7 +13,7 @@ public class Game1 : GameCore
     private ParticleManager<ParticleState> _particles;
     private Grid _grid;
 
-    public Game1() : base(1920, 1080)
+    public Game1() : base(GameSettings.ScreenWidth, GameSettings.ScreenHeight)
     {
         _bloom = new BloomComponent(this);
         Components.Add(_bloom);
@@ -24,10 +24,9 @@ public class Game1 : GameCore
     {
         base.Initialize();
 
-        _particles = new ParticleManager<ParticleState>(1024 * 20, ParticleState.UpdateParticle);
+        _particles = new ParticleManager<ParticleState>(GameSettings.MaxParticles, ParticleState.UpdateParticle);
 
-        const int maxGridPoints = 1600;
-        Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / maxGridPoints));
+        Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.MaxGridPoints));
         _grid = new Grid(GraphicsDevice.Viewport.Bounds, gridSpacing);
 
         // Seed services for the first frame before the first Update tick

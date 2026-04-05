@@ -9,8 +9,8 @@ namespace GeometryWars;
 
 public class Enemy : Entity
 {
-    private static Random rand = new();
-    private int timeUntilStart = 60;
+    private static readonly Random rand = new();
+    private int timeUntilStart = GameSettings.EnemySpawnDelay;
     private List<IEnumerator<int>> behaviours = [];
 
     public Enemy(Texture2D image, Vector2 position)
@@ -20,7 +20,7 @@ public class Enemy : Entity
         color = Color.Transparent;
 
         // Movement: decelerate each frame and stay on screen.
-        AddComponent(new VelocityMover(damping: 0.8f, clampToScreen: true));
+        AddComponent(new VelocityMover(damping: GameSettings.EnemyDamping, clampToScreen: true));
 
         // Collision response: enemies push each other apart; bullets kill them.
         // Player collision is handled entirely on the player's side.
@@ -34,21 +34,23 @@ public class Enemy : Entity
     }
 
     public bool IsActive => timeUntilStart <= 0;
-    public int PointValue { get; private set; }
+    public int PointValue { get; set; }
 
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var enemy = new Enemy(Art.Seeker, position);
-        enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition));
-        enemy.PointValue = 2;
+        var def = GameSettings.Seeker;
+        var enemy = new Enemy(def.GetTexture(), position);
+        enemy.PointValue = def.PointValue;
+        enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition, def.Acceleration));
         return enemy;
     }
 
     public static Enemy CreateWanderer(Vector2 position)
     {
-        var enemy = new Enemy(Art.Wanderer, position);
+        var def = GameSettings.Wanderer;
+        var enemy = new Enemy(def.GetTexture(), position);
+        enemy.PointValue = def.PointValue;
         enemy.AddBehaviour(enemy.MoveRandomly());
-        enemy.PointValue = 1;
         return enemy;
     }
 
@@ -59,7 +61,7 @@ public class Enemy : Entity
         else
         {
             timeUntilStart--;
-            color = Color.White * (1 - timeUntilStart / 60f);
+            color = Color.White * (1 - timeUntilStart / (float)GameSettings.EnemySpawnDelay);
         }
     }
 
@@ -79,9 +81,9 @@ public class Enemy : Entity
         float hue2 = (hue1 + rand.NextFloat(0, 2)) % 6f;
         Color color1 = ColorUtil.HSVToColor(hue1, 0.5f, 1);
         Color color2 = ColorUtil.HSVToColor(hue2, 0.5f, 1);
-        for (int i = 0; i < 120; i++)
+        for (int i = 0; i < GameSettings.EnemyDeathParticles; i++)
         {
-            float speed = 18f * (1f - 1 / rand.NextFloat(1f, 10f));
+            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / rand.NextFloat(1f, 10f));
             var state = new ParticleState
             {
                 Velocity = rand.NextVector2(speed, speed),
@@ -89,7 +91,7 @@ public class Enemy : Entity
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, rand.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, 190, 1.5f, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.DeathParticleLife, GameSettings.DeathParticleSize, state);
         }
 
         if (awardPoints)
@@ -100,7 +102,7 @@ public class Enemy : Entity
         Sound.Explosion.Play(0.5f, rand.NextFloat(-0.2f, 0.2f), 0);
     }
 
-    IEnumerable<int> FollowPlayer(Func<Vector2> getTargetPosition, float acceleration = 1f)
+    IEnumerable<int> FollowPlayer(Func<Vector2> getTargetPosition, float acceleration)
     {
         while (true)
         {
@@ -116,12 +118,12 @@ public class Enemy : Entity
         float direction = rand.NextFloat(0, MathHelper.TwoPi);
         while (true)
         {
-            direction += rand.NextFloat(-0.1f, 0.1f);
+            direction += rand.NextFloat(-GameSettings.WandererTurnRate, GameSettings.WandererTurnRate);
             direction = MathHelper.WrapAngle(direction);
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < GameSettings.WandererStepsPerTick; i++)
             {
-                Velocity += MathUtil.FromPolar(direction, 0.4f);
-                Orientation -= 0.05f;
+                Velocity += MathUtil.FromPolar(direction, GameSettings.WandererVelocity);
+                Orientation -= GameSettings.WandererOrientationDecay;
                 var bounds = GameServices.Viewport.Bounds;
                 bounds.Inflate(-image.Width, -image.Height);
                 if (!bounds.Contains(Position.ToPoint()))

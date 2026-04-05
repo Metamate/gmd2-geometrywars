@@ -5,8 +5,6 @@ namespace GeometryWars;
 
 public static class PlayerStatus
 {
-    private const float MultiplierExpiryTime = 0.8f;
-    private const int MaxMultiplier = 20;
     private const string HighScoreFilename = "highscore.txt";
 
     private static float _multiplierTimeLeft;
@@ -31,8 +29,8 @@ public static class PlayerStatus
 
         Score = 0;
         Multiplier = 1;
-        Lives = 4;
-        _scoreForExtraLife = 2000;
+        Lives = GameSettings.PlayerStartingLives;
+        _scoreForExtraLife = GameSettings.PlayerExtraLifeScore;
         _multiplierTimeLeft = 0;
     }
 
@@ -40,7 +38,7 @@ public static class PlayerStatus
     {
         if (Multiplier > 1 && (_multiplierTimeLeft -= GameServices.ElapsedSeconds) <= 0)
         {
-            _multiplierTimeLeft = MultiplierExpiryTime;
+            _multiplierTimeLeft = GameSettings.PlayerMultiplierExpiry;
             Multiplier = 1;
         }
     }
@@ -50,15 +48,15 @@ public static class PlayerStatus
         Score += basePoints * Multiplier;
         while (Score >= _scoreForExtraLife)
         {
-            _scoreForExtraLife += 2000;
+            _scoreForExtraLife += GameSettings.PlayerExtraLifeScore;
             Lives++;
         }
     }
 
     public static void IncreaseMultiplier()
     {
-        _multiplierTimeLeft = MultiplierExpiryTime;
-        if (Multiplier < MaxMultiplier) Multiplier++;
+        _multiplierTimeLeft = GameSettings.PlayerMultiplierExpiry;
+        if (Multiplier < GameSettings.PlayerMaxMultiplier) Multiplier++;
     }
 
     public static void RemoveLife() => Lives--;

@@ -10,7 +10,6 @@ public class PlayerShip : Entity
 {
     private static readonly Random rand = new();
     private int framesUntilRespawn = 0;
-    private const int CooldownFrames = 6;
     private int cooldownRemaining = 0;
 
     public bool IsDead => framesUntilRespawn > 0;
@@ -26,7 +25,7 @@ public class PlayerShip : Entity
 
         // Player dies on contact with any active enemy or black hole.
         // All enemies/blackholes are cleared as part of Kill().
-        AddComponent(new CircleCollider(10, other =>
+        AddComponent(new CircleCollider(GameSettings.PlayerColliderRadius, other =>
         {
             if (IsDead) return;
 
@@ -55,8 +54,7 @@ public class PlayerShip : Entity
             return;
         }
 
-        const float speed = 8;
-        Velocity += speed * Input.GetMovementDirection();
+        Velocity += GameSettings.PlayerSpeed * Input.GetMovementDirection();
 
         if (Velocity.LengthSquared() > 0)
             Orientation = Velocity.ToAngle();
@@ -66,14 +64,17 @@ public class PlayerShip : Entity
         var aim = Input.GetAimDirection(Position);
         if (aim.LengthSquared() > 0 && cooldownRemaining <= 0)
         {
-            cooldownRemaining = CooldownFrames;
+            cooldownRemaining = GameSettings.PlayerShotCooldown;
             float aimAngle = aim.ToAngle();
             Quaternion aimQuat = Quaternion.CreateFromYawPitchRoll(0, 0, aimAngle);
-            float randomSpread = rand.NextFloat(-0.04f, 0.04f) + rand.NextFloat(-0.04f, 0.04f);
-            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, 11f);
+            float randomSpread = rand.NextFloat(-GameSettings.PlayerBulletSpread, GameSettings.PlayerBulletSpread)
+                               + rand.NextFloat(-GameSettings.PlayerBulletSpread, GameSettings.PlayerBulletSpread);
+            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.PlayerBulletSpeed);
 
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(new Vector2(25, -8), aimQuat), vel));
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(new Vector2(25, 8), aimQuat), vel));
+            Vector2 offsetA = new(GameSettings.PlayerBulletOffsetX, -GameSettings.PlayerBulletOffsetY);
+            Vector2 offsetB = new(GameSettings.PlayerBulletOffsetX,  GameSettings.PlayerBulletOffsetY);
+            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
+            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
 
             Sound.Shot.Play(0.2f, rand.NextFloat(-0.2f, 0.2f), 0);
         }
@@ -91,14 +92,14 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-        framesUntilRespawn = PlayerStatus.IsGameOver ? 300 : 120;
+        framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.PlayerGameOverFrames : GameSettings.PlayerRespawnFrames;
 
         Color yellow = new(0.8f, 0.8f, 0.4f);
-        for (int i = 0; i < 1200; i++)
+        for (int i = 0; i < GameSettings.PlayerDeathParticles; i++)
         {
-            float speed = 18f * (1f - 1 / rand.NextFloat(1f, 10f));
+            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / rand.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, rand.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, 190, 1.5f,
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.DeathParticleLife, GameSettings.DeathParticleSize,
                 new ParticleState { Velocity = rand.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });
         }
     }

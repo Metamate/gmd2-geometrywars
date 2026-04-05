@@ -8,8 +8,8 @@ namespace GeometryWars;
 
 public class BlackHole : Entity
 {
-    private static Random rand = new();
-    private int hitpoints = 10;
+    private static readonly Random rand = new();
+    private int hitpoints = GameSettings.BlackHoleHitpoints;
     private float sprayAngle = 0;
 
     public BlackHole(Vector2 position)
@@ -32,26 +32,23 @@ public class BlackHole : Entity
 
         float hue = (float)(3 * GameServices.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
-        const int numParticles = 150;
-        float startOffset = rand.NextFloat(0, MathHelper.TwoPi / numParticles);
-        for (int i = 0; i < numParticles; i++)
+        float startOffset = rand.NextFloat(0, MathHelper.TwoPi / GameSettings.BlackHoleHitParticles);
+        for (int i = 0; i < GameSettings.BlackHoleHitParticles; i++)
         {
-            Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / numParticles + startOffset, rand.NextFloat(8, 16));
+            float speed = rand.NextFloat(GameSettings.BlackHoleHitParticleMinSpeed, GameSettings.BlackHoleHitParticleMaxSpeed);
+            Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / GameSettings.BlackHoleHitParticles + startOffset, speed);
             var state = new ParticleState
             {
                 Velocity = sprayVel,
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position + 2f * sprayVel, color, 90, 1.5f, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position + 2f * sprayVel, color,
+                GameSettings.BlackHoleHitParticleLife, GameSettings.BlackHoleHitParticleSize, state);
         }
     }
 
-    public void Kill()
-    {
-        hitpoints = 0;
-        WasShot();
-    }
+    public void Kill() => IsExpired = true;
 
     public override void Draw(SpriteBatch spriteBatch)
     {
@@ -63,7 +60,7 @@ public class BlackHole : Entity
     protected override void OnPreUpdate()
     {
         // Apply gravity and repulsion to nearby entities
-        foreach (var entity in EntityManager.GetNearbyEntities(Position, 250))
+        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
         {
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
@@ -73,7 +70,7 @@ public class BlackHole : Entity
             else
             {
                 var dPos = Position - entity.Position;
-                entity.Velocity += dPos.ScaleTo(MathHelper.Lerp(2, 0, dPos.Length() / 250f));
+                entity.Velocity += dPos.ScaleTo(MathHelper.Lerp(GameSettings.BlackHoleGravityForce, 0, dPos.Length() / GameSettings.BlackHoleGravityRange));
             }
         }
 
@@ -88,6 +85,6 @@ public class BlackHole : Entity
         }
 
         sprayAngle -= MathHelper.TwoPi / 50f;
-        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(sprayAngle / 2) * 10 + 20, Position, 200);
+        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(sprayAngle / 2) * 10 + 20, Position, GameSettings.BlackHoleGridRange);
     }
 }

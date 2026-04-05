@@ -15,7 +15,7 @@ public class Bullet : Entity
 
         // Expires when it leaves the screen; bullets don't need VelocityMover since
         // they move at constant velocity and have off-screen side-effects to handle.
-        AddComponent(new CircleCollider(8, other =>
+        AddComponent(new CircleCollider(GameSettings.BulletColliderRadius, other =>
         {
             // Bullet response: expire on contact with enemy or black hole.
             // The other entity handles its own side of the collision.
@@ -42,11 +42,11 @@ public class Bullet : Entity
         if (!GameServices.Viewport.Bounds.Contains(Position.ToPoint()))
         {
             IsExpired = true;
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < GameSettings.BulletDeathParticles; i++)
                 GameServices.Particles.CreateParticle(Art.LineParticle, Position, Color.LightBlue, 50, 1,
                     new ParticleState { Velocity = rand.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
         }
 
-        GameServices.Grid.ApplyExplosiveForce(0.5f * Velocity.Length(), Position, 80);
+        GameServices.Grid.ApplyExplosiveForce(GameSettings.BulletGridForce * Velocity.Length(), Position, GameSettings.BulletGridRadius);
     }
 }
