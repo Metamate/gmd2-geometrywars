@@ -18,8 +18,9 @@ public sealed class PlayState : GameStateBase
     {
         _paused = false;
         EntityManager.Clear();
-        PlayerShip.Instance.Reset();
-        EntityManager.Add(PlayerShip.Instance);
+        var player = new PlayerShip();
+        GameServices.Player = player;
+        EntityManager.Add(player);
         PlayerStatus.Reset();
         EnemySpawner.Reset();
         MediaPlayer.IsRepeating = true;
@@ -40,7 +41,7 @@ public sealed class PlayState : GameStateBase
         GameServices.Grid.Update();
         GameServices.Particles.Update();
 
-        if (PlayerStatus.IsGameOver && !PlayerShip.Instance.IsDead)
+        if (PlayerStatus.IsGameOver && !GameServices.Player.IsDead)
             _game.SetState(new GameOverState(_game));
     }
 

@@ -12,7 +12,7 @@ public static class EnemySpawner
 
     public static void Update()
     {
-        if (!PlayerShip.Instance.IsDead && EntityManager.Count < 200)
+        if (!GameServices.Player.IsDead && EntityManager.Count < 200)
         {
             if (rand.Next((int)inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition()));
@@ -35,7 +35,7 @@ public static class EnemySpawner
         {
             pos = new Vector2(rand.Next((int)GameServices.ScreenSize.X), rand.Next((int)GameServices.ScreenSize.Y));
         }
-        while (Vector2.DistanceSquared(pos, PlayerShip.Instance.Position) < 250 * 250);
+        while (Vector2.DistanceSquared(pos, GameServices.Player.Position) < 250 * 250);
         return pos;
     }
 

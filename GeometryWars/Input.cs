@@ -1,4 +1,5 @@
 using System.Linq;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -86,7 +87,7 @@ static class Input
 
     private static Vector2 GetMouseAimDirection()
     {
-        Vector2 direction = MousePosition - PlayerShip.Instance.Position;
+        Vector2 direction = MousePosition - GameServices.Player.Position;
 
         if (direction == Vector2.Zero)
             return Vector2.Zero;

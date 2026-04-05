@@ -8,34 +8,17 @@ namespace GeometryWars;
 
 public class PlayerShip : Entity
 {
-    private static PlayerShip _instance;
-    private static Random rand = new();
+    private static readonly Random rand = new();
     private int framesUntilRespawn = 0;
     private const int CooldownFrames = 6;
     private int cooldownRemaining = 0;
 
     public bool IsDead => framesUntilRespawn > 0;
 
-    public void Reset()
-    {
-        framesUntilRespawn = 0;
-        cooldownRemaining = 0;
-        IsExpired = false;
-    }
-
-    public static PlayerShip Instance
-    {
-        get
-        {
-            _instance ??= new PlayerShip();
-            return _instance;
-        }
-    }
-
-    private PlayerShip()
+    public PlayerShip()
     {
         image = Art.Player;
-        Position = new Vector2(960, 540);
+        Position = GameServices.ScreenSize / 2;
 
         // Damping = 0 clears velocity after each frame; player ship is input-driven,
         // not physics-based — no momentum carries over between frames.

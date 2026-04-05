@@ -99,7 +99,7 @@ public class Enemy : Entity
     {
         while (true)
         {
-            Velocity += (PlayerShip.Instance.Position - Position).ScaleTo(acceleration);
+            Velocity += (GameServices.Player.Position - Position).ScaleTo(acceleration);
             if (Velocity != Vector2.Zero)
                 Orientation = Velocity.ToAngle();
             yield return 0;
