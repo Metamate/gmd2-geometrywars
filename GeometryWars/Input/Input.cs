@@ -33,7 +33,6 @@ static class Input
             isAimingWithMouse = true;
     }
 
-    // Checks if any key was just pressed down
     public static bool WasKeyPressed(Keys key)
     {
         return lastKeyboardState.IsKeyUp(key) && keyboardState.IsKeyDown(key);
@@ -78,7 +77,6 @@ static class Input
             direction.Y -= 1;
         if (keyboardState.IsKeyDown(Keys.Down))
             direction.Y += 1;
-        // If there's no aim input, return zero. Otherwise normalize the direction to have a length of 1. 
         if (direction == Vector2.Zero)
             return Vector2.Zero;
         else

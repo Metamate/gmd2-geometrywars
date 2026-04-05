@@ -4,9 +4,9 @@ using Microsoft.Xna.Framework;
 namespace GeometryWars.Components;
 
 // Applies velocity to position each frame, with optional screen clamping and damping.
-// Damping = 0 clears velocity after moving (player ship: input-driven, no momentum).
-// Damping = 0.8 slows the entity each frame (enemies: gradual deceleration).
-// Damping = 1 preserves full velocity (not used currently; bullets handle themselves).
+// Damping = 0 clears velocity after moving (input-driven entities: no momentum).
+// Damping = 0.8 slows the entity each frame (gradual deceleration).
+// Damping = 1 preserves full velocity.
 public sealed class VelocityMover : IComponent
 {
     private readonly float _damping;

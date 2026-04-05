@@ -6,7 +6,6 @@ namespace GeometryWars.Services;
 // Service locator for game-wide singletons.
 // Game1.RegisterServices() refreshes Time and Viewport each frame.
 // Particles and Grid are set once during initialization.
-// Entities pull from here directly — no ctx parameter threading required.
 public static class GameServices
 {
     public static ParticleManager<ParticleState> Particles { get; set; }

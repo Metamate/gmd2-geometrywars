@@ -9,7 +9,7 @@ public static class EnemySpawner
     private static float _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 
     // isPlayerAlive guards spawning; getPlayerPosition is passed to seekers so they
-    // track the live position each frame. No dependency on PlayerShip.
+    // track the live player position each frame.
     public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
     {
         if (isPlayerAlive && EntityManager.Count < GameSettings.MaxActiveEntities)

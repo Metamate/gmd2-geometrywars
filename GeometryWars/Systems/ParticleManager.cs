@@ -6,7 +6,6 @@ namespace GeometryWars;
 
 public class ParticleManager<T>
 {
-    // This delegate will be called for each particle. 
     private readonly Action<Particle> updateParticle;
     private readonly CircularParticleArray particleList;
     public ParticleManager(int capacity, Action<Particle> updateParticle)
@@ -26,9 +25,8 @@ public class ParticleManager<T>
             var particle = particleList[i];
             updateParticle(particle);
             particle.PercentLife -= 1f / particle.Duration;
-            // sift deleted particles to the end of the list 
+            // sift deleted particles to the end of the list
             Swap(particleList, i - removalCount, i);
-            // if the particle has expired, delete this particle 
             if (particle.PercentLife < 0)
                 removalCount++;
         }
@@ -58,7 +56,6 @@ public class ParticleManager<T>
             particle = particleList[particleList.Count];
             particleList.Count++;
         }
-        // Create the particle 
         particle.Texture = texture;
         particle.Position = position;
         particle.Tint = tint;
