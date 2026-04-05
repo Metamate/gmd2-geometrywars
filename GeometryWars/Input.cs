@@ -1,7 +1,8 @@
 using System.Linq;
-using GeometryWars;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+
+namespace GeometryWars;
 
 static class Input
 {
@@ -39,7 +40,7 @@ static class Input
 
     public static bool WasButtonPressed(Buttons button)
     {
-        return lastGamepadState.IsButtonUp(button) || gamepadState.IsButtonDown(button);
+        return lastGamepadState.IsButtonUp(button) && gamepadState.IsButtonDown(button);
     }
 
     public static Vector2 GetMovementDirection()

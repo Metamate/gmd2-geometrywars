@@ -18,6 +18,7 @@ public sealed class PlayState : GameStateBase
     {
         _paused = false;
         EntityManager.Clear();
+        PlayerShip.Instance.Reset();
         EntityManager.Add(PlayerShip.Instance);
         PlayerStatus.Reset();
         EnemySpawner.Reset();

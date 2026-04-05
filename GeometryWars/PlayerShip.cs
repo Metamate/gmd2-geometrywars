@@ -16,6 +16,13 @@ public class PlayerShip : Entity
 
     public bool IsDead => framesUntilRespawn > 0;
 
+    public void Reset()
+    {
+        framesUntilRespawn = 0;
+        cooldownRemaining = 0;
+        IsExpired = false;
+    }
+
     public static PlayerShip Instance
     {
         get
