@@ -9,18 +9,16 @@ public static class EnemySpawner
     private static readonly Random rand = new();
     private static float _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 
-    // getPlayerPosition returns null when the player is dead; no dependency on PlayerShip.
-    // A delegate is used (rather than a plain Vector2?) so seekers capture a live reference
-    // and get the current position on every frame, not just the position at spawn time.
-    public static void Update(Func<Vector2?> getPlayerPosition)
+    // isPlayerAlive guards spawning; getPlayerPosition is passed to seekers so they
+    // track the live position each frame. No dependency on PlayerShip.
+    public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
     {
-        Vector2? playerPosition = getPlayerPosition();
-        if (playerPosition.HasValue && EntityManager.Count < GameSettings.MaxActiveEntities)
+        if (isPlayerAlive && EntityManager.Count < GameSettings.MaxActiveEntities)
         {
-            Vector2 playerPos = playerPosition.Value;
+            Vector2 playerPos = getPlayerPosition();
 
             if (rand.Next((int)_inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), () => getPlayerPosition().GetValueOrDefault()));
+                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
 
             if (rand.Next((int)_inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
