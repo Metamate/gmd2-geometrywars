@@ -9,28 +9,27 @@ namespace GeometryWars;
 
 public class Enemy : Entity
 {
-    private static readonly Random rand = new();
     private int timeUntilStart = GameSettings.EnemySpawnDelay;
     private List<IEnumerator<int>> behaviours = [];
 
     public Enemy(Texture2D image, Vector2 position)
     {
-        this.image = image;
+        this.Image = image;
         Position = position;
-        color = Color.Transparent;
+        Tint = Color.Transparent;
 
         // Movement: decelerate each frame and stay on screen.
         AddComponent(new VelocityMover(damping: GameSettings.EnemyDamping, clampToScreen: true));
 
         // Collision response: enemies push each other apart; bullets kill them.
         // Player collision is handled entirely on the player's side.
-        AddComponent(new CircleCollider(image.Width / 2f, other =>
+        Collider = new CircleCollider(image.Width / 2f, other =>
         {
             if (other is Bullet || (other is BlackHole && IsActive))
                 WasShot();
             else if (other is Enemy e)
                 HandleCollision(e);
-        }));
+        });
     }
 
     public bool IsActive => timeUntilStart <= 0;
@@ -54,14 +53,14 @@ public class Enemy : Entity
         return enemy;
     }
 
-    protected override void OnPreUpdate()
+    protected override void OnUpdate()
     {
         if (timeUntilStart <= 0)
             ApplyBehaviours();
         else
         {
             timeUntilStart--;
-            color = Color.White * (1 - timeUntilStart / (float)GameSettings.EnemySpawnDelay);
+            Tint = Color.White * (1 - timeUntilStart / (float)GameSettings.EnemySpawnDelay);
         }
     }
 
@@ -77,20 +76,20 @@ public class Enemy : Entity
     {
         IsExpired = true;
 
-        float hue1 = rand.NextFloat(0, 6);
-        float hue2 = (hue1 + rand.NextFloat(0, 2)) % 6f;
+        float hue1 = Random.Shared.NextFloat(0, 6);
+        float hue2 = (hue1 + Random.Shared.NextFloat(0, 2)) % 6f;
         Color color1 = ColorUtil.HSVToColor(hue1, 0.5f, 1);
         Color color2 = ColorUtil.HSVToColor(hue2, 0.5f, 1);
         for (int i = 0; i < GameSettings.EnemyDeathParticles; i++)
         {
-            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / rand.NextFloat(1f, 10f));
+            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             var state = new ParticleState
             {
-                Velocity = rand.NextVector2(speed, speed),
+                Velocity = Random.Shared.NextVector2(speed, speed),
                 Type = ParticleType.Enemy,
                 LengthMultiplier = 1f
             };
-            Color color = Color.Lerp(color1, color2, rand.NextFloat(0, 1));
+            Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
             GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.DeathParticleLife, GameSettings.DeathParticleSize, state);
         }
 
@@ -99,8 +98,13 @@ public class Enemy : Entity
             PlayerStatus.AddPoints(PointValue);
             PlayerStatus.IncreaseMultiplier();
         }
-        Sound.Explosion.Play(0.5f, rand.NextFloat(-0.2f, 0.2f), 0);
+        Sound.Explosion.Play(0.5f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
     }
+
+    // Behaviour methods use C#'s generator (yield return) as a simple coroutine.
+    // Each call to MoveNext() runs the method up to the next yield, advancing the
+    // behaviour by one frame. This lets AI logic be written as a straight-line loop
+    // instead of a state machine, while still executing one step per frame.
 
     IEnumerable<int> FollowPlayer(Func<Vector2> getTargetPosition, float acceleration)
     {
@@ -115,20 +119,20 @@ public class Enemy : Entity
 
     IEnumerable<int> MoveRandomly()
     {
-        float direction = rand.NextFloat(0, MathHelper.TwoPi);
+        float direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
         while (true)
         {
-            direction += rand.NextFloat(-GameSettings.WandererTurnRate, GameSettings.WandererTurnRate);
+            direction += Random.Shared.NextFloat(-GameSettings.WandererTurnRate, GameSettings.WandererTurnRate);
             direction = MathHelper.WrapAngle(direction);
             for (int i = 0; i < GameSettings.WandererStepsPerTick; i++)
             {
                 Velocity += MathUtil.FromPolar(direction, GameSettings.WandererVelocity);
                 Orientation -= GameSettings.WandererOrientationDecay;
                 var bounds = GameServices.Viewport.Bounds;
-                bounds.Inflate(-image.Width, -image.Height);
+                bounds.Inflate(-Image.Width, -Image.Height);
                 if (!bounds.Contains(Position.ToPoint()))
                     direction = (GameServices.ScreenSize / 2 - Position).ToAngle() +
-                                rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
+                                Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
                 yield return 0;
             }
         }

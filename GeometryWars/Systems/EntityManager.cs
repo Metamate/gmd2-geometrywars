@@ -6,8 +6,14 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars;
 
 // Manages entity lifecycle: add, update, draw, remove.
-// Collision detection: a generic circle-pair loop fires each entity's CircleCollider.OnCollide
-// callback. Collision RULES live in the entity constructors, not here.
+//
+// Deferred removal: entities set IsExpired = true during Update() but are not
+// removed until the end of the frame. This keeps the entity list stable while
+// it is being iterated, so any entity can safely expire itself or others.
+//
+// Collision detection: a generic circle-pair loop fires each entity's
+// CircleCollider.OnCollide callback. Collision RULES live in the entity
+// constructors, not here — the manager only detects, never responds.
 static class EntityManager
 {
     private static readonly List<Entity> entities = [];

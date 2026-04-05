@@ -9,14 +9,12 @@ namespace GeometryWars;
 static class Sound
 {
     public static Song Music { get; private set; }
-    private static readonly Random rand = new();
     private static SoundEffect[] explosions;
-    // return a random explosion sound 
-    public static SoundEffect Explosion { get { return explosions[rand.Next(explosions.Length)]; } }
+    public static SoundEffect Explosion => explosions[Random.Shared.Next(explosions.Length)];
     private static SoundEffect[] shots;
-    public static SoundEffect Shot { get { return shots[rand.Next(shots.Length)]; } }
+    public static SoundEffect Shot => shots[Random.Shared.Next(shots.Length)];
     private static SoundEffect[] spawns;
-    public static SoundEffect Spawn { get { return spawns[rand.Next(spawns.Length)]; } }
+    public static SoundEffect Spawn => spawns[Random.Shared.Next(spawns.Length)];
     public static void Load(ContentManager content)
     {
         MediaPlayer.Volume = 0.00f;

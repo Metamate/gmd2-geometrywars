@@ -5,42 +5,50 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
+// Base class for all game entities.
+//
+// Uses the Template Method pattern: Update() defines a fixed execution order —
+// OnUpdate() (entity logic) always runs before components (physics etc.) so that
+// VelocityMover always sees the velocity the entity just wrote, not last frame's.
+// Subclasses override OnUpdate() and must never override Update() directly.
 public abstract class Entity
 {
-    protected Texture2D image;
-    protected Color color = Color.White;
-
     private readonly List<IComponent> _components = [];
+
+    protected Texture2D Image { get; set; }
+    protected Color Tint { get; set; } = Color.White;
 
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
     public float Orientation { get; set; }
+
+    // IsExpired flags the entity for removal at the end of the current frame.
+    // Entities are never removed mid-update to avoid corrupting the entity list
+    // while EntityManager is iterating it.
     public bool IsExpired { get; set; }
-    public CircleCollider Collider { get; private set; }
 
-    public Vector2 Size => image == null ? Vector2.Zero : new Vector2(image.Width, image.Height);
+    // Null means the entity has no collision shape and is skipped by EntityManager.
+    public CircleCollider Collider { get; protected set; }
 
-    // Update order: OnPreUpdate (AI / input), then components (physics, etc.)
+    public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
+
     public void Update()
     {
-        OnPreUpdate();
+        OnUpdate();
         foreach (var comp in _components)
             comp.Update(this);
     }
 
-    // Override for entity-specific logic that runs before components (AI, input, coroutines).
-    protected virtual void OnPreUpdate() { }
+    protected virtual void OnUpdate() { }
 
     protected T AddComponent<T>(T component) where T : IComponent
     {
         _components.Add(component);
-        if (component is CircleCollider c)
-            Collider = c;
         return component;
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(image, Position, null, color, Orientation, Size / 2f, 1f, 0, 0);
+        spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, 1f, 0, 0);
     }
 }

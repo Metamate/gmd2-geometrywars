@@ -6,7 +6,6 @@ namespace GeometryWars;
 
 public static class EnemySpawner
 {
-    private static readonly Random rand = new();
     private static float _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 
     // isPlayerAlive guards spawning; getPlayerPosition is passed to seekers so they
@@ -17,14 +16,14 @@ public static class EnemySpawner
         {
             Vector2 playerPos = getPlayerPosition();
 
-            if (rand.Next((int)_inverseSpawnChance) == 0)
+            if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
 
-            if (rand.Next((int)_inverseSpawnChance) == 0)
+            if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
 
             if (EntityManager.BlackHoleCount < GameSettings.MaxBlackHoles &&
-                rand.Next((int)GameSettings.BlackHoleSpawnChance) == 0)
+                Random.Shared.Next((int)GameSettings.BlackHoleSpawnChance) == 0)
                 EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
         }
 
@@ -38,7 +37,7 @@ public static class EnemySpawner
         Vector2 pos;
         do
         {
-            pos = new Vector2(rand.Next((int)GameServices.ScreenSize.X), rand.Next((int)GameServices.ScreenSize.Y));
+            pos = new Vector2(Random.Shared.Next((int)GameServices.ScreenSize.X), Random.Shared.Next((int)GameServices.ScreenSize.Y));
         }
         while (Vector2.DistanceSquared(pos, playerPosition) < minDistSq);
         return pos;
