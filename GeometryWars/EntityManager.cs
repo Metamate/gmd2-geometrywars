@@ -1,51 +1,74 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GeometryWars;
 
+namespace GeometryWars;
+
+// Manages entity lifecycle: add, update, draw, remove.
+// Collision detection is delegated to CollisionSystem.
+// Bullet instances are pooled via ObjectPool<Bullet> to avoid per-frame allocation.
 static class EntityManager
 {
-    static List<Entity> entities = [];
-    static List<Enemy> enemies = [];
-    static List<Bullet> bullets = [];
-    static List<BlackHole> blackHoles = [];
-    static bool isUpdating;
-    static readonly List<Entity> addedEntities = [];
-    public static IEnumerable<BlackHole> BlackHoles { get { return blackHoles; } }
+    private static readonly List<Entity> entities = [];
+    private static readonly List<Enemy> enemies = [];
+    private static readonly List<Bullet> bullets = [];
+    private static readonly List<BlackHole> blackHoles = [];
+    private static readonly List<Entity> pendingAdd = [];
+    private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);
+    private static bool isUpdating;
 
-    public static int Count { get { return entities.Count; } }
-    public static int BlackHoleCount { get { return blackHoles.Count; } }
+    public static IEnumerable<BlackHole> BlackHoles => blackHoles;
+    public static int Count => entities.Count;
+    public static int BlackHoleCount => blackHoles.Count;
+
+    // Retrieve a pooled bullet, configured with given position and velocity.
+    public static Bullet GetBullet(Microsoft.Xna.Framework.Vector2 position, Microsoft.Xna.Framework.Vector2 velocity)
+    {
+        var bullet = bulletPool.Get();
+        bullet.Reset(position, velocity);
+        return bullet;
+    }
 
     public static void Add(Entity entity)
     {
         if (!isUpdating)
-            AddEntity(entity);
+            RegisterEntity(entity);
         else
-            addedEntities.Add(entity);
+            pendingAdd.Add(entity);
     }
 
-    public static void Update()
+    public static void Clear()
+    {
+        entities.Clear();
+        enemies.Clear();
+        bullets.Clear();
+        blackHoles.Clear();
+        pendingAdd.Clear();
+    }
+
+    public static void Update(GameContext ctx)
     {
         isUpdating = true;
-        HandleCollisions();
+
+        CollisionSystem.HandleCollisions(enemies, bullets, blackHoles, PlayerShip.Instance);
 
         foreach (var entity in entities)
-            entity.Update();
+            entity.Update(ctx);
 
         isUpdating = false;
 
-        foreach (var entity in addedEntities)
-            AddEntity(entity);
+        foreach (var entity in pendingAdd)
+            RegisterEntity(entity);
+        pendingAdd.Clear();
 
-        addedEntities.Clear();
+        // Return expired bullets to pool before removing from lists
+        foreach (var b in bullets)
+            if (b.IsExpired) bulletPool.Return(b);
 
-        //remove any expired entities
-        entities = [.. entities.Where(x => !x.IsExpired)];
-        bullets = [.. bullets.Where(x => !x.IsExpired)];
-        enemies = [.. enemies.Where(x => !x.IsExpired)];
-        blackHoles = [.. blackHoles.Where(x => !x.IsExpired)];
+        entities.RemoveAll(e => e.IsExpired);
+        bullets.RemoveAll(b => b.IsExpired);
+        enemies.RemoveAll(e => e.IsExpired);
+        blackHoles.RemoveAll(bh => bh.IsExpired);
     }
 
     public static void Draw(SpriteBatch spriteBatch)
@@ -54,89 +77,18 @@ static class EntityManager
             entity.Draw(spriteBatch);
     }
 
-    private static void AddEntity(Entity entity)
+    // C# pattern matching replaces the old (entity as Bullet) casts.
+    // Adding a new entity type only requires adding a new typed list and a case here.
+    private static void RegisterEntity(Entity entity)
     {
         entities.Add(entity);
-        if (entity is Bullet)
-            bullets.Add(entity as Bullet);
-        else if (entity is BlackHole)
-            blackHoles.Add(entity as BlackHole);
-        else if (entity is Enemy)
-            enemies.Add(entity as Enemy);
+        if (entity is Bullet b) bullets.Add(b);
+        else if (entity is BlackHole bh) blackHoles.Add(bh);
+        else if (entity is Enemy e) enemies.Add(e);
     }
-    private static bool IsColliding(Entity a, Entity b)
+
+    public static IEnumerable<Entity> GetNearbyEntities(Microsoft.Xna.Framework.Vector2 position, float radius)
     {
-        float radius = a.Radius + b.Radius;
-        return !a.IsExpired && !b.IsExpired && Vector2.DistanceSquared(a.Position, b.Position) < radius * radius;
+        return entities.Where(e => Microsoft.Xna.Framework.Vector2.DistanceSquared(position, e.Position) < radius * radius);
     }
-
-    static void HandleCollisions()
-    {
-        // handle collisions between enemies 
-        for (int i = 0; i < enemies.Count; i++)
-            for (int j = i + 1; j < enemies.Count; j++)
-            {
-                if (IsColliding(enemies[i], enemies[j]))
-                {
-                    enemies[i].HandleCollision(enemies[j]);
-                    enemies[j].HandleCollision(enemies[i]);
-                }
-            }
-        // handle collisions between bullets and enemies 
-        for (int i = 0; i < enemies.Count; i++)
-            for (int j = 0; j < bullets.Count; j++)
-            {
-                if (IsColliding(enemies[i], bullets[j]))
-                {
-                    enemies[i].WasShot();
-                    bullets[j].IsExpired = true;
-                }
-            }
-        // handle collisions between the player and enemies 
-        for (int i = 0; i < enemies.Count; i++)
-        {
-            if (enemies[i].IsActive && IsColliding(PlayerShip.Instance, enemies[i]))
-            {
-                PlayerShip.Instance.Kill();
-                enemies.ForEach(x => x.WasShot());
-                EnemySpawner.Reset();
-                break;
-            }
-        }
-
-        // handle collisions with black holes 
-        for (int i = 0; i < blackHoles.Count; i++)
-        {
-            for (int j = 0; j < enemies.Count; j++)
-                if (enemies[j].IsActive && IsColliding(blackHoles[i], enemies[j]))
-                    enemies[j].WasShot();
-            for (int j = 0; j < bullets.Count; j++)
-            {
-                if (IsColliding(blackHoles[i], bullets[j]))
-                {
-                    bullets[j].IsExpired = true;
-                    blackHoles[i].WasShot();
-                }
-            }
-            if (IsColliding(PlayerShip.Instance, blackHoles[i]))
-            {
-                KillPlayer();
-                break;
-            }
-        }
-    }
-
-    private static void KillPlayer()
-    {
-        PlayerShip.Instance.Kill();
-        enemies.ForEach(x => x.WasShot());
-        blackHoles.ForEach(x => x.Kill());
-        EnemySpawner.Reset();
-    }
-
-    public static IEnumerable<Entity> GetNearbyEntities(Vector2 position, float radius)
-    {
-        return entities.Where(x => Vector2.DistanceSquared(position, x.Position) < radius * radius);
-    }
-
 }

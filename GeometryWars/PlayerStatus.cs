@@ -4,13 +4,12 @@ namespace GeometryWars;
 
 public static class PlayerStatus
 {
-    // amount of time it takes, in seconds, for a multiplier to expire. 
-    private const float multiplierExpiryTime = 0.8f;
-    private const int maxMultiplier = 20;
-    private const string highScoreFilename = "highscore.txt";
-    private static float multiplierTimeLeft;    // time until the current multiplier expires 
-    private static int scoreForExtraLife;       // score required to gain an extra life 
-                                                // Static constructor 
+    private const float MultiplierExpiryTime = 0.8f;
+    private const int MaxMultiplier = 20;
+    private const string HighScoreFilename = "highscore.txt";
+
+    private static float _multiplierTimeLeft;
+    private static int _scoreForExtraLife;
 
     static PlayerStatus()
     {
@@ -21,7 +20,7 @@ public static class PlayerStatus
     public static int Lives { get; private set; }
     public static int Score { get; private set; }
     public static int Multiplier { get; private set; }
-    public static bool IsGameOver { get { return Lives == 0; } }
+    public static bool IsGameOver => Lives == 0;
     public static int HighScore { get; private set; }
 
     public static void Reset()
@@ -32,55 +31,54 @@ public static class PlayerStatus
         Score = 0;
         Multiplier = 1;
         Lives = 4;
-        scoreForExtraLife = 2000;
-        multiplierTimeLeft = 0;
+        _scoreForExtraLife = 2000;
+        _multiplierTimeLeft = 0;
     }
-    public static void Update()
+
+    public static void Update(GameContext ctx)
     {
         if (Multiplier > 1)
         {
-            // update the multiplier timer 
-            if ((multiplierTimeLeft -= (float)Game1.GameTime.ElapsedGameTime.TotalSeconds) <= 0)
+            if ((_multiplierTimeLeft -= ctx.ElapsedSeconds) <= 0)
             {
-                multiplierTimeLeft = multiplierExpiryTime;
+                _multiplierTimeLeft = MultiplierExpiryTime;
                 ResetMultiplier();
             }
         }
     }
+
     public static void AddPoints(int basePoints)
     {
         if (PlayerShip.Instance.IsDead)
             return;
         Score += basePoints * Multiplier;
-        while (Score >= scoreForExtraLife)
+        while (Score >= _scoreForExtraLife)
         {
-            scoreForExtraLife += 2000;
+            _scoreForExtraLife += 2000;
             Lives++;
         }
     }
+
     public static void IncreaseMultiplier()
     {
         if (PlayerShip.Instance.IsDead)
             return;
-        multiplierTimeLeft = multiplierExpiryTime;
-        if (Multiplier < maxMultiplier)
+        _multiplierTimeLeft = MultiplierExpiryTime;
+        if (Multiplier < MaxMultiplier)
             Multiplier++;
     }
-    public static void ResetMultiplier()
-    {
-        Multiplier = 1;
-    }
-    public static void RemoveLife()
-    {
-        Lives--;
-    }
+
+    public static void ResetMultiplier() => Multiplier = 1;
+
+    public static void RemoveLife() => Lives--;
+
     private static int LoadHighScore()
     {
-        // return the saved high score if possible and return 0 otherwise 
-        return File.Exists(highScoreFilename) && int.TryParse(File.ReadAllText(highScoreFilename), out int score) ? score : 0;
+        return File.Exists(HighScoreFilename) && int.TryParse(File.ReadAllText(HighScoreFilename), out int score) ? score : 0;
     }
+
     private static void SaveHighScore(int score)
     {
-        File.WriteAllText(highScoreFilename, score.ToString());
+        File.WriteAllText(HighScoreFilename, score.ToString());
     }
 }

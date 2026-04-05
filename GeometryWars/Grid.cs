@@ -12,6 +12,7 @@ public class Grid
     Vector2 screenSize;
     public Grid(Rectangle size, Vector2 spacing)
     {
+        screenSize = new Vector2(size.Width, size.Height);
         var springList = new List<Spring>();
         int numColumns = (int)(size.Width / spacing.X) + 1;
         int numRows = (int)(size.Height / spacing.Y) + 1;

@@ -7,27 +7,37 @@ public class Bullet : Entity
 {
     private static readonly Random rand = new();
 
-    public Bullet(Vector2 position, Vector2 velocity)
+    // Parameterless constructor for ObjectPool<Bullet>
+    public Bullet()
     {
         image = Art.Bullet;
-        Position = position;
-        Velocity = velocity;
-        Orientation = Velocity.ToAngle();
         Radius = 8;
     }
-    public override void Update()
+
+    // Called by EntityManager.GetBullet() to reinitialise a pooled instance
+    public void Reset(Vector2 position, Vector2 velocity)
+    {
+        Position = position;
+        Velocity = velocity;
+        Orientation = velocity.ToAngle();
+        IsExpired = false;
+    }
+
+    public override void Update(GameContext ctx)
     {
         if (Velocity.LengthSquared() > 0)
             Orientation = Velocity.ToAngle();
+
         Position += Velocity;
-        // delete bullets that go off-screen 
-        if (!Game1.Viewport.Bounds.Contains(Position.ToPoint()))
+
+        if (!ctx.Viewport.Bounds.Contains(Position.ToPoint()))
         {
             IsExpired = true;
             for (int i = 0; i < 30; i++)
-                Game1.ParticleManager.CreateParticle(Art.LineParticle, Position, Color.LightBlue, 50, 1,
+                ctx.Particles.CreateParticle(Art.LineParticle, Position, Color.LightBlue, 50, 1,
                     new ParticleState() { Velocity = rand.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
         }
-        Game1.Grid.ApplyExplosiveForce(0.5f * Velocity.Length(), Position, 80);
+
+        ctx.Grid.ApplyExplosiveForce(0.5f * Velocity.Length(), Position, 80);
     }
 }

@@ -14,15 +14,9 @@ public abstract class Entity
     public float Radius { get; set; } = 20;
     public bool IsExpired { get; set; }
 
-    public Vector2 Size
-    {
-        get
-        {
-            return image == null ? Vector2.Zero : new Vector2(image.Width, image.Height);
-        }
-    }
+    public Vector2 Size => image == null ? Vector2.Zero : new Vector2(image.Width, image.Height);
 
-    public abstract void Update();
+    public abstract void Update(GameContext ctx);
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {

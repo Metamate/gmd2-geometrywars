@@ -10,6 +10,7 @@ public class Enemy : Entity
     private static Random rand = new();
     private int timeUntilStart = 60;
     private List<IEnumerator<int>> behaviours = [];
+
     public Enemy(Texture2D image, Vector2 position)
     {
         this.image = image;
@@ -17,7 +18,8 @@ public class Enemy : Entity
         Radius = image.Width / 2f;
         color = Color.Transparent;
     }
-    public bool IsActive { get { return timeUntilStart <= 0; } }
+
+    public bool IsActive => timeUntilStart <= 0;
     public int PointValue { get; private set; }
 
     public static Enemy CreateSeeker(Vector2 position)
@@ -36,19 +38,20 @@ public class Enemy : Entity
         return enemy;
     }
 
-    public override void Update()
+    public override void Update(GameContext ctx)
     {
         if (timeUntilStart <= 0)
         {
-            ApplyBehaviours();
+            ApplyBehaviours(ctx);
         }
         else
         {
             timeUntilStart--;
             color = Color.White * (1 - timeUntilStart / 60f);
         }
+
         Position += Velocity;
-        Position = Vector2.Clamp(Position, Size / 2, Game1.ScreenSize - Size / 2);
+        Position = Vector2.Clamp(Position, Size / 2, ctx.ScreenSize - Size / 2);
         Velocity *= 0.8f;
     }
 
@@ -57,6 +60,7 @@ public class Enemy : Entity
         var d = Position - other.Position;
         Velocity += 10 * d / (d.LengthSquared() + 1);
     }
+
     public void WasShot()
     {
         IsExpired = true;
@@ -65,6 +69,8 @@ public class Enemy : Entity
         float hue2 = (hue1 + rand.NextFloat(0, 2)) % 6f;
         Color color1 = ColorUtil.HSVToColor(hue1, 0.5f, 1);
         Color color2 = ColorUtil.HSVToColor(hue2, 0.5f, 1);
+
+        var ctx = GameContext.Current;
         for (int i = 0; i < 120; i++)
         {
             float speed = 18f * (1f - 1 / rand.NextFloat(1f, 10f));
@@ -75,8 +81,9 @@ public class Enemy : Entity
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, rand.NextFloat(0, 1));
-            Game1.ParticleManager.CreateParticle(Art.LineParticle, Position, color, 190, 1.5f, state);
+            ctx.Particles.CreateParticle(Art.LineParticle, Position, color, 190, 1.5f, state);
         }
+
         PlayerStatus.AddPoints(PointValue);
         PlayerStatus.IncreaseMultiplier();
         Sound.Explosion.Play(0.5f, rand.NextFloat(-0.2f, 0.2f), 0);
@@ -104,11 +111,11 @@ public class Enemy : Entity
             {
                 Velocity += MathUtil.FromPolar(direction, 0.4f);
                 Orientation -= 0.05f;
-                var bounds = Game1.Viewport.Bounds;
+                var ctx = GameContext.Current;
+                var bounds = ctx.Viewport.Bounds;
                 bounds.Inflate(-image.Width, -image.Height);
-                // if the enemy is outside the bounds, make it move away from the edge 
                 if (!bounds.Contains(Position.ToPoint()))
-                    direction = (Game1.ScreenSize / 2 - Position).ToAngle() + rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
+                    direction = (ctx.ScreenSize / 2 - Position).ToAngle() + rand.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
                 yield return 0;
             }
         }
@@ -119,7 +126,7 @@ public class Enemy : Entity
         behaviours.Add(behaviour.GetEnumerator());
     }
 
-    private void ApplyBehaviours()
+    private void ApplyBehaviours(GameContext ctx)
     {
         for (int i = 0; i < behaviours.Count; i++)
         {
