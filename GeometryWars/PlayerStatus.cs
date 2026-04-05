@@ -1,4 +1,5 @@
 using System.IO;
+using GeometryWars.Services;
 
 namespace GeometryWars;
 
@@ -35,22 +36,18 @@ public static class PlayerStatus
         _multiplierTimeLeft = 0;
     }
 
-    public static void Update(GameContext ctx)
+    public static void Update()
     {
-        if (Multiplier > 1)
+        if (Multiplier > 1 && (_multiplierTimeLeft -= GameServices.ElapsedSeconds) <= 0)
         {
-            if ((_multiplierTimeLeft -= ctx.ElapsedSeconds) <= 0)
-            {
-                _multiplierTimeLeft = MultiplierExpiryTime;
-                ResetMultiplier();
-            }
+            _multiplierTimeLeft = MultiplierExpiryTime;
+            Multiplier = 1;
         }
     }
 
     public static void AddPoints(int basePoints)
     {
-        if (PlayerShip.Instance.IsDead)
-            return;
+        if (PlayerShip.Instance.IsDead) return;
         Score += basePoints * Multiplier;
         while (Score >= _scoreForExtraLife)
         {
@@ -61,24 +58,16 @@ public static class PlayerStatus
 
     public static void IncreaseMultiplier()
     {
-        if (PlayerShip.Instance.IsDead)
-            return;
+        if (PlayerShip.Instance.IsDead) return;
         _multiplierTimeLeft = MultiplierExpiryTime;
-        if (Multiplier < MaxMultiplier)
-            Multiplier++;
+        if (Multiplier < MaxMultiplier) Multiplier++;
     }
-
-    public static void ResetMultiplier() => Multiplier = 1;
 
     public static void RemoveLife() => Lives--;
 
     private static int LoadHighScore()
-    {
-        return File.Exists(HighScoreFilename) && int.TryParse(File.ReadAllText(HighScoreFilename), out int score) ? score : 0;
-    }
+        => File.Exists(HighScoreFilename) && int.TryParse(File.ReadAllText(HighScoreFilename), out int s) ? s : 0;
 
     private static void SaveHighScore(int score)
-    {
-        File.WriteAllText(HighScoreFilename, score.ToString());
-    }
+        => File.WriteAllText(HighScoreFilename, score.ToString());
 }

@@ -1,9 +1,9 @@
 using System;
 using BloomPostprocess;
-using GeometryWars.Core;
+using GMDCore;
+using GeometryWars.Services;
 using GeometryWars.States;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
@@ -22,13 +22,16 @@ public class Game1 : GameCore
 
     protected override void Initialize()
     {
-        base.Initialize(); // creates SpriteBatch, calls Components.Initialize()
+        base.Initialize();
 
         _particles = new ParticleManager<ParticleState>(1024 * 20, ParticleState.UpdateParticle);
 
         const int maxGridPoints = 1600;
         Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / maxGridPoints));
         _grid = new Grid(GraphicsDevice.Viewport.Bounds, gridSpacing);
+
+        // Seed services for the first frame before the first Update tick
+        RegisterServices(new GameTime());
 
         SetState(new PlayState(this));
     }
@@ -39,26 +42,27 @@ public class Game1 : GameCore
         Sound.Load(Content);
     }
 
-    protected override GameContext BuildContext(GameTime gameTime)
+    protected override void OnUpdateInput() => Input.Update();
+
+    // Push game-specific singletons into the service locator each frame.
+    // Time and Viewport change each frame; Particles and Grid are stable after init.
+    protected override void RegisterServices(GameTime gameTime)
     {
-        return new GameContext(gameTime, _particles, _grid, GraphicsDevice.Viewport);
+        GameServices.Time = gameTime;
+        GameServices.Viewport = GraphicsDevice.Viewport;
+        GameServices.Particles = _particles;
+        GameServices.Grid = _grid;
     }
 
-    // Overrides GameCore.Draw() so bloom can wrap world rendering.
-    // RunComponents() triggers Components.Draw() (bloom post-processing) without
-    // re-invoking state methods — avoids the double-draw that base.Draw() would cause.
+    // Inserts bloom around the world draw pass.
+    // RunComponents() triggers Game.Draw() -> Components.Draw() (bloom post-processing)
+    // without re-invoking state drawing that GameCore.Draw() would add.
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
         _bloom.BeginDraw();
-
-        // World pass — state manages its own SpriteBatch Begin/End
-        ActiveState?.DrawWorld(SpriteBatch, Context);
-
-        // Bloom processes the render target
+        ActiveState?.DrawWorld(SpriteBatch);
         RunComponents(gameTime);
-
-        // HUD pass — drawn after bloom so UI stays crisp
-        ActiveState?.DrawHUD(SpriteBatch, Context);
+        ActiveState?.DrawHUD(SpriteBatch);
     }
 }

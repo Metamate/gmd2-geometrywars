@@ -2,21 +2,20 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace GeometryWars.Core;
+namespace GMDCore;
 
 // Base game class that owns the state machine.
-// Subclasses override BuildContext() to supply frame-specific systems.
-// Subclasses that need post-processing (e.g. bloom) override Draw() and call
-// RunComponents() in place of base.Draw() to avoid double-invoking state drawing.
+// Subclasses override RegisterServices() to push game-specific singletons into
+// whatever service locator the game uses, called once per frame before state.Update().
+// Subclasses that use post-processing override Draw() and use RunComponents() in
+// place of base.Draw() to avoid double-invoking state drawing.
 public abstract class GameCore : Game
 {
     protected GraphicsDeviceManager Graphics;
     public SpriteBatch SpriteBatch { get; private set; }
 
     private GameStateBase _activeState;
-    private GameContext _context;
 
-    protected GameContext Context => _context;
     protected GameStateBase ActiveState => _activeState;
 
     protected GameCore(int width, int height)
@@ -42,7 +41,12 @@ public abstract class GameCore : Game
         _activeState?.Enter();
     }
 
-    protected abstract GameContext BuildContext(GameTime gameTime);
+    // Called once per frame before the active state updates.
+    // Override to push this frame's GameTime, Viewport, etc. into a service locator.
+    protected virtual void RegisterServices(GameTime gameTime) { }
+
+    // Called once per frame to handle platform input (e.g. Input.Update()).
+    protected virtual void OnUpdateInput() { }
 
     protected override void Update(GameTime gameTime)
     {
@@ -50,25 +54,23 @@ public abstract class GameCore : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        Input.Update();
-
-        _context = BuildContext(gameTime);
-        _activeState?.Update(_context);
+        OnUpdateInput();
+        RegisterServices(gameTime);
+        _activeState?.Update();
 
         base.Update(gameTime);
     }
 
-    // Runs Game.Draw() → Components.Draw() (bloom, etc.) without re-invoking state methods.
-    // Call this from an overriding Draw() instead of base.Draw() to avoid double-draw.
+    // Runs Game.Draw() -> Components.Draw() (bloom etc.) without re-invoking state methods.
+    // Call from an overriding Draw() instead of base.Draw() to avoid double-draw.
     protected void RunComponents(GameTime gameTime) => base.Draw(gameTime);
 
     // Default draw path for games without post-processing.
-    // Override Draw() and use RunComponents() if you need to wrap world rendering.
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
-        _activeState?.DrawWorld(SpriteBatch, _context);
+        _activeState?.DrawWorld(SpriteBatch);
         RunComponents(gameTime);
-        _activeState?.DrawHUD(SpriteBatch, _context);
+        _activeState?.DrawHUD(SpriteBatch);
     }
 }

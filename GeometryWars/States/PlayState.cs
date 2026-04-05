@@ -1,4 +1,5 @@
-using GeometryWars.Core;
+using GMDCore;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,10 +12,7 @@ public sealed class PlayState : GameStateBase
     private readonly GameCore _game;
     private bool _paused;
 
-    public PlayState(GameCore game)
-    {
-        _game = game;
-    }
+    public PlayState(GameCore game) => _game = game;
 
     public override void Enter()
     {
@@ -27,60 +25,59 @@ public sealed class PlayState : GameStateBase
         MediaPlayer.Play(Sound.Music);
     }
 
-    public override void Update(GameContext ctx)
+    public override void Update()
     {
         if (Input.WasKeyPressed(Keys.P))
             _paused = !_paused;
 
-        if (_paused)
-            return;
+        if (_paused) return;
 
-        PlayerStatus.Update(ctx);
-        EntityManager.Update(ctx);
-        EnemySpawner.Update(ctx);
+        PlayerStatus.Update();
+        EntityManager.Update();
+        EnemySpawner.Update();
 
-        ctx.Grid.Update();
-        ctx.Particles.Update();
+        GameServices.Grid.Update();
+        GameServices.Particles.Update();
 
-        // Transition to game over once the death animation completes
         if (PlayerStatus.IsGameOver && !PlayerShip.Instance.IsDead)
             _game.SetState(new GameOverState(_game));
     }
 
-    public override void DrawWorld(SpriteBatch spriteBatch, GameContext ctx)
+    public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
         EntityManager.Draw(spriteBatch);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        ctx.Grid.Draw(spriteBatch);
-        ctx.Particles.Draw(spriteBatch);
+        GameServices.Grid.Draw(spriteBatch);
+        GameServices.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }
 
-    public override void DrawHUD(SpriteBatch spriteBatch, GameContext ctx)
+    public override void DrawHUD(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 
         spriteBatch.Draw(Art.Pointer, Input.MousePosition, Color.White);
         spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
-        DrawRightAligned(spriteBatch, ctx, "Score: " + PlayerStatus.Score, 5);
-        DrawRightAligned(spriteBatch, ctx, "Multiplier: " + PlayerStatus.Multiplier, 35);
+        DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
+        DrawRightAligned(spriteBatch, "Multiplier: " + PlayerStatus.Multiplier, 35);
 
         if (_paused)
         {
-            string paused = "PAUSED";
-            Vector2 size = Art.Font.MeasureString(paused);
-            spriteBatch.DrawString(Art.Font, paused, ctx.ScreenSize / 2 - size / 2, Color.White);
+            string text = "PAUSED";
+            Vector2 size = Art.Font.MeasureString(text);
+            spriteBatch.DrawString(Art.Font, text, GameServices.ScreenSize / 2 - size / 2, Color.White);
         }
 
         spriteBatch.End();
     }
 
-    private static void DrawRightAligned(SpriteBatch spriteBatch, GameContext ctx, string text, float y)
+    private static void DrawRightAligned(SpriteBatch spriteBatch, string text, float y)
     {
         float width = Art.Font.MeasureString(text).X;
-        spriteBatch.DrawString(Art.Font, text, new Vector2(ctx.ScreenSize.X - width - 5, y), Color.White);
+        spriteBatch.DrawString(Art.Font, text,
+            new Vector2(GameServices.ScreenSize.X - width - 5, y), Color.White);
     }
 }

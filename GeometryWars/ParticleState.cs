@@ -1,4 +1,5 @@
 using System;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars;
@@ -28,10 +29,8 @@ public struct ParticleState(Vector2 velocity, ParticleType type, float lengthMul
             particle.Scale.X = particle.State.LengthMultiplier * Math.Min(Math.Min(1f, 0.2f * speed + 0.1f), alpha);
 
         var pos = particle.Position;
-        // Use GameContext.Current for screen bounds — set at the start of each Update tick
-        var ctx = GameContext.Current;
-        int width = (int)ctx.ScreenSize.X;
-        int height = (int)ctx.ScreenSize.Y;
+        int width = (int)GameServices.ScreenSize.X;
+        int height = (int)GameServices.ScreenSize.Y;
 
         if (pos.X < 0) vel.X = Math.Abs(vel.X);
         else if (pos.X > width) vel.X = -Math.Abs(vel.X);

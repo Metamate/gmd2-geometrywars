@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
 // Manages entity lifecycle: add, update, draw, remove.
-// Collision detection is delegated to CollisionSystem.
-// Bullet instances are pooled via ObjectPool<Bullet> to avoid per-frame allocation.
+// Collision detection: a generic circle-pair loop fires each entity's CircleCollider.OnCollide
+// callback. Collision RULES live in the entity constructors, not here.
 static class EntityManager
 {
     private static readonly List<Entity> entities = [];
@@ -21,8 +22,7 @@ static class EntityManager
     public static int Count => entities.Count;
     public static int BlackHoleCount => blackHoles.Count;
 
-    // Retrieve a pooled bullet, configured with given position and velocity.
-    public static Bullet GetBullet(Microsoft.Xna.Framework.Vector2 position, Microsoft.Xna.Framework.Vector2 velocity)
+    public static Bullet GetBullet(Vector2 position, Vector2 velocity)
     {
         var bullet = bulletPool.Get();
         bullet.Reset(position, velocity);
@@ -31,10 +31,8 @@ static class EntityManager
 
     public static void Add(Entity entity)
     {
-        if (!isUpdating)
-            RegisterEntity(entity);
-        else
-            pendingAdd.Add(entity);
+        if (!isUpdating) RegisterEntity(entity);
+        else pendingAdd.Add(entity);
     }
 
     public static void Clear()
@@ -46,22 +44,21 @@ static class EntityManager
         pendingAdd.Clear();
     }
 
-    public static void Update(GameContext ctx)
+    public static void KillAllEnemies() => enemies.ForEach(e => e.WasShot());
+    public static void KillAllBlackHoles() => blackHoles.ForEach(bh => bh.Kill());
+
+    public static void Update()
     {
         isUpdating = true;
-
-        CollisionSystem.HandleCollisions(enemies, bullets, blackHoles, PlayerShip.Instance);
-
+        HandleCollisions();
         foreach (var entity in entities)
-            entity.Update(ctx);
-
+            entity.Update();
         isUpdating = false;
 
         foreach (var entity in pendingAdd)
             RegisterEntity(entity);
         pendingAdd.Clear();
 
-        // Return expired bullets to pool before removing from lists
         foreach (var b in bullets)
             if (b.IsExpired) bulletPool.Return(b);
 
@@ -77,8 +74,6 @@ static class EntityManager
             entity.Draw(spriteBatch);
     }
 
-    // C# pattern matching replaces the old (entity as Bullet) casts.
-    // Adding a new entity type only requires adding a new typed list and a case here.
     private static void RegisterEntity(Entity entity)
     {
         entities.Add(entity);
@@ -87,8 +82,30 @@ static class EntityManager
         else if (entity is Enemy e) enemies.Add(e);
     }
 
-    public static IEnumerable<Entity> GetNearbyEntities(Microsoft.Xna.Framework.Vector2 position, float radius)
+    // Generic circle-pair collision detection. Fires both entities' OnCollide callbacks.
+    // O(n²) over all entities — fine for this game's scale (<200 entities).
+    private static void HandleCollisions()
     {
-        return entities.Where(e => Microsoft.Xna.Framework.Vector2.DistanceSquared(position, e.Position) < radius * radius);
+        for (int i = 0; i < entities.Count; i++)
+        {
+            var a = entities[i];
+            if (a.IsExpired || a.Collider == null) continue;
+
+            for (int j = i + 1; j < entities.Count; j++)
+            {
+                var b = entities[j];
+                if (b.IsExpired || b.Collider == null) continue;
+
+                float r = a.Collider.Radius + b.Collider.Radius;
+                if (Vector2.DistanceSquared(a.Position, b.Position) < r * r)
+                {
+                    a.Collider.OnCollide?.Invoke(b);
+                    b.Collider.OnCollide?.Invoke(a);
+                }
+            }
+        }
     }
+
+    public static IEnumerable<Entity> GetNearbyEntities(Vector2 position, float radius)
+        => entities.Where(e => Vector2.DistanceSquared(position, e.Position) < radius * radius);
 }
