@@ -26,7 +26,7 @@ public class Enemy : Entity
         // Player collision is handled entirely on the player's side.
         AddComponent(new CircleCollider(image.Width / 2f, other =>
         {
-            if (other is Bullet)
+            if (other is Bullet || (other is BlackHole && IsActive))
                 WasShot();
             else if (other is Enemy e)
                 HandleCollision(e);
