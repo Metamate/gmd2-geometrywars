@@ -10,6 +10,7 @@ namespace GeometryWars.States;
 public sealed class PlayState : GameStateBase
 {
     private readonly GameCore _game;
+    private PlayerShip _player;
     private bool _paused;
 
     public PlayState(GameCore game) => _game = game;
@@ -18,9 +19,8 @@ public sealed class PlayState : GameStateBase
     {
         _paused = false;
         EntityManager.Clear();
-        var player = new PlayerShip();
-        GameServices.Player = player;
-        EntityManager.Add(player);
+        _player = new PlayerShip();
+        EntityManager.Add(_player);
         PlayerStatus.Reset();
         EnemySpawner.Reset();
         MediaPlayer.IsRepeating = true;
@@ -36,12 +36,12 @@ public sealed class PlayState : GameStateBase
 
         PlayerStatus.Update();
         EntityManager.Update();
-        EnemySpawner.Update();
+        EnemySpawner.Update(!_player.IsDead, () => _player.Position);
 
         GameServices.Grid.Update();
         GameServices.Particles.Update();
 
-        if (PlayerStatus.IsGameOver && !GameServices.Player.IsDead)
+        if (PlayerStatus.IsGameOver && !_player.IsDead)
             _game.SetState(new GameOverState(_game));
     }
 

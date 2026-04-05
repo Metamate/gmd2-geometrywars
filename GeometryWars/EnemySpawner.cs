@@ -10,32 +10,36 @@ public static class EnemySpawner
     private static float inverseSpawnChance = 60;
     private static readonly float inverseBlackHoleChance = 600;
 
-    public static void Update()
+    // isPlayerAlive and getPlayerPosition are passed from PlayState so this
+    // class has no dependency on the PlayerShip type or GameServices.Player.
+    public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
     {
-        if (!GameServices.Player.IsDead && EntityManager.Count < 200)
+        if (isPlayerAlive && EntityManager.Count < 200)
         {
-            if (rand.Next((int)inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition()));
+            Vector2 playerPos = getPlayerPosition();
 
             if (rand.Next((int)inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition()));
+                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
+
+            if (rand.Next((int)inverseSpawnChance) == 0)
+                EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
 
             if (EntityManager.BlackHoleCount < 2 && rand.Next((int)inverseBlackHoleChance) == 0)
-                EntityManager.Add(new BlackHole(GetSpawnPosition()));
+                EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
         }
 
         if (inverseSpawnChance > 20)
             inverseSpawnChance -= 0.005f;
     }
 
-    private static Vector2 GetSpawnPosition()
+    private static Vector2 GetSpawnPosition(Vector2 playerPosition)
     {
         Vector2 pos;
         do
         {
             pos = new Vector2(rand.Next((int)GameServices.ScreenSize.X), rand.Next((int)GameServices.ScreenSize.Y));
         }
-        while (Vector2.DistanceSquared(pos, GameServices.Player.Position) < 250 * 250);
+        while (Vector2.DistanceSquared(pos, playerPosition) < 250 * 250);
         return pos;
     }
 

@@ -13,7 +13,6 @@ public static class GameServices
     public static Grid Grid { get; set; }
     public static GameTime Time { get; set; }
     public static Viewport Viewport { get; set; }
-    public static PlayerShip Player { get; set; }
 
     public static Vector2 ScreenSize => new(Viewport.Width, Viewport.Height);
     public static double TotalSeconds => Time.TotalGameTime.TotalSeconds;

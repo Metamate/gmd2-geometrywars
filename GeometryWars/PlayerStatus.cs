@@ -47,7 +47,6 @@ public static class PlayerStatus
 
     public static void AddPoints(int basePoints)
     {
-        if (GameServices.Player.IsDead) return;
         Score += basePoints * Multiplier;
         while (Score >= _scoreForExtraLife)
         {
@@ -58,7 +57,6 @@ public static class PlayerStatus
 
     public static void IncreaseMultiplier()
     {
-        if (GameServices.Player.IsDead) return;
         _multiplierTimeLeft = MultiplierExpiryTime;
         if (Multiplier < MaxMultiplier) Multiplier++;
     }

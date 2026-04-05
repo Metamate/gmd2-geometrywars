@@ -64,10 +64,10 @@ static class Input
         return direction;
     }
 
-    public static Vector2 GetAimDirection()
+    public static Vector2 GetAimDirection(Vector2 shipPosition)
     {
         if (isAimingWithMouse)
-            return GetMouseAimDirection();
+            return GetMouseAimDirection(shipPosition);
         Vector2 direction = gamepadState.ThumbSticks.Right;
         direction.Y *= -1;
         if (keyboardState.IsKeyDown(Keys.Left))
@@ -85,9 +85,9 @@ static class Input
             return Vector2.Normalize(direction);
     }
 
-    private static Vector2 GetMouseAimDirection()
+    private static Vector2 GetMouseAimDirection(Vector2 shipPosition)
     {
-        Vector2 direction = MousePosition - GameServices.Player.Position;
+        Vector2 direction = MousePosition - shipPosition;
 
         if (direction == Vector2.Zero)
             return Vector2.Zero;

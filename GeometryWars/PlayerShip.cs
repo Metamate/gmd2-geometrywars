@@ -63,7 +63,7 @@ public class PlayerShip : Entity
 
         MakeExhaustFire();
 
-        var aim = Input.GetAimDirection();
+        var aim = Input.GetAimDirection(Position);
         if (aim.LengthSquared() > 0 && cooldownRemaining <= 0)
         {
             cooldownRemaining = CooldownFrames;

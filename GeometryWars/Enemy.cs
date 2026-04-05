@@ -36,10 +36,10 @@ public class Enemy : Entity
     public bool IsActive => timeUntilStart <= 0;
     public int PointValue { get; private set; }
 
-    public static Enemy CreateSeeker(Vector2 position)
+    public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var enemy = new Enemy(Art.Seeker, position);
-        enemy.AddBehaviour(enemy.FollowPlayer());
+        enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition));
         enemy.PointValue = 2;
         return enemy;
     }
@@ -69,7 +69,9 @@ public class Enemy : Entity
         Velocity += 10 * d / (d.LengthSquared() + 1);
     }
 
-    public void WasShot()
+    // awardPoints = false when enemies are killed as a side-effect of the player dying,
+    // so the player doesn't score points from their own death explosion.
+    public void WasShot(bool awardPoints = true)
     {
         IsExpired = true;
 
@@ -90,16 +92,19 @@ public class Enemy : Entity
             GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, 190, 1.5f, state);
         }
 
-        PlayerStatus.AddPoints(PointValue);
-        PlayerStatus.IncreaseMultiplier();
+        if (awardPoints)
+        {
+            PlayerStatus.AddPoints(PointValue);
+            PlayerStatus.IncreaseMultiplier();
+        }
         Sound.Explosion.Play(0.5f, rand.NextFloat(-0.2f, 0.2f), 0);
     }
 
-    IEnumerable<int> FollowPlayer(float acceleration = 1f)
+    IEnumerable<int> FollowPlayer(Func<Vector2> getTargetPosition, float acceleration = 1f)
     {
         while (true)
         {
-            Velocity += (GameServices.Player.Position - Position).ScaleTo(acceleration);
+            Velocity += (getTargetPosition() - Position).ScaleTo(acceleration);
             if (Velocity != Vector2.Zero)
                 Orientation = Velocity.ToAngle();
             yield return 0;

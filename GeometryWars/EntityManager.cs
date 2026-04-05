@@ -44,7 +44,7 @@ static class EntityManager
         pendingAdd.Clear();
     }
 
-    public static void KillAllEnemies() => enemies.ForEach(e => e.WasShot());
+    public static void KillAllEnemies() => enemies.ForEach(e => e.WasShot(awardPoints: false));
     public static void KillAllBlackHoles() => blackHoles.ForEach(bh => bh.Kill());
 
     public static void Update()
