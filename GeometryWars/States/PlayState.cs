@@ -36,7 +36,7 @@ public sealed class PlayState : GameStateBase
 
         PlayerStatus.Update();
         EntityManager.Update();
-        EnemySpawner.Update(!_player.IsDead, () => _player.Position);
+        EnemySpawner.Update(_player.IsDead ? null : _player.Position);
 
         GameServices.Grid.Update();
         GameServices.Particles.Update();

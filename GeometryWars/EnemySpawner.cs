@@ -10,16 +10,15 @@ public static class EnemySpawner
     private static float inverseSpawnChance = 60;
     private static readonly float inverseBlackHoleChance = 600;
 
-    // isPlayerAlive and getPlayerPosition are passed from PlayState so this
-    // class has no dependency on the PlayerShip type or GameServices.Player.
-    public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
+    // playerPosition is null when the player is dead; no dependency on PlayerShip.
+    public static void Update(Vector2? playerPosition)
     {
-        if (isPlayerAlive && EntityManager.Count < 200)
+        if (playerPosition.HasValue && EntityManager.Count < 200)
         {
-            Vector2 playerPos = getPlayerPosition();
+            Vector2 playerPos = playerPosition.Value;
 
             if (rand.Next((int)inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
+                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), () => playerPosition.Value));
 
             if (rand.Next((int)inverseSpawnChance) == 0)
                 EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
