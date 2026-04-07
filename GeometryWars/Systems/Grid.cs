@@ -11,6 +11,9 @@ namespace GeometryWars;
 // 1. PointMass: A single point in space with velocity and mass.
 // 2. Spring: Connects two PointMasses and pulls them toward a target distance.
 // 3. Grid: A 2D mesh of points and springs.
+//
+// Note: See GridOptimized.cs for a high-performance version of this system
+// using Data Oriented Design (DOD) and Memory Locality.
 public class Grid
 {
     private readonly Spring[] _springs;

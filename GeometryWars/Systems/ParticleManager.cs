@@ -10,6 +10,9 @@ namespace GeometryWars;
 // When a particle dies, we swap it with the LAST living particle in the array.
 // This is a simple, high-performance way to keep the list contiguous without
 // needing complex circular buffers or moving every item in memory.
+//
+// Note: See ParticleManagerOptimized.cs for a high-performance version of 
+// this system using Data Oriented Design (DOD) and Memory Locality.
 public class ParticleManager<T>
 {
     private readonly Action<Particle> _updateParticle;
