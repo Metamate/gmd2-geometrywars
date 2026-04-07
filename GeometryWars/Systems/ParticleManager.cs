@@ -4,52 +4,48 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
-// DATA LOCALITY NOTE — Array of Objects (current layout):
-// CircularParticleArray holds Particle references. The Particle objects themselves
-// live scattered across the heap, so iterating the array causes one pointer
-// dereference per particle — each likely a cache miss at high particle counts.
+// Manages high-performance particles using Data Oriented Design (DOD).
 //
-// A more cache-friendly layout (Struct of Arrays / SoA) would store each field
-// in its own contiguous array:
-//     float[] positionX, positionY;
-//     float[] orientations;
-//     Color[] tints;
-//     ...
-// This lets the CPU prefetch and process fields in tight loops without chasing
-// pointers. ParticleState is already a value type (struct), which is a step in
-// that direction — note how it is stored inline in Particle.State rather than
-// as a separate heap object.
-public class ParticleManager<T>
+// Refactored for Data Locality:
+// 1. Particle is now a struct.
+// 2. All particles are stored in a flat array (contiguous memory).
+// 3. Update/Draw loops use 'ref' to avoid copying structs.
+public class ParticleManager<T> where T : struct
 {
-    private readonly Action<Particle> updateParticle;
-    private readonly CircularParticleArray particleList;
-    public ParticleManager(int capacity, Action<Particle> updateParticle)
+    public delegate void UpdateParticleDelegate(ref Particle particle);
+
+    private readonly UpdateParticleDelegate _updateParticle;
+    private readonly Particle[] _list;
+    private int _count;
+    private readonly int _capacity;
+
+    public ParticleManager(int capacity, UpdateParticleDelegate updateParticle)
     {
-        this.updateParticle = updateParticle;
-        particleList = new CircularParticleArray(capacity);
-        // Populate the list with empty particle objects, for reuse. 
-        for (int i = 0; i < capacity; i++)
-            particleList[i] = new Particle();
+        _capacity = capacity;
+        _updateParticle = updateParticle;
+        _list = new Particle[capacity];
     }
 
     public void Update()
     {
-        int removalCount = 0;
-        for (int i = 0; i < particleList.Count; i++)
+        for (int i = 0; i < _count; i++)
         {
-            var particle = particleList[i];
-            updateParticle(particle);
+            // Logic: Process every living particle.
+            ref var particle = ref _list[i];
+
+            _updateParticle(ref particle);
             particle.PercentLife -= 1f / particle.Duration;
-            // sift deleted particles to the end of the list
-            Swap(particleList, i - removalCount, i);
+
+            // Removal: If a particle dies, swap it with the LAST living particle
+            // and decrease the count. This keeps the array contiguous without
+            // needing complex circular logic or "ghost" particles.
             if (particle.PercentLife < 0)
-                removalCount++;
+            {
+                _list[i] = _list[_count - 1];
+                _count--;
+                i--; // Re-process the particle we just swapped into this slot.
+            }
         }
-        particleList.Count -= removalCount;
-    }
-    private static void Swap(CircularParticleArray list, int index1, int index2)
-    {
-        (list[index2], list[index1]) = (list[index1], list[index2]);
     }
 
     public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, float scale, T state, float theta = 0)
@@ -59,18 +55,20 @@ public class ParticleManager<T>
 
     public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, Vector2 scale, T state, float theta = 0)
     {
-        Particle particle;
-        if (particleList.Count == particleList.Capacity)
+        int index;
+        if (_count < _capacity)
         {
-            // if the list is full, overwrite the oldest particle, and rotate the circular list 
-            particle = particleList[0];
-            particleList.Start++;
+            index = _count;
+            _count++;
         }
         else
         {
-            particle = particleList[particleList.Count];
-            particleList.Count++;
+            // If full, overwrite a random particle to avoid "ghosting" bias
+            // and keep the system responsive under load.
+            index = Random.Shared.Next(0, _capacity);
         }
+
+        ref var particle = ref _list[index];
         particle.Texture = texture;
         particle.Position = position;
         particle.Tint = tint;
@@ -83,42 +81,23 @@ public class ParticleManager<T>
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        for (int i = 0; i < particleList.Count; i++)
+        for (int i = 0; i < _count; i++)
         {
-            var particle = particleList[i];
-            Vector2 origin = new(particle.Texture.Width / 2, particle.Texture.Height / 2);
-            spriteBatch.Draw(particle.Texture, particle.Position, null, particle.Tint, particle.Orientation, origin, particle.Scale, 0, 0);
+            ref var particle = ref _list[i];
+            Vector2 origin = new(particle.Texture.Width / 2f, particle.Texture.Height / 2f);
+            spriteBatch.Draw(particle.Texture, particle.Position, null, particle.Tint, particle.Orientation, origin, particle.Scale, SpriteEffects.None, 0f);
         }
     }
 
-    public class Particle
+    public struct Particle
     {
         public Texture2D Texture;
         public Vector2 Position;
         public float Orientation;
-        public Vector2 Scale = Vector2.One;
+        public Vector2 Scale;
         public Color Tint;
         public float Duration;
-        public float PercentLife = 1f;
+        public float PercentLife;
         public T State;
-    }
-
-    private class CircularParticleArray(int capacity)
-    {
-        private int start;
-        public int Start
-        {
-            get { return start; }
-            set { start = value % list.Length; }
-        }
-        public int Count { get; set; }
-        public int Capacity { get { return list.Length; } }
-        private readonly Particle[] list = new Particle[capacity];
-
-        public Particle this[int i]
-        {
-            get { return list[(start + i) % list.Length]; }
-            set { list[(start + i) % list.Length] = value; }
-        }
     }
 }

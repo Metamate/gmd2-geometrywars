@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
@@ -13,7 +14,9 @@ static class Input
 
     private static bool isAimingWithMouse;
 
-    // MousePosition always returns the most recent hardware state for smooth UI/cursor.
+    // Use ReadOnlySpan to avoid array allocations in hot paths.
+    private static readonly Keys[] AimKeys = [Keys.Left, Keys.Right, Keys.Up, Keys.Down];
+
     public static Vector2 MousePosition => new(mouseState.X, mouseState.Y);
 
     public static void Update()
@@ -24,12 +27,9 @@ static class Input
         keyboardState = Keyboard.GetState();
         gamepadState  = GamePad.GetState(PlayerIndex.One);
 
-        // Update the current hardware state.
         var currentMouseState = Mouse.GetState();
 
-        // Detect aiming mode based on logic-frame delta (60Hz) rather than
-        // render-frame delta, so slow mouse movements are still detected.
-        if (new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Any(x => keyboardState.IsKeyDown(x)) || gamepadState.ThumbSticks.Right != Vector2.Zero)
+        if (IsAnyAimKeyPressed() || gamepadState.ThumbSticks.Right != Vector2.Zero)
         {
             isAimingWithMouse = false;
         }
@@ -38,13 +38,10 @@ static class Input
             isAimingWithMouse = true;
         }
 
-        // Sync for the next logic update.
         logicLastMouseState = currentMouseState;
         mouseState = currentMouseState;
     }
 
-    // Call every frame from Game1.Update() to ensure the cursor is responsive
-    // even if the logic loop hasn't run yet.
     public static void UpdateMouseOnly()
     {
         mouseState = Mouse.GetState();
@@ -65,14 +62,10 @@ static class Input
         Vector2 direction = gamepadState.ThumbSticks.Left;
         direction.Y *= -1;
 
-        if (keyboardState.IsKeyDown(Keys.A))
-            direction.X -= 1;
-        if (keyboardState.IsKeyDown(Keys.D))
-            direction.X += 1;
-        if (keyboardState.IsKeyDown(Keys.W))
-            direction.Y -= 1;
-        if (keyboardState.IsKeyDown(Keys.S))
-            direction.Y += 1;
+        if (keyboardState.IsKeyDown(Keys.A)) direction.X -= 1;
+        if (keyboardState.IsKeyDown(Keys.D)) direction.X += 1;
+        if (keyboardState.IsKeyDown(Keys.W)) direction.Y -= 1;
+        if (keyboardState.IsKeyDown(Keys.S)) direction.Y += 1;
 
         if (direction.LengthSquared() > 1)
             direction.Normalize();
@@ -82,16 +75,19 @@ static class Input
 
     public static bool IsShooting()
     {
-        // 1. Mouse mode: only shoot if holding the left button.
         if (isAimingWithMouse)
             return mouseState.LeftButton == ButtonState.Pressed;
 
-        // 2. Controller/Keyboard mode: shoot if any aiming input is active.
-        Vector2 stick = gamepadState.ThumbSticks.Right;
-        bool hasStickInput = stick.LengthSquared() > 0.01f;
-        bool hasKeyInput = new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Any(x => keyboardState.IsKeyDown(x));
+        return gamepadState.ThumbSticks.Right.LengthSquared() > 0.01f || IsAnyAimKeyPressed();
+    }
 
-        return hasStickInput || hasKeyInput;
+    private static bool IsAnyAimKeyPressed()
+    {
+        // Iterating a Span is zero-allocation.
+        ReadOnlySpan<Keys> keys = AimKeys;
+        for (int i = 0; i < keys.Length; i++)
+            if (keyboardState.IsKeyDown(keys[i])) return true;
+        return false;
     }
 
     public static Vector2 GetAimDirection(Vector2 shipPosition)

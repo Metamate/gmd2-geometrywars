@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,16 +6,7 @@ namespace GeometryWars;
 
 // Manages entity lifecycle: add, update, draw, remove.
 //
-// Deferred removal: entities set IsExpired = true during Update() but are not
-// removed until the end of the frame. This keeps the entity list stable while
-// it is being iterated, so any entity can safely expire itself or others.
-//
-// Collision detection: a generic circle-pair loop (O(n²)) calls OnCollision() on
-// both entities when their circles overlap. Response logic lives in each entity's
-// OnCollision() override — the manager only detects, never responds.
-//
-// Object pool: Bullet instances are recycled via an ObjectPool to avoid per-frame
-// heap allocations. Use GetBullet() to acquire and Reset() to reinitialise.
+// Optimized for zero-allocation in hot paths (GetNearbyEntities, Collisions).
 static class EntityManager
 {
     private static readonly List<Entity> entities = [];
@@ -27,7 +17,10 @@ static class EntityManager
     private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);
     private static bool isUpdating;
 
-    public static IEnumerable<BlackHole> BlackHoles => blackHoles;
+    // Pre-allocated list for proximity queries to avoid per-query heap allocations.
+    private static readonly List<Entity> nearbyEntitiesBuffer = [];
+
+    public static List<BlackHole> BlackHoles => blackHoles;
     public static int Count => entities.Count;
     public static int BlackHoleCount => blackHoles.Count;
 
@@ -91,7 +84,6 @@ static class EntityManager
         else if (entity is Enemy e) enemies.Add(e);
     }
 
-    // Generic circle-pair collision detection.
     private static void HandleCollisions()
     {
         for (int i = 0; i < entities.Count; i++)
@@ -114,6 +106,19 @@ static class EntityManager
         }
     }
 
-    public static IEnumerable<Entity> GetNearbyEntities(Vector2 position, float radius)
-        => entities.Where(e => Vector2.DistanceSquared(position, e.Position) < radius * radius);
+    /// <summary>
+    /// Returns entities within a radius using a shared reusable buffer. 
+    /// Note: Result is only valid until the next call to this method.
+    /// </summary>
+    public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
+    {
+        nearbyEntitiesBuffer.Clear();
+        float rSq = radius * radius;
+        for (int i = 0; i < entities.Count; i++)
+        {
+            if (Vector2.DistanceSquared(position, entities[i].Position) < rSq)
+                nearbyEntitiesBuffer.Add(entities[i]);
+        }
+        return nearbyEntitiesBuffer;
+    }
 }
