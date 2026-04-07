@@ -22,7 +22,7 @@ public class PlayerShip : Entity
         // not physics-based — no momentum carries over between frames.
         AddComponent(new VelocityMover(damping: 0f, clampToScreen: true));
 
-        Collider = new CircleCollider(GameSettings.PlayerColliderRadius);
+        Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
     }
 
     // Collision response: the player dies on contact with any active enemy or black hole.
@@ -56,7 +56,7 @@ public class PlayerShip : Entity
             return;
         }
 
-        Velocity += GameSettings.PlayerSpeed * Input.GetMovementDirection();
+        Velocity += GameSettings.Player.Speed * Input.GetMovementDirection();
 
         if (Velocity.LengthSquared() > 0)
             Orientation = Velocity.ToAngle();
@@ -66,15 +66,15 @@ public class PlayerShip : Entity
         var aim = Input.GetAimDirection(Position);
         if (Input.IsShooting() && _cooldownRemaining <= 0)
         {
-            _cooldownRemaining = GameSettings.PlayerShotCooldown;
+            _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
             float aimAngle = aim.ToAngle();
             Quaternion aimQuat = Quaternion.CreateFromYawPitchRoll(0, 0, aimAngle);
-            float randomSpread = Random.Shared.NextFloat(-GameSettings.PlayerBulletSpread, GameSettings.PlayerBulletSpread)
-                               + Random.Shared.NextFloat(-GameSettings.PlayerBulletSpread, GameSettings.PlayerBulletSpread);
-            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.PlayerBulletSpeed);
+            float randomSpread = Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread)
+                               + Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread);
+            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.Bullets.Speed);
 
-            Vector2 offsetA = new(GameSettings.PlayerBulletOffsetX, -GameSettings.PlayerBulletOffsetY);
-            Vector2 offsetB = new(GameSettings.PlayerBulletOffsetX,  GameSettings.PlayerBulletOffsetY);
+            Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
+            Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
             EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
             EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
 
@@ -94,14 +94,14 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-        _framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.PlayerGameOverFrames : GameSettings.PlayerRespawnFrames;
+        _framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
 
         Color yellow = new(0.8f, 0.8f, 0.4f);
-        for (int i = 0; i < GameSettings.PlayerDeathParticles; i++)
+        for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)
         {
-            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
+            float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.DeathParticleLife, GameSettings.DeathParticleSize,
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize,
                 new ParticleState { Velocity = Random.Shared.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });
         }
     }

@@ -128,15 +128,13 @@ public class GridOptimized
                 if (x > 1)
                 {
                     Vector2 left = ToVec2(_points[index - 1].Position);
-                    float thickness = y % 3 == 1 ? 3f : 1f;
-                    spriteBatch.DrawLine(left, p, color, thickness);
+                    spriteBatch.DrawLine(left, p, color, 1f);
                 }
 
                 if (y > 1)
                 {
                     Vector2 up = ToVec2(_points[index - _cols].Position);
-                    float thickness = x % 3 == 1 ? 3f : 1f;
-                    spriteBatch.DrawLine(up, p, color, thickness);
+                    spriteBatch.DrawLine(up, p, color, 1f);
                 }
             }
         }

@@ -7,7 +7,7 @@ namespace GeometryWars;
 
 public class BlackHole : Entity
 {
-    private int _hitpoints = GameSettings.BlackHoleHitpoints;
+    private int _hitpoints = GameSettings.Hazards.BlackHoleHitpoints;
     private float _sprayAngle = 0;
 
     public BlackHole(Vector2 position)
@@ -32,11 +32,11 @@ public class BlackHole : Entity
 
         float hue = (float)(3 * FrameContext.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
-        float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.BlackHoleHitParticles);
-        for (int i = 0; i < GameSettings.BlackHoleHitParticles; i++)
+        float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
+        for (int i = 0; i < GameSettings.Visuals.BlackHoleHitParticles; i++)
         {
-            float speed = Random.Shared.NextFloat(GameSettings.BlackHoleHitParticleMinSpeed, GameSettings.BlackHoleHitParticleMaxSpeed);
-            Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / GameSettings.BlackHoleHitParticles + startOffset, speed);
+            float speed = Random.Shared.NextFloat(GameSettings.Visuals.BlackHoleHitParticleMinSpeed, GameSettings.Visuals.BlackHoleHitParticleMaxSpeed);
+            Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / GameSettings.Visuals.BlackHoleHitParticles + startOffset, speed);
             var state = new ParticleState
             {
                 Velocity = sprayVel,
@@ -44,7 +44,7 @@ public class BlackHole : Entity
                 Type = ParticleType.IgnoreGravity
             };
             GameServices.Particles.CreateParticle(Art.LineParticle, Position + 2f * sprayVel, color,
-                GameSettings.BlackHoleHitParticleLife, GameSettings.BlackHoleHitParticleSize, state);
+                GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }
 
@@ -60,7 +60,7 @@ public class BlackHole : Entity
     protected override void OnUpdate()
     {
         // Apply gravity and repulsion to nearby entities
-        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
+        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.Hazards.BlackHoleGravityRange))
         {
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
@@ -70,7 +70,7 @@ public class BlackHole : Entity
             else
             {
                 var dPos = Position - entity.Position;
-                entity.Velocity += dPos.ScaleTo(MathHelper.Lerp(GameSettings.BlackHoleGravityForce, 0, dPos.Length() / GameSettings.BlackHoleGravityRange));
+                entity.Velocity += dPos.ScaleTo(MathHelper.Lerp(GameSettings.Hazards.BlackHoleGravityForce, 0, dPos.Length() / GameSettings.Hazards.BlackHoleGravityRange));
             }
         }
 
@@ -85,6 +85,6 @@ public class BlackHole : Entity
         }
 
         _sprayAngle -= MathHelper.TwoPi / 50f;
-        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(_sprayAngle / 2) * 10 + 20, Position, GameSettings.BlackHoleGridRange);
+        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(_sprayAngle / 2) * 10 + 20, Position, GameSettings.Hazards.BlackHoleGridRange);
     }
 }

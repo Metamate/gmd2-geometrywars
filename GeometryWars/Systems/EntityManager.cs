@@ -46,8 +46,17 @@ static class EntityManager
         pendingAdd.Clear();
     }
 
-    public static void KillAllEnemies() => enemies.ForEach(e => e.WasShot(awardPoints: false));
-    public static void KillAllBlackHoles() => blackHoles.ForEach(bh => bh.Kill());
+    public static void KillAllEnemies()
+    {
+        for (int i = 0; i < enemies.Count; i++)
+            enemies[i].WasShot(awardPoints: false);
+    }
+
+    public static void KillAllBlackHoles()
+    {
+        for (int i = 0; i < blackHoles.Count; i++)
+            blackHoles[i].Kill();
+    }
 
     public static void Update()
     {

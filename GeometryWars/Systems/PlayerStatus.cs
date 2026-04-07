@@ -29,8 +29,8 @@ public static class PlayerStatus
 
         Score = 0;
         Multiplier = 1;
-        Lives = GameSettings.PlayerStartingLives;
-        _scoreForExtraLife = GameSettings.PlayerExtraLifeScore;
+        Lives = GameSettings.Player.StartingLives;
+        _scoreForExtraLife = GameSettings.Player.ExtraLifeScore;
         _multiplierTimeLeft = 0;
     }
 
@@ -38,7 +38,7 @@ public static class PlayerStatus
     {
         if (Multiplier > 1 && (_multiplierTimeLeft -= FrameContext.ElapsedSeconds) <= 0)
         {
-            _multiplierTimeLeft = GameSettings.PlayerMultiplierExpiry;
+            _multiplierTimeLeft = GameSettings.Player.MultiplierExpiry;
             Multiplier = 1;
         }
     }
@@ -48,15 +48,15 @@ public static class PlayerStatus
         Score += basePoints * Multiplier;
         while (Score >= _scoreForExtraLife)
         {
-            _scoreForExtraLife += GameSettings.PlayerExtraLifeScore;
+            _scoreForExtraLife += GameSettings.Player.ExtraLifeScore;
             Lives++;
         }
     }
 
     public static void IncreaseMultiplier()
     {
-        _multiplierTimeLeft = GameSettings.PlayerMultiplierExpiry;
-        if (Multiplier < GameSettings.PlayerMaxMultiplier) Multiplier++;
+        _multiplierTimeLeft = GameSettings.Player.MultiplierExpiry;
+        if (Multiplier < GameSettings.Player.MaxMultiplier) Multiplier++;
     }
 
     public static void RemoveLife() => Lives--;

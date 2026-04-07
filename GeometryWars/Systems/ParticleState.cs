@@ -42,18 +42,18 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
                 var dPos     = blackHole.Position - pos;
                 float distance = dPos.Length();
                 var n        = dPos / distance;
-                vel += GameSettings.ParticleGravityForce * n / (distance * distance + GameSettings.ParticleGravityForce);
-                if (distance < GameSettings.ParticleOrbitalRange)
-                    vel += GameSettings.ParticleOrbitalForce * new Vector2(n.Y, -n.X) / (distance + GameSettings.ParticleOrbitalDamping);
+                vel += GameSettings.Physics.ParticleGravityForce * n / (distance * distance + GameSettings.Physics.ParticleGravityForce);
+                if (distance < GameSettings.Physics.ParticleOrbitalRange)
+                    vel += GameSettings.Physics.ParticleOrbitalForce * new Vector2(n.Y, -n.X) / (distance + GameSettings.Physics.ParticleOrbitalDamping);
             }
         }
 
         if (Math.Abs(vel.X) + Math.Abs(vel.Y) < 0.00000000001f)
             vel = Vector2.Zero;
         else if (particle.State.Type == ParticleType.Enemy)
-            vel *= GameSettings.ParticleEnemyDamping;
+            vel *= GameSettings.Physics.ParticleEnemyDamping;
         else
-            vel *= GameSettings.ParticleDefaultDamping + Math.Abs(pos.X) % 0.04f;
+            vel *= GameSettings.Physics.ParticleDefaultDamping + Math.Abs(pos.X) % 0.04f;
 
         particle.State.Velocity = vel;
     }

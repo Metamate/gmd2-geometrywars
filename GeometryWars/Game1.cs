@@ -11,7 +11,7 @@ public class Game1 : GameCore
 {
     private readonly BloomComponent _bloom;
 
-    public Game1() : base(GameSettings.ScreenWidth, GameSettings.ScreenHeight)
+    public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
     {
         // Disable VSync and FixedTimeStep for performance benchmarking.
         Graphics.SynchronizeWithVerticalRetrace = false;
@@ -27,9 +27,9 @@ public class Game1 : GameCore
         base.Initialize();
 
         // Register stable services once.
-        GameServices.Particles = new ParticleManager<ParticleState>(GameSettings.MaxParticles, ParticleState.UpdateParticle);
+        GameServices.Particles = new ParticleManager<ParticleState>(GameSettings.Performance.MaxParticles, ParticleState.UpdateParticle);
 
-        Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.MaxGridPoints));
+        Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.Performance.MaxGridPoints));
         GameServices.Grid = new Grid(GraphicsDevice.Viewport.Bounds, gridSpacing);
 
         // Seed frame context before the first tick.

@@ -9,7 +9,7 @@ public class Bullet : Entity
     public Bullet()
     {
         Image    = Art.Bullet;
-        Collider = new CircleCollider(GameSettings.BulletColliderRadius);
+        Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
     }
 
     public void Reset(Vector2 position, Vector2 velocity)
@@ -41,11 +41,11 @@ public class Bullet : Entity
         if (!FrameContext.Viewport.Bounds.Contains(Position.ToPoint()))
         {
             IsExpired = true;
-            for (int i = 0; i < GameSettings.BulletDeathParticles; i++)
+            for (int i = 0; i < GameSettings.Visuals.BulletDeathParticles; i++)
                 GameServices.Particles.CreateParticle(Art.LineParticle, Position, Color.LightBlue, 50, 1,
                     new ParticleState { Velocity = Random.Shared.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
         }
 
-        GameServices.Grid.ApplyExplosiveForce(GameSettings.BulletGridForce * Velocity.Length(), Position, GameSettings.BulletGridRadius);
+        GameServices.Grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * Velocity.Length(), Position, GameSettings.Physics.BulletGridRadius);
     }
 }

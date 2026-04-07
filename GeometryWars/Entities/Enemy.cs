@@ -10,7 +10,7 @@ namespace GeometryWars;
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    private int _timeUntilStart = GameSettings.EnemySpawnDelay;
+    private int _timeUntilStart = GameSettings.Enemy.SpawnDelay;
     private readonly List<IEnumerator<int>> _behaviours = [];
 
     public Enemy(EnemyDef def, Vector2 position)
@@ -21,7 +21,7 @@ public class Enemy : Entity
         Tint     = Color.Transparent;
 
         // Movement: decelerate each frame and stay on screen.
-        AddComponent(new VelocityMover(damping: GameSettings.EnemyDamping, clampToScreen: true));
+        AddComponent(new VelocityMover(damping: GameSettings.Enemy.Damping, clampToScreen: true));
 
         Collider = new CircleCollider(Image.Width / 2f);
     }
@@ -33,7 +33,7 @@ public class Enemy : Entity
     // (declared in GameSettings) to the constructor.
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var def   = GameSettings.Seeker;
+        var def   = GameSettings.Enemy.Seeker;
         var enemy = new Enemy(def, position);
         enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition, def.Acceleration));
         return enemy;
@@ -41,7 +41,7 @@ public class Enemy : Entity
 
     public static Enemy CreateWanderer(Vector2 position)
     {
-        var def   = GameSettings.Wanderer;
+        var def   = GameSettings.Enemy.Wanderer;
         var enemy = new Enemy(def, position);
         enemy.AddBehaviour(enemy.MoveRandomly());
         return enemy;
@@ -54,7 +54,7 @@ public class Enemy : Entity
         else
         {
             _timeUntilStart--;
-            Tint = Color.White * (1 - _timeUntilStart / (float)GameSettings.EnemySpawnDelay);
+            Tint = Color.White * (1 - _timeUntilStart / (float)GameSettings.Enemy.SpawnDelay);
         }
     }
 
@@ -89,9 +89,9 @@ public class Enemy : Entity
         float hue2 = (hue1 + Random.Shared.NextFloat(0, 2)) % 6f;
         Color color1 = ColorUtil.HSVToColor(hue1, 0.5f, 1);
         Color color2 = ColorUtil.HSVToColor(hue2, 0.5f, 1);
-        for (int i = 0; i < GameSettings.EnemyDeathParticles; i++)
+        for (int i = 0; i < GameSettings.Visuals.EnemyDeathParticles; i++)
         {
-            float speed = GameSettings.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
+            float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             var state = new ParticleState
             {
                 Velocity = Random.Shared.NextVector2(speed, speed),
@@ -99,7 +99,7 @@ public class Enemy : Entity
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.DeathParticleLife, GameSettings.DeathParticleSize, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
         if (awardPoints)
@@ -130,12 +130,12 @@ public class Enemy : Entity
         float direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
         while (true)
         {
-            direction += Random.Shared.NextFloat(-GameSettings.WandererTurnRate, GameSettings.WandererTurnRate);
+            direction += Random.Shared.NextFloat(-GameSettings.Enemy.WandererTurnRate, GameSettings.Enemy.WandererTurnRate);
             direction = MathHelper.WrapAngle(direction);
-            for (int i = 0; i < GameSettings.WandererStepsPerTick; i++)
+            for (int i = 0; i < GameSettings.Enemy.WandererStepsPerTick; i++)
             {
-                Velocity += MathUtil.FromPolar(direction, GameSettings.WandererVelocity);
-                Orientation -= GameSettings.WandererOrientationDecay;
+                Velocity += MathUtil.FromPolar(direction, GameSettings.Enemy.WandererVelocity);
+                Orientation -= GameSettings.Enemy.WandererOrientationDecay;
                 var bounds = FrameContext.Viewport.Bounds;
                 bounds.Inflate(-Image.Width, -Image.Height);
                 if (!bounds.Contains(Position.ToPoint()))
