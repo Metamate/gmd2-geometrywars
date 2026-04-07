@@ -37,7 +37,7 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
         {
             // Particles are attracted to black holes — read the live black hole list
             // from the entity manager each frame.
-            foreach (var blackHole in GameServices.Entities.BlackHoles)
+            foreach (var blackHole in EntityManager.BlackHoles)
             {
                 var dPos     = blackHole.Position - pos;
                 float distance = dPos.Length();

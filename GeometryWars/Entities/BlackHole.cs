@@ -60,7 +60,7 @@ public class BlackHole : Entity
     protected override void OnUpdate()
     {
         // Apply gravity and repulsion to nearby entities
-        foreach (var entity in GameServices.Entities.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
+        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
         {
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;

@@ -35,14 +35,14 @@ public class PlayerShip : Entity
         if (other is Enemy e && e.IsActive)
         {
             Kill();
-            GameServices.Entities.KillAllEnemies();
+            EntityManager.KillAllEnemies();
             EnemySpawner.Reset();
         }
         else if (other is BlackHole)
         {
             Kill();
-            GameServices.Entities.KillAllEnemies();
-            GameServices.Entities.KillAllBlackHoles();
+            EntityManager.KillAllEnemies();
+            EntityManager.KillAllBlackHoles();
             EnemySpawner.Reset();
         }
     }
@@ -75,8 +75,8 @@ public class PlayerShip : Entity
 
             Vector2 offsetA = new(GameSettings.PlayerBulletOffsetX, -GameSettings.PlayerBulletOffsetY);
             Vector2 offsetB = new(GameSettings.PlayerBulletOffsetX,  GameSettings.PlayerBulletOffsetY);
-            GameServices.Entities.Add(GameServices.Entities.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
-            GameServices.Entities.Add(GameServices.Entities.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
+            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
+            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
 
             Sound.Shot.Play(0.2f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
         }

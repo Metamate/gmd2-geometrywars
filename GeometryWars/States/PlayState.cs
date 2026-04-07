@@ -18,9 +18,9 @@ public sealed class PlayState : GameStateBase
     public override void Enter()
     {
         _paused = false;
-        GameServices.Entities.Clear();
+        EntityManager.Clear();
         _player = new PlayerShip();
-        GameServices.Entities.Add(_player);
+        EntityManager.Add(_player);
         PlayerStatus.Reset();
         EnemySpawner.Reset();
         MediaPlayer.IsRepeating = true;
@@ -35,7 +35,7 @@ public sealed class PlayState : GameStateBase
         if (_paused) return;
 
         PlayerStatus.Update();
-        GameServices.Entities.Update();
+        EntityManager.Update();
         EnemySpawner.Update(!_player.IsDead, () => _player.Position);
 
         GameServices.Grid.Update();
@@ -48,7 +48,7 @@ public sealed class PlayState : GameStateBase
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        GameServices.Entities.Draw(spriteBatch);
+        EntityManager.Draw(spriteBatch);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
@@ -63,6 +63,7 @@ public sealed class PlayState : GameStateBase
 
         spriteBatch.Draw(Art.Pointer, Input.MousePosition, Color.White);
         spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
+        GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35));
         DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
         DrawRightAligned(spriteBatch, "Multiplier: " + PlayerStatus.Multiplier, 35);
 

@@ -13,6 +13,10 @@ public class Game1 : GameCore
 
     public Game1() : base(GameSettings.ScreenWidth, GameSettings.ScreenHeight)
     {
+        // Disable VSync and FixedTimeStep for performance benchmarking.
+        Graphics.SynchronizeWithVerticalRetrace = false;
+        IsFixedTimeStep = false;
+
         _bloom = new BloomComponent(this);
         Components.Add(_bloom);
         _bloom.Settings = new BloomSettings("", 0.2f, 4f, 2f, 1f, 1.5f, 1f);
@@ -24,7 +28,6 @@ public class Game1 : GameCore
 
         // Register stable services once — these are created here and never replaced.
         // Frame-varying services (Time, Viewport) are updated in RegisterServices().
-        GameServices.Entities  = new EntityManager();
         GameServices.Particles = new ParticleManager<ParticleState>(GameSettings.MaxParticles, ParticleState.UpdateParticle);
 
         Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.MaxGridPoints));
@@ -36,16 +39,26 @@ public class Game1 : GameCore
         SetState(new PlayState(this));
     }
 
+    protected override void Update(GameTime gameTime)
+    {
+        // Performance and Mouse position (for UI) are updated every rendering frame.
+        GameServices.Performance.Update(gameTime);
+        Input.UpdateMouseOnly();
+
+        base.Update(gameTime);
+    }
+
     protected override void LoadContent()
     {
         Art.Load(Content);
         Sound.Load(Content);
     }
 
+    // The main logic tick calls the full input update (keyboard, gamepad, mouse history).
     protected override void OnUpdateInput() => Input.Update();
 
     // Called once per frame — only update values that actually change each frame.
-    // Stable services (Entities, Particles, Grid) stay set from Initialize().
+    // Stable services (Particles, Grid) stay set from Initialize().
     protected override void RegisterServices(GameTime gameTime)
     {
         GameServices.Time     = gameTime;

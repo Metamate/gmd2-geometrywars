@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -5,16 +6,19 @@ using Microsoft.Xna.Framework.Input;
 namespace GMDCore;
 
 // Base game class that owns the state machine.
-// Subclasses override RegisterServices() to push game-specific singletons into
-// whatever service locator the game uses, called once per frame before state.Update().
-// Subclasses that use post-processing override Draw() and use RunComponents() in
-// place of base.Draw() to avoid double-invoking state drawing.
+//
+// Implementation Note: Fixed-Timestep Accumulator
+// We implement our own logic loop to allow uncapped rendering (VSync off)
+// while keeping gameplay simulation deterministic at 60Hz. This prevents
+// physics (like the spring grid) from breaking at high frame rates.
 public abstract class GameCore : Game
 {
     protected GraphicsDeviceManager Graphics;
     public SpriteBatch SpriteBatch { get; private set; }
 
     private GameStateBase _activeState;
+    private double _accumulator;
+    private readonly GameTime _fixedGameTime = new();
 
     protected GameStateBase ActiveState => _activeState;
 
@@ -41,11 +45,7 @@ public abstract class GameCore : Game
         _activeState?.Enter();
     }
 
-    // Called once per frame before the active state updates.
-    // Override to push this frame's GameTime, Viewport, etc. into a service locator.
     protected virtual void RegisterServices(GameTime gameTime) { }
-
-    // Called once per frame to handle platform input (e.g. Input.Update()).
     protected virtual void OnUpdateInput() { }
 
     protected override void Update(GameTime gameTime)
@@ -54,18 +54,30 @@ public abstract class GameCore : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        OnUpdateInput();
-        RegisterServices(gameTime);
-        _activeState?.Update();
+        // 60Hz fixed logic step
+        const double timeStep = 1.0 / 60.0;
+        _accumulator += gameTime.ElapsedGameTime.TotalSeconds;
+
+        // Prevent "spiral of death" if the simulation falls too far behind
+        if (_accumulator > 0.25) _accumulator = 0.25;
+
+        while (_accumulator >= timeStep)
+        {
+            _fixedGameTime.ElapsedGameTime = TimeSpan.FromSeconds(timeStep);
+            _fixedGameTime.TotalGameTime += TimeSpan.FromSeconds(timeStep);
+
+            OnUpdateInput();
+            RegisterServices(_fixedGameTime);
+            _activeState?.Update();
+
+            _accumulator -= timeStep;
+        }
 
         base.Update(gameTime);
     }
 
-    // Runs Game.Draw() -> Components.Draw() (bloom etc.) without re-invoking state methods.
-    // Call from an overriding Draw() instead of base.Draw() to avoid double-draw.
     protected void RunComponents(GameTime gameTime) => base.Draw(gameTime);
 
-    // Default draw path for games without post-processing.
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);

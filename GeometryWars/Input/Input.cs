@@ -18,19 +18,24 @@ static class Input
     public static void Update()
     {
         lastKeyboardState = keyboardState;
-        lastMouseState = mouseState;
-        lastGamepadState = gamepadState;
+        lastMouseState    = mouseState;
+        lastGamepadState  = gamepadState;
 
         keyboardState = Keyboard.GetState();
-        mouseState = Mouse.GetState();
+        UpdateMouseOnly();
         gamepadState = GamePad.GetState(PlayerIndex.One);
 
-        // If the player pressed one of the arrow keys or is using a gamepad to aim, we want to disable mouse aiming. Otherwise, 
-        // if the player moves the mouse, enable mouse aiming.
+        // If the player pressed one of the arrow keys or is using a gamepad to aim, we want to disable mouse aiming.
         if (new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Any(x => keyboardState.IsKeyDown(x)) || gamepadState.ThumbSticks.Right != Vector2.Zero)
             isAimingWithMouse = false;
         else if (MousePosition != new Vector2(lastMouseState.X, lastMouseState.Y))
             isAimingWithMouse = true;
+    }
+
+    // Call every frame from Game1.Update() so the UI/cursor feels responsive at high framerates.
+    public static void UpdateMouseOnly()
+    {
+        mouseState = Mouse.GetState();
     }
 
     public static bool WasKeyPressed(Keys key)

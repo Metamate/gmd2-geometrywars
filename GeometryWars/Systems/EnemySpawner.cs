@@ -13,19 +13,19 @@ public static class EnemySpawner
     // position each frame without needing a direct reference to PlayerShip.
     public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
     {
-        if (isPlayerAlive && GameServices.Entities.Count < GameSettings.MaxActiveEntities)
+        if (isPlayerAlive && EntityManager.Count < GameSettings.MaxActiveEntities)
         {
             Vector2 playerPos = getPlayerPosition();
 
             if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                GameServices.Entities.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
+                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
 
             if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                GameServices.Entities.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
+                EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
 
-            if (GameServices.Entities.BlackHoleCount < GameSettings.MaxBlackHoles &&
+            if (EntityManager.BlackHoleCount < GameSettings.MaxBlackHoles &&
                 Random.Shared.Next((int)GameSettings.BlackHoleSpawnChance) == 0)
-                GameServices.Entities.Add(new BlackHole(GetSpawnPosition(playerPos)));
+                EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
         }
 
         if (_inverseSpawnChance > GameSettings.EnemySpawnChanceMin)
