@@ -32,6 +32,9 @@ public sealed class PlayState : GameStateBase
         if (Input.WasKeyPressed(Keys.P))
             _paused = !_paused;
 
+        if (Input.WasKeyPressed(Keys.F3))
+            GameServices.Performance.Toggle();
+
         if (_paused) return;
 
         PlayerStatus.Update();
@@ -63,7 +66,7 @@ public sealed class PlayState : GameStateBase
 
         spriteBatch.Draw(Art.Pointer, Input.MousePosition, Color.White);
         spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
-        GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35));
+        GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35), EntityManager.Count);
         DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
         DrawRightAligned(spriteBatch, "Multiplier: " + PlayerStatus.Multiplier, 35);
 
@@ -75,12 +78,12 @@ public sealed class PlayState : GameStateBase
         }
 
         spriteBatch.End();
-        }
+    }
 
-        private static void DrawRightAligned(SpriteBatch spriteBatch, string text, float y)
-        {
+    private static void DrawRightAligned(SpriteBatch spriteBatch, string text, float y)
+    {
         float width = Art.Font.MeasureString(text).X;
         spriteBatch.DrawString(Art.Font, text,
             new Vector2(FrameContext.ScreenSize.X - width - 5, y), Color.White);
-        }
+    }
 }

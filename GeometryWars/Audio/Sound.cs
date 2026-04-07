@@ -17,10 +17,11 @@ static class Sound
     public static SoundEffect Spawn => spawns[Random.Shared.Next(spawns.Length)];
     public static void Load(ContentManager content)
     {
-        MediaPlayer.Volume = 0.00f;
-        SoundEffect.MasterVolume = 0.00f;
+        MediaPlayer.Volume = 0.5f;
+        SoundEffect.MasterVolume = 1.0f;
         Music = content.Load<Song>("Audio/Music");
-        // These linq expressions are just a fancy way loading all sounds of each category into an array. 
+        // Enumerable.Range + Select loads all numbered sound files into an array concisely.
+        // e.g. "Audio/explosion-01" through "Audio/explosion-08".
         explosions = [.. Enumerable.Range(1, 8).Select(x => content.Load<SoundEffect>("Audio/explosion-0" + x))];
         shots = [.. Enumerable.Range(1, 4).Select(x => content.Load<SoundEffect>("Audio/shoot-0" + x))];
         spawns = [.. Enumerable.Range(1, 8).Select(x => content.Load<SoundEffect>("Audio/spawn-0" + x))];

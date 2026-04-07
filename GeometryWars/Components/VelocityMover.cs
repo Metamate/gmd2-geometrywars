@@ -28,5 +28,5 @@ public sealed class VelocityMover : IComponent
                 FrameContext.ScreenSize - owner.Size / 2);
 
         owner.Velocity *= _damping;
-        }
+    }
 }

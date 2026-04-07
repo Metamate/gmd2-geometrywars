@@ -84,6 +84,9 @@ public class GridOptimized
             _points[i].Update();
     }
 
+    public void ApplyDirectedForce(Vector2 force, Vector2 position, float radius)
+        => ApplyDirectedForce(new Vector3(force, 0), new Vector3(position, 0), radius);
+
     public void ApplyDirectedForce(Vector3 force, Vector3 position, float radius)
     {
         float rSq = radius * radius;
@@ -94,6 +97,26 @@ public class GridOptimized
                 _points[i].ApplyForce(10 * force / (10 + MathF.Sqrt(distSq)));
         }
     }
+
+    public void ApplyImplosiveForce(float force, Vector2 position, float radius)
+        => ApplyImplosiveForce(force, new Vector3(position, 0), radius);
+
+    public void ApplyImplosiveForce(float force, Vector3 position, float radius)
+    {
+        float rSq = radius * radius;
+        for (int i = 0; i < _points.Length; i++)
+        {
+            float distSq = Vector3.DistanceSquared(position, _points[i].Position);
+            if (distSq < rSq)
+            {
+                _points[i].ApplyForce(10 * force * (position - _points[i].Position) / (100 + distSq));
+                _points[i].IncreaseDamping(0.6f);
+            }
+        }
+    }
+
+    public void ApplyExplosiveForce(float force, Vector2 position, float radius)
+        => ApplyExplosiveForce(force, new Vector3(position, 0), radius);
 
     public void ApplyExplosiveForce(float force, Vector3 position, float radius)
     {
@@ -128,13 +151,38 @@ public class GridOptimized
                 if (x > 1)
                 {
                     Vector2 left = ToVec2(_points[index - 1].Position);
-                    spriteBatch.DrawLine(left, p, color, 1f);
+                    float thickness = y % 3 == 1 ? 3f : 1f;
+
+                    // Catmull-Rom: smooth the line using neighbouring points as control handles.
+                    // When the midpoint deviates from the straight segment, split into two segments.
+                    int xNext = Math.Min(x + 1, _cols - 1);
+                    Vector2 pNext = ToVec2(_points[y * _cols + xNext].Position);
+                    Vector2 pPrev = ToVec2(_points[y * _cols + x - 2].Position);
+                    Vector2 mid = Vector2.CatmullRom(pPrev, left, p, pNext, 0.5f);
+
+                    if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
+                    {
+                        spriteBatch.DrawLine(left, mid, color, thickness);
+                        spriteBatch.DrawLine(mid, p, color, thickness);
+                    }
+                    else
+                        spriteBatch.DrawLine(left, p, color, thickness);
                 }
 
                 if (y > 1)
                 {
                     Vector2 up = ToVec2(_points[index - _cols].Position);
-                    spriteBatch.DrawLine(up, p, color, 1f);
+                    float thickness = x % 3 == 1 ? 3f : 1f;
+                    spriteBatch.DrawLine(up, p, color, thickness);
+                }
+
+                if (x > 1 && y > 1)
+                {
+                    Vector2 up     = ToVec2(_points[index - _cols].Position);
+                    Vector2 left   = ToVec2(_points[index - 1].Position);
+                    Vector2 upLeft = ToVec2(_points[index - _cols - 1].Position);
+                    spriteBatch.DrawLine(0.5f * (upLeft + up), 0.5f * (left + p), color, 1f);
+                    spriteBatch.DrawLine(0.5f * (upLeft + left), 0.5f * (up + p), color, 1f);
                 }
             }
         }
@@ -156,7 +204,10 @@ public class GridOptimized
             Velocity += _acceleration;
             Position += Velocity;
             _acceleration = Vector3.Zero;
-            Velocity *= _damping;
+            if (Velocity.LengthSquared() < 0.000001f)
+                Velocity = Vector3.Zero;
+            else
+                Velocity *= _damping;
             _damping = 0.98f;
         }
     }

@@ -64,7 +64,7 @@ public class PlayerShip : Entity
         MakeExhaustFire();
 
         var aim = Input.GetAimDirection(Position);
-        if (Input.IsShooting() && _cooldownRemaining <= 0)
+        if (Input.IsShooting() && aim.LengthSquared() > 0 && _cooldownRemaining <= 0)
         {
             _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
             float aimAngle = aim.ToAngle();
