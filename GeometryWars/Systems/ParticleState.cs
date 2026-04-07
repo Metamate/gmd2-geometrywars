@@ -8,7 +8,7 @@ public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
 
 public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
 {
-    public static void UpdateParticle(ref ParticleManager<ParticleState>.Particle particle)
+    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle)
     {
         var vel = particle.State.Velocity;
         particle.Position    += vel;

@@ -7,20 +7,17 @@ namespace GeometryWars;
 
 // Spring-mass cloth simulation used as a visual background distortion effect.
 //
-// Refactored for Data Oriented Design (DOD):
-// 1. PointMass is now a struct stored in a flat array (PointMass[]).
-//    This ensures the entire grid is contiguous in memory, maximizing cache hits.
-// 2. Spring stores indices (int) into the points array instead of object references.
-//    This allows springs to modify the actual points in the array without copying.
-// 3. TargetLength is calculated once during construction to ensure stable physics.
+// Concepts:
+// 1. PointMass: A single point in space with velocity and mass.
+// 2. Spring: Connects two PointMasses and pulls them toward a target distance.
+// 3. Grid: A 2D mesh of points and springs.
 public class Grid
 {
     private readonly Spring[] _springs;
-    private readonly PointMass[] _points;
-    private readonly PointMass[] _fixedPoints;
+    private readonly PointMass[,] _points;
+    private readonly Vector2 _screenSize;
     private readonly int _cols;
     private readonly int _rows;
-    private readonly Vector2 _screenSize;
 
     public Grid(Rectangle size, Vector2 spacing)
     {
@@ -28,65 +25,43 @@ public class Grid
         _cols = (int)(size.Width / spacing.X) + 1;
         _rows = (int)(size.Height / spacing.Y) + 1;
 
-        int totalPoints = _cols * _rows;
-        _points = new PointMass[totalPoints];
-        _fixedPoints = new PointMass[totalPoints];
+        _points = new PointMass[_cols, _rows];
 
-        // 1. Initialize points in a flat array (row-major order)
+        // 1. Create the points
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                int index = y * _cols + x;
-                Vector3 pos = new(size.Left + x * spacing.X, size.Top + y * spacing.Y, 0);
-                _points[index] = new PointMass(pos, 1f);
-                _fixedPoints[index] = new PointMass(pos, 0f); // Fixed anchor (infinite mass)
+                _points[x, y] = new PointMass(new Vector3(size.Left + x * spacing.X, size.Top + y * spacing.Y, 0), 1f);
             }
         }
 
-        // 2. Link the point masses with springs using the INITIAL distances
+        // 2. Link points with springs
         var springList = new List<Spring>();
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                int index = y * _cols + x;
-
-                // Anchor the border of the grid to fixed points
+                // Anchor the border and some interior points to "fixed" positions
                 if (x == 0 || y == 0 || x == _cols - 1 || y == _rows - 1)
-                    springList.Add(CreateSpring(index, index, 0.1f, 0.1f, true));
-                // Loosely anchor 1/9th of the interior points
+                    springList.Add(new Spring(_points[x, y], _points[x, y], 0.1f, 0.1f, true));
                 else if (x % 3 == 0 && y % 3 == 0)
-                    springList.Add(CreateSpring(index, index, 0.002f, 0.02f, true));
+                    springList.Add(new Spring(_points[x, y], _points[x, y], 0.002f, 0.02f, true));
 
-                // Mesh connections (to the left and above)
+                // Mesh connections
                 const float stiffness = 0.28f;
                 const float damping = 0.06f;
-                if (x > 0) springList.Add(CreateSpring(index - 1, index, stiffness, damping));
-                if (y > 0) springList.Add(CreateSpring(index - _cols, index, stiffness, damping));
+                if (x > 0) springList.Add(new Spring(_points[x - 1, y], _points[x, y], stiffness, damping));
+                if (y > 0) springList.Add(new Spring(_points[x, y - 1], _points[x, y], stiffness, damping));
             }
         }
         _springs = [.. springList];
     }
 
-    // Helper to calculate target length at construction time based on initial positions
-    private Spring CreateSpring(int i1, int i2, float stiffness, float damping, bool toFixed = false)
-    {
-        Vector3 p1 = toFixed ? _fixedPoints[i1].Position : _points[i1].Position;
-        Vector3 p2 = _points[i2].Position;
-        float targetLength = Vector3.Distance(p1, p2) * 0.95f;
-        return new Spring(i1, i2, targetLength, stiffness, damping, toFixed);
-    }
-
     public void Update()
     {
-        // Springs pull on points
-        for (int i = 0; i < _springs.Length; i++)
-            _springs[i].Update(_points, _fixedPoints);
-
-        // Points integrate velocity
-        for (int i = 0; i < _points.Length; i++)
-            _points[i].Update();
+        foreach (var spring in _springs) spring.Update();
+        foreach (var mass in _points) mass.Update();
     }
 
     public void ApplyDirectedForce(Vector2 force, Vector2 position, float radius)
@@ -95,11 +70,11 @@ public class Grid
     public void ApplyDirectedForce(Vector3 force, Vector3 position, float radius)
     {
         float rSq = radius * radius;
-        for (int i = 0; i < _points.Length; i++)
+        foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, _points[i].Position);
+            float distSq = Vector3.DistanceSquared(position, mass.Position);
             if (distSq < rSq)
-                _points[i].ApplyForce(10 * force / (10 + MathF.Sqrt(distSq)));
+                mass.ApplyForce(10 * force / (10 + MathF.Sqrt(distSq)));
         }
     }
 
@@ -109,13 +84,13 @@ public class Grid
     public void ApplyImplosiveForce(float force, Vector3 position, float radius)
     {
         float rSq = radius * radius;
-        for (int i = 0; i < _points.Length; i++)
+        foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, _points[i].Position);
+            float distSq = Vector3.DistanceSquared(position, mass.Position);
             if (distSq < rSq)
             {
-                _points[i].ApplyForce(10 * force * (position - _points[i].Position) / (100 + distSq));
-                _points[i].IncreaseDamping(0.6f);
+                mass.ApplyForce(10 * force * (position - mass.Position) / (100 + distSq));
+                mass.IncreaseDamping(0.6f);
             }
         }
     }
@@ -126,13 +101,13 @@ public class Grid
     public void ApplyExplosiveForce(float force, Vector3 position, float radius)
     {
         float rSq = radius * radius;
-        for (int i = 0; i < _points.Length; i++)
+        foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, _points[i].Position);
+            float distSq = Vector3.DistanceSquared(position, mass.Position);
             if (distSq < rSq)
             {
-                _points[i].ApplyForce(100 * force * (_points[i].Position - position) / (10000 + distSq));
-                _points[i].IncreaseDamping(0.6f);
+                mass.ApplyForce(100 * force * (mass.Position - position) / (10000 + distSq));
+                mass.IncreaseDamping(0.6f);
             }
         }
     }
@@ -150,18 +125,16 @@ public class Grid
         {
             for (int x = 1; x < _cols; x++)
             {
-                int index = y * _cols + x;
-                Vector2 p = ToVec2(_points[index].Position);
+                Vector2 p = ToVec2(_points[x, y].Position);
 
                 if (x > 1)
                 {
-                    Vector2 left = ToVec2(_points[index - 1].Position);
+                    Vector2 left = ToVec2(_points[x - 1, y].Position);
                     float thickness = y % 3 == 1 ? 3f : 1f;
 
-                    // Interpolate midpoint for smooth bending using row neighbors
                     int xNext = Math.Min(x + 1, _cols - 1);
-                    Vector2 pNext = ToVec2(_points[y * _cols + xNext].Position);
-                    Vector2 pPrev = ToVec2(_points[y * _cols + x - 2].Position);
+                    Vector2 pNext = ToVec2(_points[xNext, y].Position);
+                    Vector2 pPrev = ToVec2(_points[x - 2, y].Position);
                     Vector2 mid = Vector2.CatmullRom(pPrev, left, p, pNext, 0.5f);
 
                     if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
@@ -175,16 +148,16 @@ public class Grid
 
                 if (y > 1)
                 {
-                    Vector2 up = ToVec2(_points[index - _cols].Position);
+                    Vector2 up = ToVec2(_points[x, y - 1].Position);
                     float thickness = x % 3 == 1 ? 3f : 1f;
                     spriteBatch.DrawLine(up, p, color, thickness);
                 }
 
                 if (x > 1 && y > 1)
                 {
-                    Vector2 up = ToVec2(_points[index - _cols].Position);
-                    Vector2 left = ToVec2(_points[index - 1].Position);
-                    Vector2 upLeft = ToVec2(_points[index - _cols - 1].Position);
+                    Vector2 up = ToVec2(_points[x, y - 1].Position);
+                    Vector2 left = ToVec2(_points[x - 1, y].Position);
+                    Vector2 upLeft = ToVec2(_points[x - 1, y - 1].Position);
                     spriteBatch.DrawLine(0.5f * (upLeft + up), 0.5f * (left + p), color, 1f);
                     spriteBatch.DrawLine(0.5f * (upLeft + left), 0.5f * (up + p), color, 1f);
                 }
@@ -192,7 +165,7 @@ public class Grid
         }
     }
 
-    private struct PointMass(Vector3 position, float invMass)
+    private class PointMass(Vector3 position, float invMass)
     {
         public Vector3 Position = position;
         public Vector3 Velocity;
@@ -214,32 +187,43 @@ public class Grid
         }
     }
 
-    private readonly struct Spring(int end1, int end2, float targetLength, float stiffness, float damping, bool toFixed = false)
+    private class Spring
     {
-        private readonly int _end1 = end1;
-        private readonly int _end2 = end2;
-        private readonly float _stiffness = stiffness;
-        private readonly float _damping = damping;
-        private readonly float _targetLength = targetLength;
-        private readonly bool _toFixed = toFixed;
+        private readonly PointMass _end1;
+        private readonly PointMass _end2;
+        private readonly float _targetLength;
+        private readonly float _stiffness;
+        private readonly float _damping;
+        private readonly bool _toFixed;
+        private readonly Vector3 _fixedPos;
 
-        public void Update(PointMass[] points, PointMass[] fixedPoints)
+        public Spring(PointMass end1, PointMass end2, float stiffness, float damping, bool toFixed = false)
         {
-            // Use 'ref' to modify the structs in the array directly.
-            ref var p1 = ref _toFixed ? ref fixedPoints[_end1] : ref points[_end1];
-            ref var p2 = ref points[_end2];
+            _end1 = end1;
+            _end2 = end2;
+            _stiffness = stiffness;
+            _damping = damping;
+            _toFixed = toFixed;
+            _fixedPos = end1.Position;
+            _targetLength = Vector3.Distance(end1.Position, end2.Position) * 0.95f;
+        }
 
-            var x = p1.Position - p2.Position;
+        public void Update()
+        {
+            var p1Pos = _toFixed ? _fixedPos : _end1.Position;
+            var p2Pos = _end2.Position;
+
+            var x = p1Pos - p2Pos;
             float length = x.Length();
 
             if (length <= _targetLength) return;
 
             x = (x / length) * (length - _targetLength);
-            var dv = p2.Velocity - p1.Velocity;
+            var dv = _end2.Velocity - (_toFixed ? Vector3.Zero : _end1.Velocity);
             var force = _stiffness * x - dv * _damping;
 
-            p1.ApplyForce(-force);
-            p2.ApplyForce(force);
+            if (!_toFixed) _end1.ApplyForce(-force);
+            _end2.ApplyForce(force);
         }
     }
 }

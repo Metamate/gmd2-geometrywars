@@ -4,72 +4,69 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
-// Manages a list of game particles.
-//
-// Removal Logic (Sifting):
-// When a particle dies, we swap it with the LAST living particle in the array.
-// This is a simple, high-performance way to keep the list contiguous without
-// needing complex circular buffers or moving every item in memory.
-public class ParticleManager<T>
+/// <summary>
+/// ADVANCED: A high-performance particle manager using Data Oriented Design.
+/// 
+/// Educational Value (DOD & Data Locality):
+/// 1. Value Memory: Particle is a struct. All particle data is stored "in-line"
+///    within the array, meaning zero pointer chasing for the CPU.
+/// 2. Contiguous Memory: The Particle[] array is a solid block of memory. 
+///    CPUs can pre-fetch this data perfectly, maximizing Cache Hits.
+/// 3. Zero Garbage: No objects are created or destroyed during the game loop.
+/// 4. Sifting Swap: Deletion is O(1) and keeps the array packed by swapping the 
+///    dead particle with the last living one.
+/// </summary>
+public class ParticleManagerOptimized<T> where T : struct
 {
-    private readonly Action<Particle> _updateParticle;
+    // Custom delegate because 'ref' is not supported by standard Action<T>.
+    public delegate void UpdateParticleDelegate(ref Particle particle);
+
+    private readonly UpdateParticleDelegate _updateParticle;
     private readonly Particle[] _list;
     private int _count;
     private readonly int _capacity;
 
-    public ParticleManager(int capacity, Action<Particle> updateParticle)
+    public ParticleManagerOptimized(int capacity, UpdateParticleDelegate updateParticle)
     {
         _capacity = capacity;
         _updateParticle = updateParticle;
         _list = new Particle[capacity];
-
-        // Pre-populate the array with objects we can reuse.
-        for (int i = 0; i < capacity; i++)
-            _list[i] = new Particle();
     }
 
     public void Update()
     {
         for (int i = 0; i < _count; i++)
         {
-            Particle p = _list[i];
-            _updateParticle(p);
+            // Use 'ref' to modify the struct directly in the array memory.
+            ref var p = ref _list[i];
+            
+            _updateParticle(ref p);
             p.PercentLife -= 1f / p.Duration;
 
-            // If dead, swap with the last living particle and decrease count.
             if (p.PercentLife < 0)
             {
-                // Note: We don't actually delete the object, we just swap
-                // its position in the array so it's outside the "living" range.
-                Particle last = _list[_count - 1];
-                _list[i] = last;
-                _list[_count - 1] = p;
-
+                // Sifting Swap: copy the last living particle into this slot.
+                _list[i] = _list[_count - 1];
                 _count--;
-                i--; // Process the particle we just swapped into this slot.
+                i--; // Process the new particle we just moved into this slot.
             }
         }
     }
 
-    public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, float scale, T state, float theta = 0)
-    {
-        CreateParticle(texture, position, tint, duration, new Vector2(scale), state, theta);
-    }
-
     public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, Vector2 scale, T state, float theta = 0)
     {
-        Particle p;
+        int index;
         if (_count < _capacity)
         {
-            p = _list[_count];
+            index = _count;
             _count++;
         }
         else
         {
-            // If the buffer is full, overwrite a random living particle.
-            p = _list[Random.Shared.Next(0, _capacity)];
+            index = Random.Shared.Next(0, _capacity);
         }
 
+        ref var p = ref _list[index];
         p.Texture = texture;
         p.Position = position;
         p.Tint = tint;
@@ -84,13 +81,13 @@ public class ParticleManager<T>
     {
         for (int i = 0; i < _count; i++)
         {
-            Particle p = _list[i];
+            ref var p = ref _list[i];
             Vector2 origin = new(p.Texture.Width / 2f, p.Texture.Height / 2f);
             spriteBatch.Draw(p.Texture, p.Position, null, p.Tint, p.Orientation, origin, p.Scale, SpriteEffects.None, 0f);
         }
     }
 
-    public class Particle
+    public struct Particle
     {
         public Texture2D Texture;
         public Vector2 Position;
