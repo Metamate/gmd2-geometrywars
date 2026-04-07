@@ -48,10 +48,15 @@ public abstract class GameCore : Game
     protected virtual void RegisterServices(GameTime gameTime) { }
     protected virtual void OnUpdateInput() { }
 
+    protected virtual bool ShouldExit()
+    {
+        return GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+               Keyboard.GetState().IsKeyDown(Keys.Escape);
+    }
+
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (ShouldExit())
             Exit();
 
         if (!IsActive)
@@ -86,7 +91,7 @@ public abstract class GameCore : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Black);
+        GraphicsDevice.Clear(Color.Black);
         _activeState?.DrawWorld(SpriteBatch);
         RunComponents(gameTime);
         _activeState?.DrawHUD(SpriteBatch);

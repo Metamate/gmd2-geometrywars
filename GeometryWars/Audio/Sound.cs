@@ -17,8 +17,8 @@ static class Sound
     public static SoundEffect Spawn => spawns[Random.Shared.Next(spawns.Length)];
     public static void Load(ContentManager content)
     {
-        MediaPlayer.Volume = 0.5f;
-        SoundEffect.MasterVolume = 1.0f;
+        MediaPlayer.Volume = 0.1f;
+        SoundEffect.MasterVolume = 0.1f;
         Music = content.Load<Song>("Audio/Music");
         // Enumerable.Range + Select loads all numbered sound files into an array concisely.
         // e.g. "Audio/explosion-01" through "Audio/explosion-08".

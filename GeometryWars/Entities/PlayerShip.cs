@@ -56,15 +56,15 @@ public class PlayerShip : Entity
             return;
         }
 
-        Velocity += GameSettings.Player.Speed * Input.GetMovementDirection();
+        Velocity += GameSettings.Player.Speed * GameController.Movement;
 
         if (Velocity.LengthSquared() > 0)
             Orientation = Velocity.ToAngle();
 
         MakeExhaustFire();
 
-        var aim = Input.GetAimDirection(Position);
-        if (Input.IsShooting() && aim.LengthSquared() > 0 && _cooldownRemaining <= 0)
+        var aim = GameController.AimDirection(Position);
+        if (GameController.IsShooting && _cooldownRemaining <= 0)
         {
             _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
             float aimAngle = aim.ToAngle();

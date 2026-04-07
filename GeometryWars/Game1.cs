@@ -42,7 +42,7 @@ public class Game1 : GameCore
     {
         // Performance and Mouse (UI) update every frame for smoothness.
         GameServices.Performance.Update(gameTime);
-        Input.UpdateMouseOnly();
+        RawInput.UpdateMouseOnly();
 
         base.Update(gameTime);
     }
@@ -53,7 +53,14 @@ public class Game1 : GameCore
         Sound.Load(Content);
     }
 
-    protected override void OnUpdateInput() => Input.Update();
+    // The main logic tick (60Hz) handles the core input processing.
+    protected override void OnUpdateInput()
+    {
+        RawInput.Update();
+        GameController.Update();
+    }
+
+    protected override bool ShouldExit() => GameController.WasExitPressed;
 
     protected override void RegisterServices(GameTime gameTime)
     {

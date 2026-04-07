@@ -1,8 +1,8 @@
 using GMDCore;
+using GeometryWars;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
 namespace GeometryWars.States;
@@ -29,10 +29,10 @@ public sealed class PlayState : GameStateBase
 
     public override void Update()
     {
-        if (Input.WasKeyPressed(Keys.P))
+        if (GameController.WasPausePressed)
             _paused = !_paused;
 
-        if (Input.WasKeyPressed(Keys.F3))
+        if (GameController.WasDebugTogglePressed)
             GameServices.Performance.Toggle();
 
         if (_paused) return;
@@ -64,7 +64,7 @@ public sealed class PlayState : GameStateBase
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 
-        spriteBatch.Draw(Art.Pointer, Input.MousePosition, Color.White);
+        spriteBatch.Draw(Art.Pointer, GameController.MousePosition, Color.White);
         spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
         GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35), EntityManager.Count);
         DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
