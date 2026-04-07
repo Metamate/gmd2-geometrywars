@@ -36,7 +36,7 @@ public static class PlayerStatus
 
     public static void Update()
     {
-        if (Multiplier > 1 && (_multiplierTimeLeft -= GameServices.ElapsedSeconds) <= 0)
+        if (Multiplier > 1 && (_multiplierTimeLeft -= FrameContext.ElapsedSeconds) <= 0)
         {
             _multiplierTimeLeft = GameSettings.PlayerMultiplierExpiry;
             Multiplier = 1;

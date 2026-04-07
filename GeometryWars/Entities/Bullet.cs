@@ -38,7 +38,7 @@ public class Bullet : Entity
 
         Position += Velocity;
 
-        if (!GameServices.Viewport.Bounds.Contains(Position.ToPoint()))
+        if (!FrameContext.Viewport.Bounds.Contains(Position.ToPoint()))
         {
             IsExpired = true;
             for (int i = 0; i < GameSettings.BulletDeathParticles; i++)

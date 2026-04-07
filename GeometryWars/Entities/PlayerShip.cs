@@ -8,15 +8,15 @@ namespace GeometryWars;
 
 public class PlayerShip : Entity
 {
-    private int framesUntilRespawn = 0;
-    private int cooldownRemaining = 0;
+    private int _framesUntilRespawn = 0;
+    private int _cooldownRemaining = 0;
 
-    public bool IsDead => framesUntilRespawn > 0;
+    public bool IsDead => _framesUntilRespawn > 0;
 
     public PlayerShip()
     {
         Image    = Art.Player;
-        Position = GameServices.ScreenSize / 2;
+        Position = FrameContext.ScreenSize / 2;
 
         // Damping = 0 clears velocity after each frame; player ship is input-driven,
         // not physics-based — no momentum carries over between frames.
@@ -51,7 +51,7 @@ public class PlayerShip : Entity
     {
         if (IsDead)
         {
-            if (--framesUntilRespawn == 0 && !PlayerStatus.IsGameOver)
+            if (--_framesUntilRespawn == 0 && !PlayerStatus.IsGameOver)
                 GameServices.Grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(Position, 0), 50);
             return;
         }
@@ -64,9 +64,9 @@ public class PlayerShip : Entity
         MakeExhaustFire();
 
         var aim = Input.GetAimDirection(Position);
-        if (Input.IsShooting() && cooldownRemaining <= 0)
+        if (Input.IsShooting() && _cooldownRemaining <= 0)
         {
-            cooldownRemaining = GameSettings.PlayerShotCooldown;
+            _cooldownRemaining = GameSettings.PlayerShotCooldown;
             float aimAngle = aim.ToAngle();
             Quaternion aimQuat = Quaternion.CreateFromYawPitchRoll(0, 0, aimAngle);
             float randomSpread = Random.Shared.NextFloat(-GameSettings.PlayerBulletSpread, GameSettings.PlayerBulletSpread)
@@ -81,8 +81,8 @@ public class PlayerShip : Entity
             Sound.Shot.Play(0.2f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
         }
 
-        if (cooldownRemaining > 0)
-            cooldownRemaining--;
+        if (_cooldownRemaining > 0)
+            _cooldownRemaining--;
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -94,7 +94,7 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-        framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.PlayerGameOverFrames : GameSettings.PlayerRespawnFrames;
+        _framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.PlayerGameOverFrames : GameSettings.PlayerRespawnFrames;
 
         Color yellow = new(0.8f, 0.8f, 0.4f);
         for (int i = 0; i < GameSettings.PlayerDeathParticles; i++)
@@ -113,7 +113,7 @@ public class PlayerShip : Entity
 
         Orientation = Velocity.ToAngle();
         Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, Orientation);
-        double t = GameServices.TotalSeconds;
+        double t = FrameContext.TotalSeconds;
 
         Vector2 baseVel = Velocity.ScaleTo(-3);
         Vector2 perpVel = new Vector2(baseVel.Y, -baseVel.X) * (0.6f * (float)Math.Sin(t * 10));

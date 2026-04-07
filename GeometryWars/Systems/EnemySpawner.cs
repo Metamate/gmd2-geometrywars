@@ -38,7 +38,7 @@ public static class EnemySpawner
         Vector2 pos;
         do
         {
-            pos = new Vector2(Random.Shared.Next((int)GameServices.ScreenSize.X), Random.Shared.Next((int)GameServices.ScreenSize.Y));
+            pos = new Vector2(Random.Shared.Next((int)FrameContext.ScreenSize.X), Random.Shared.Next((int)FrameContext.ScreenSize.Y));
         }
         while (Vector2.DistanceSquared(pos, playerPosition) < minDistSq);
         return pos;

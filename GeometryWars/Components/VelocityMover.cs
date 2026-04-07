@@ -25,8 +25,8 @@ public sealed class VelocityMover : IComponent
         if (_clampToScreen)
             owner.Position = Vector2.Clamp(owner.Position,
                 owner.Size / 2,
-                GameServices.ScreenSize - owner.Size / 2);
+                FrameContext.ScreenSize - owner.Size / 2);
 
         owner.Velocity *= _damping;
-    }
+        }
 }

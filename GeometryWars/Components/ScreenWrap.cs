@@ -17,7 +17,7 @@ public sealed class ScreenWrap : IComponent
 {
     public void Update(Entity owner)
     {
-        var screen = GameServices.ScreenSize;
+        var screen = FrameContext.ScreenSize;
         var half   = owner.Size / 2f;
         var pos    = owner.Position;
 

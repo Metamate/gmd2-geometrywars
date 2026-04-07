@@ -7,8 +7,8 @@ namespace GeometryWars;
 
 public class BlackHole : Entity
 {
-    private int hitpoints = GameSettings.BlackHoleHitpoints;
-    private float sprayAngle = 0;
+    private int _hitpoints = GameSettings.BlackHoleHitpoints;
+    private float _sprayAngle = 0;
 
     public BlackHole(Vector2 position)
     {
@@ -27,10 +27,10 @@ public class BlackHole : Entity
 
     public void WasShot()
     {
-        if (--hitpoints <= 0)
+        if (--_hitpoints <= 0)
             IsExpired = true;
 
-        float hue = (float)(3 * GameServices.TotalSeconds % 6);
+        float hue = (float)(3 * FrameContext.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.BlackHoleHitParticles);
         for (int i = 0; i < GameSettings.BlackHoleHitParticles; i++)
@@ -52,7 +52,7 @@ public class BlackHole : Entity
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        float scale = 1 + 0.1f * (float)Math.Sin(10 * GameServices.TotalSeconds);
+        float scale = 1 + 0.1f * (float)Math.Sin(10 * FrameContext.TotalSeconds);
         spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, scale, 0, 0);
         base.Draw(spriteBatch);
     }
@@ -75,16 +75,16 @@ public class BlackHole : Entity
         }
 
         // Orbital particle spray toggles every quarter second
-        if ((GameServices.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
+        if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
         {
-            Vector2 sprayVel = MathUtil.FromPolar(sprayAngle, Random.Shared.NextFloat(12, 15));
+            Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));
             Color color = ColorUtil.HSVToColor(5, 0.5f, 0.8f);
             Vector2 pos = Position + 2f * new Vector2(sprayVel.Y, -sprayVel.X) + Random.Shared.NextVector2(4, 8);
             GameServices.Particles.CreateParticle(Art.LineParticle, pos, color, 190, 1.5f,
                 new ParticleState { Velocity = sprayVel, LengthMultiplier = 1, Type = ParticleType.Enemy });
         }
 
-        sprayAngle -= MathHelper.TwoPi / 50f;
-        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(sprayAngle / 2) * 10 + 20, Position, GameSettings.BlackHoleGridRange);
+        _sprayAngle -= MathHelper.TwoPi / 50f;
+        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(_sprayAngle / 2) * 10 + 20, Position, GameSettings.BlackHoleGridRange);
     }
 }

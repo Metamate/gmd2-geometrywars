@@ -9,32 +9,32 @@ namespace GeometryWars;
 
 public class Enemy : Entity
 {
-    private int timeUntilStart = GameSettings.EnemySpawnDelay;
-    private List<IEnumerator<int>> behaviours = [];
+    private readonly EnemyDef _def;
+    private int _timeUntilStart = GameSettings.EnemySpawnDelay;
+    private readonly List<IEnumerator<int>> _behaviours = [];
 
-    public Enemy(Texture2D image, Vector2 position)
+    public Enemy(EnemyDef def, Vector2 position)
     {
-        this.Image = image;
-        Position   = position;
-        Tint       = Color.Transparent;
+        _def     = def;
+        Image    = def.GetTexture();
+        Position = position;
+        Tint     = Color.Transparent;
 
         // Movement: decelerate each frame and stay on screen.
         AddComponent(new VelocityMover(damping: GameSettings.EnemyDamping, clampToScreen: true));
 
-        Collider = new CircleCollider(image.Width / 2f);
+        Collider = new CircleCollider(Image.Width / 2f);
     }
 
-    public bool IsActive => timeUntilStart <= 0;
-    public int PointValue { get; set; }
+    public bool IsActive => _timeUntilStart <= 0;
+    public int PointValue => _def.PointValue;
 
-    // Flyweight usage: CreateSeeker/CreateWanderer read from a shared EnemyDef
-    // (declared in GameSettings) rather than hard-coding values per enemy instance.
-    // All seekers share the same EnemyDef; all wanderers share another.
+    // Flyweight usage: CreateSeeker/CreateWanderer pass the shared EnemyDef
+    // (declared in GameSettings) to the constructor.
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var def   = GameSettings.Seeker;
-        var enemy = new Enemy(def.GetTexture(), position);
-        enemy.PointValue = def.PointValue;
+        var enemy = new Enemy(def, position);
         enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition, def.Acceleration));
         return enemy;
     }
@@ -42,20 +42,19 @@ public class Enemy : Entity
     public static Enemy CreateWanderer(Vector2 position)
     {
         var def   = GameSettings.Wanderer;
-        var enemy = new Enemy(def.GetTexture(), position);
-        enemy.PointValue = def.PointValue;
+        var enemy = new Enemy(def, position);
         enemy.AddBehaviour(enemy.MoveRandomly());
         return enemy;
     }
 
     protected override void OnUpdate()
     {
-        if (timeUntilStart <= 0)
+        if (_timeUntilStart <= 0)
             ApplyBehaviours();
         else
         {
-            timeUntilStart--;
-            Tint = Color.White * (1 - timeUntilStart / (float)GameSettings.EnemySpawnDelay);
+            _timeUntilStart--;
+            Tint = Color.White * (1 - _timeUntilStart / (float)GameSettings.EnemySpawnDelay);
         }
     }
 
@@ -138,22 +137,22 @@ public class Enemy : Entity
             {
                 Velocity += MathUtil.FromPolar(direction, GameSettings.WandererVelocity);
                 Orientation -= GameSettings.WandererOrientationDecay;
-                var bounds = GameServices.Viewport.Bounds;
+                var bounds = FrameContext.Viewport.Bounds;
                 bounds.Inflate(-Image.Width, -Image.Height);
                 if (!bounds.Contains(Position.ToPoint()))
-                    direction = (GameServices.ScreenSize / 2 - Position).ToAngle() +
+                    direction = (FrameContext.ScreenSize / 2 - Position).ToAngle() +
                                 Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
                 yield return 0;
             }
         }
     }
 
-    private void AddBehaviour(IEnumerable<int> behaviour) => behaviours.Add(behaviour.GetEnumerator());
+    private void AddBehaviour(IEnumerable<int> behaviour) => _behaviours.Add(behaviour.GetEnumerator());
 
     private void ApplyBehaviours()
     {
-        for (int i = 0; i < behaviours.Count; i++)
-            if (!behaviours[i].MoveNext())
-                behaviours.RemoveAt(i--);
+        for (int i = 0; i < _behaviours.Count; i++)
+            if (!_behaviours[i].MoveNext())
+                _behaviours.RemoveAt(i--);
     }
 }

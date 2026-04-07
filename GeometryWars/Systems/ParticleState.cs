@@ -25,8 +25,8 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
             particle.Scale.X = particle.State.LengthMultiplier * Math.Min(Math.Min(1f, 0.2f * speed + 0.1f), alpha);
 
         var pos    = particle.Position;
-        int width  = (int)GameServices.ScreenSize.X;
-        int height = (int)GameServices.ScreenSize.Y;
+        int width  = (int)FrameContext.ScreenSize.X;
+        int height = (int)FrameContext.ScreenSize.Y;
 
         if (pos.X < 0)       vel.X =  Math.Abs(vel.X);
         else if (pos.X > width)  vel.X = -Math.Abs(vel.X);

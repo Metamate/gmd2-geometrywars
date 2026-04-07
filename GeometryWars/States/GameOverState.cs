@@ -25,7 +25,7 @@ public sealed class GameOverState : GameStateBase
 
         string text = $"Game Over\nScore: {PlayerStatus.Score}\nHigh Score: {PlayerStatus.HighScore}\n\nPress Enter to restart";
         Vector2 textSize = Art.Font.MeasureString(text);
-        spriteBatch.DrawString(Art.Font, text, GameServices.ScreenSize / 2 - textSize / 2, Color.White);
+        spriteBatch.DrawString(Art.Font, text, FrameContext.ScreenSize / 2 - textSize / 2, Color.White);
 
         spriteBatch.End();
     }
