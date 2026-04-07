@@ -1,5 +1,4 @@
 using System;
-using GeometryWars.Components;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

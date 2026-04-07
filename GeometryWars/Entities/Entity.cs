@@ -34,8 +34,9 @@ public abstract class Entity
     // while EntityManager is iterating it.
     public bool IsExpired { get; set; }
 
-    // Null means the entity has no collision shape and is skipped by EntityManager.
-    public CircleCollider Collider { get; protected set; }
+    // Struct-based collider. If Collider.IsActive is false (Radius <= 0),
+    // the entity is skipped by EntityManager's collision pass.
+    public CircleCollider Collider { get; protected set; } = new(0);
 
     public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
 

@@ -19,7 +19,7 @@ public static class GameSettings
     // ── Player ───────────────────────────────────────────────────────────────
     public const float PlayerSpeed          = 8f;
     public const int   PlayerShotCooldown   = 6;       // frames between shots
-    public const float PlayerBulletSpeed    = 11f;
+    public const float PlayerBulletSpeed    = 20f;//11f;
     public const float PlayerBulletSpread   = 0.04f;   // applied twice per shot (±0.08f total)
     public const float PlayerBulletOffsetX  = 25f;
     public const float PlayerBulletOffsetY  = 8f;

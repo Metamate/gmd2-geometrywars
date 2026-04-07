@@ -6,12 +6,8 @@ namespace GeometryWars;
 
 public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
 
-public struct ParticleState(Vector2 velocity, ParticleType type, float lengthMultiplier = 1f)
+public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
 {
-    public Vector2     Velocity         = velocity;
-    public ParticleType Type            = type;
-    public float       LengthMultiplier = lengthMultiplier;
-
     public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle)
     {
         var vel = particle.State.Velocity;

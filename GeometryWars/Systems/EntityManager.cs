@@ -105,12 +105,12 @@ public sealed class EntityManager
         for (int i = 0; i < _entities.Count; i++)
         {
             var a = _entities[i];
-            if (a.IsExpired || a.Collider == null) continue;
+            if (a.IsExpired || !a.Collider.IsActive) continue;
 
             for (int j = i + 1; j < _entities.Count; j++)
             {
                 var b = _entities[j];
-                if (b.IsExpired || b.Collider == null) continue;
+                if (b.IsExpired || !b.Collider.IsActive) continue;
 
                 float r = a.Collider.Radius + b.Collider.Radius;
                 if (Vector2.DistanceSquared(a.Position, b.Position) < r * r)
