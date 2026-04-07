@@ -8,23 +8,24 @@ public static class EnemySpawner
 {
     private static float _inverseSpawnChance = GameSettings.EnemySpawnChanceStart;
 
-    // isPlayerAlive guards spawning; getPlayerPosition is passed to seekers so they
-    // track the live player position each frame.
+    // isPlayerAlive guards spawning so enemies stop appearing during the death sequence.
+    // getPlayerPosition is a delegate passed to seekers so they track the live player
+    // position each frame without needing a direct reference to PlayerShip.
     public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
     {
-        if (isPlayerAlive && EntityManager.Count < GameSettings.MaxActiveEntities)
+        if (isPlayerAlive && GameServices.Entities.Count < GameSettings.MaxActiveEntities)
         {
             Vector2 playerPos = getPlayerPosition();
 
             if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
+                GameServices.Entities.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
 
             if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
+                GameServices.Entities.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
 
-            if (EntityManager.BlackHoleCount < GameSettings.MaxBlackHoles &&
+            if (GameServices.Entities.BlackHoleCount < GameSettings.MaxBlackHoles &&
                 Random.Shared.Next((int)GameSettings.BlackHoleSpawnChance) == 0)
-                EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
+                GameServices.Entities.Add(new BlackHole(GetSpawnPosition(playerPos)));
         }
 
         if (_inverseSpawnChance > GameSettings.EnemySpawnChanceMin)

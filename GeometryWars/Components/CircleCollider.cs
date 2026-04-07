@@ -1,20 +1,15 @@
-using System;
-
 namespace GeometryWars.Components;
 
-// Data class describing an entity's collision shape and response.
-// Not a component — it has no per-frame behaviour. Detection is handled
-// centrally by EntityManager (O(n²) circle-pair test); the response callback
-// is set in each entity's constructor so collision rules live next to the
-// entity they belong to, not in a central collision manager.
+// Data class describing an entity's collision shape.
+// Detection is handled centrally by EntityManager (O(n²) circle-pair test).
+// When two colliders overlap, EntityManager calls OnCollision(other) on both entities.
+// Each entity defines its own response by overriding Entity.OnCollision().
 public sealed class CircleCollider
 {
     public float Radius { get; }
-    public Action<Entity> OnCollide { get; }
 
-    public CircleCollider(float radius, Action<Entity> onCollide = null)
+    public CircleCollider(float radius)
     {
         Radius = radius;
-        OnCollide = onCollide;
     }
 }

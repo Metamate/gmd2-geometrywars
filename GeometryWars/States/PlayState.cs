@@ -18,9 +18,9 @@ public sealed class PlayState : GameStateBase
     public override void Enter()
     {
         _paused = false;
-        EntityManager.Clear();
+        GameServices.Entities.Clear();
         _player = new PlayerShip();
-        EntityManager.Add(_player);
+        GameServices.Entities.Add(_player);
         PlayerStatus.Reset();
         EnemySpawner.Reset();
         MediaPlayer.IsRepeating = true;
@@ -35,7 +35,7 @@ public sealed class PlayState : GameStateBase
         if (_paused) return;
 
         PlayerStatus.Update();
-        EntityManager.Update();
+        GameServices.Entities.Update();
         EnemySpawner.Update(!_player.IsDead, () => _player.Position);
 
         GameServices.Grid.Update();
@@ -48,7 +48,7 @@ public sealed class PlayState : GameStateBase
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        EntityManager.Draw(spriteBatch);
+        GameServices.Entities.Draw(spriteBatch);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);

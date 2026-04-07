@@ -7,10 +7,17 @@ namespace GeometryWars;
 
 // Base class for all game entities.
 //
-// Uses the Template Method pattern: Update() defines a fixed execution order —
-// OnUpdate() (entity logic) always runs before components (physics etc.) so that
-// VelocityMover always sees the velocity the entity just wrote, not last frame's.
-// Subclasses override OnUpdate() and must never override Update() directly.
+// Component system: AddComponent() registers an IComponent to run each frame.
+// Components that also implement IDrawableComponent are called during Draw().
+// Components decouple reusable behaviours (physics, wrapping, lifetime) from the
+// entity class hierarchy, so they can be mixed and matched without subclassing.
+//
+// Update order: OnUpdate() (entity logic) always runs before component updates
+// so that VelocityMover always sees the velocity the entity wrote this frame,
+// not last frame's. Subclasses override OnUpdate() and must never override Update().
+//
+// Collision: EntityManager calls OnCollision(other) on both entities when their
+// circles overlap. Override OnCollision() in a subclass to define the response.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
@@ -41,6 +48,12 @@ public abstract class Entity
 
     protected virtual void OnUpdate() { }
 
+    // Called by EntityManager when this entity's collider overlaps another entity's.
+    // Override in subclasses to define the collision response: take damage, expire,
+    // bounce, score points, etc. The base implementation is intentionally empty —
+    // entities that do not care about a particular collision type can ignore it silently.
+    public virtual void OnCollision(Entity other) { }
+
     protected T AddComponent<T>(T component) where T : IComponent
     {
         _components.Add(component);
@@ -50,5 +63,12 @@ public abstract class Entity
     public virtual void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, 1f, 0, 0);
+
+        // Drawable components render on top of the entity's own sprite.
+        // This lets components add overlays (glows, shields, debug shapes)
+        // without the entity knowing anything about them.
+        foreach (var comp in _components)
+            if (comp is IDrawableComponent dc)
+                dc.Draw(this, spriteBatch);
     }
 }

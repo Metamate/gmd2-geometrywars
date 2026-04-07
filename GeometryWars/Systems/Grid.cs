@@ -5,6 +5,40 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
+// Spring-mass cloth simulation used as a visual background distortion effect.
+//
+// The grid is made of two building blocks:
+//
+//   PointMass — a node with a 3D position and velocity. InverseMass = 0 means the
+//   point is fixed (infinite mass, cannot be moved by forces). InverseMass = 1 gives
+//   normal mass. Acceleration accumulates applied forces (F = m*a → a = F / m = F * invMass)
+//   and is consumed in Update() using semi-implicit Euler integration:
+//       velocity += acceleration
+//       position += velocity
+//       velocity *= damping      (energy loss each frame)
+//
+//   Spring — connects two PointMasses and enforces a target length using Hooke's law.
+//   These springs only pull (not push): if the current length is less than TargetLength,
+//   no force is applied. Force = stiffness * extension − damping * relative_velocity.
+//   Each spring applies equal and opposite forces to its two endpoints.
+//
+// Grid topology:
+//   Border points  → strongly anchored to fixed positions (stiffness 0.1) so the
+//                    edges stay roughly in place no matter what happens in the middle.
+//   1/9 interior points → loosely anchored (stiffness 0.002) to gently pull the
+//                    grid back to rest over time.
+//   All neighbouring points → connected by mesh springs (stiffness 0.28) that
+//                    transmit disturbance waves across the grid.
+//
+// External forces:
+//   ApplyDirectedForce   — pushes nearby points in a given direction (player respawn).
+//   ApplyExplosiveForce  — pushes points outward from an origin (bullet impact).
+//   ApplyImplosiveForce  — pulls points toward an origin (black hole gravity).
+//
+// Rendering:
+//   ToVec2() applies a simple perspective projection: points with Z < 0 (pushed "into"
+//   the screen) appear to shrink toward the centre; Z > 0 expands outward.
+//   Catmull-Rom interpolation smooths sharp bends between grid line segments.
 public class Grid
 {
     Spring[] springs;

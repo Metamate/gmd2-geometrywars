@@ -15,29 +15,24 @@ public class Enemy : Entity
     public Enemy(Texture2D image, Vector2 position)
     {
         this.Image = image;
-        Position = position;
-        Tint = Color.Transparent;
+        Position   = position;
+        Tint       = Color.Transparent;
 
         // Movement: decelerate each frame and stay on screen.
         AddComponent(new VelocityMover(damping: GameSettings.EnemyDamping, clampToScreen: true));
 
-        // Collision response: enemies push each other apart; bullets kill them.
-        // Player collision is handled entirely on the player's side.
-        Collider = new CircleCollider(image.Width / 2f, other =>
-        {
-            if (other is Bullet || (other is BlackHole && IsActive))
-                WasShot();
-            else if (other is Enemy e)
-                HandleCollision(e);
-        });
+        Collider = new CircleCollider(image.Width / 2f);
     }
 
     public bool IsActive => timeUntilStart <= 0;
     public int PointValue { get; set; }
 
+    // Flyweight usage: CreateSeeker/CreateWanderer read from a shared EnemyDef
+    // (declared in GameSettings) rather than hard-coding values per enemy instance.
+    // All seekers share the same EnemyDef; all wanderers share another.
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var def = GameSettings.Seeker;
+        var def   = GameSettings.Seeker;
         var enemy = new Enemy(def.GetTexture(), position);
         enemy.PointValue = def.PointValue;
         enemy.AddBehaviour(enemy.FollowPlayer(getTargetPosition, def.Acceleration));
@@ -46,7 +41,7 @@ public class Enemy : Entity
 
     public static Enemy CreateWanderer(Vector2 position)
     {
-        var def = GameSettings.Wanderer;
+        var def   = GameSettings.Wanderer;
         var enemy = new Enemy(def.GetTexture(), position);
         enemy.PointValue = def.PointValue;
         enemy.AddBehaviour(enemy.MoveRandomly());
@@ -64,6 +59,21 @@ public class Enemy : Entity
         }
     }
 
+    // Collision response:
+    //   Bullet or active BlackHole → enemy dies.
+    //   Another enemy              → push apart (enemies must not stack).
+    //   PlayerShip                 → player handles its own side; enemy does nothing.
+    //
+    // Note: the IsActive guard on BlackHole prevents spawning enemies from being
+    // killed by a black hole before they have fully faded in.
+    public override void OnCollision(Entity other)
+    {
+        if (other is Bullet || (other is BlackHole && IsActive))
+            WasShot();
+        else if (other is Enemy e)
+            HandleCollision(e);
+    }
+
     public void HandleCollision(Enemy other)
     {
         var d = Position - other.Position;
@@ -71,7 +81,7 @@ public class Enemy : Entity
     }
 
     // awardPoints = false when enemies are killed as a side-effect of the player dying,
-    // so the player doesn't score points from their own death explosion.
+    // so the player does not score points from their own death explosion.
     public void WasShot(bool awardPoints = true)
     {
         IsExpired = true;

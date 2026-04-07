@@ -13,15 +13,17 @@ public class BlackHole : Entity
 
     public BlackHole(Vector2 position)
     {
-        Image = Art.BlackHole;
+        Image    = Art.BlackHole;
         Position = position;
+        Collider = new CircleCollider(Image.Width / 2f);
+    }
 
-        // Bullets weaken the black hole; everything else is handled by their own colliders.
-        Collider = new CircleCollider(Image.Width / 2f, other =>
-        {
-            if (other is Bullet)
-                WasShot();
-        });
+    // Collision response: only bullets damage the black hole.
+    // Enemy and player collisions are handled entirely on their own side.
+    public override void OnCollision(Entity other)
+    {
+        if (other is Bullet)
+            WasShot();
     }
 
     public void WasShot()
@@ -59,7 +61,7 @@ public class BlackHole : Entity
     protected override void OnUpdate()
     {
         // Apply gravity and repulsion to nearby entities
-        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
+        foreach (var entity in GameServices.Entities.GetNearbyEntities(Position, GameSettings.BlackHoleGravityRange))
         {
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;

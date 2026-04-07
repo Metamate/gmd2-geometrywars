@@ -15,33 +15,36 @@ public class PlayerShip : Entity
 
     public PlayerShip()
     {
-        Image = Art.Player;
+        Image    = Art.Player;
         Position = GameServices.ScreenSize / 2;
 
         // Damping = 0 clears velocity after each frame; player ship is input-driven,
         // not physics-based — no momentum carries over between frames.
         AddComponent(new VelocityMover(damping: 0f, clampToScreen: true));
 
-        // Player dies on contact with any active enemy or black hole.
-        // All enemies/blackholes are cleared as part of Kill().
-        Collider = new CircleCollider(GameSettings.PlayerColliderRadius, other =>
-        {
-            if (IsDead) return;
+        Collider = new CircleCollider(GameSettings.PlayerColliderRadius);
+    }
 
-            if (other is Enemy e && e.IsActive)
-            {
-                Kill();
-                EntityManager.KillAllEnemies();
-                EnemySpawner.Reset();
-            }
-            else if (other is BlackHole)
-            {
-                Kill();
-                EntityManager.KillAllEnemies();
-                EntityManager.KillAllBlackHoles();
-                EnemySpawner.Reset();
-            }
-        });
+    // Collision response: the player dies on contact with any active enemy or black hole.
+    // All enemies and black holes are cleared as part of the death sequence so the
+    // player does not score points from the explosion of their own death.
+    public override void OnCollision(Entity other)
+    {
+        if (IsDead) return;
+
+        if (other is Enemy e && e.IsActive)
+        {
+            Kill();
+            GameServices.Entities.KillAllEnemies();
+            EnemySpawner.Reset();
+        }
+        else if (other is BlackHole)
+        {
+            Kill();
+            GameServices.Entities.KillAllEnemies();
+            GameServices.Entities.KillAllBlackHoles();
+            EnemySpawner.Reset();
+        }
     }
 
     protected override void OnUpdate()
@@ -72,8 +75,8 @@ public class PlayerShip : Entity
 
             Vector2 offsetA = new(GameSettings.PlayerBulletOffsetX, -GameSettings.PlayerBulletOffsetY);
             Vector2 offsetB = new(GameSettings.PlayerBulletOffsetX,  GameSettings.PlayerBulletOffsetY);
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
+            GameServices.Entities.Add(GameServices.Entities.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
+            GameServices.Entities.Add(GameServices.Entities.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
 
             Sound.Shot.Play(0.2f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
         }

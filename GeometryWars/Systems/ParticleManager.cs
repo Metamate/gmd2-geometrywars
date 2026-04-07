@@ -4,6 +4,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
+// DATA LOCALITY NOTE — Array of Objects (current layout):
+// CircularParticleArray holds Particle references. The Particle objects themselves
+// live scattered across the heap, so iterating the array causes one pointer
+// dereference per particle — each likely a cache miss at high particle counts.
+//
+// A more cache-friendly layout (Struct of Arrays / SoA) would store each field
+// in its own contiguous array:
+//     float[] positionX, positionY;
+//     float[] orientations;
+//     Color[] tints;
+//     ...
+// This lets the CPU prefetch and process fields in tight loops without chasing
+// pointers. ParticleState is already a value type (struct), which is a step in
+// that direction — note how it is stored inline in Particle.State rather than
+// as a separate heap object.
 public class ParticleManager<T>
 {
     private readonly Action<Particle> updateParticle;
