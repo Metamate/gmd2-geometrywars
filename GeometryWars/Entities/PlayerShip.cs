@@ -78,7 +78,7 @@ public class PlayerShip : Entity
             EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
             EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
 
-            Sound.Shot.Play(0.2f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
+            GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
         }
 
         if (_cooldownRemaining > 0)

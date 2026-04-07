@@ -108,7 +108,11 @@ static class EntityManager
 
     /// <summary>
     /// Returns entities within a radius using a shared reusable buffer. 
-    /// Note: Result is only valid until the next call to this method.
+    /// 
+    /// ARCHITECTURAL NOTE (Temporal Coupling): 
+    /// This method is optimized for zero-allocation. The returned list is 
+    /// shared across all callers. You MUST process the results immediately; 
+    /// do not store the list, as it will be cleared by the next caller!
     /// </summary>
     public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
     {

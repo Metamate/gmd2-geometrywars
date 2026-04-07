@@ -11,4 +11,5 @@ public static class GameServices
     public static ParticleManager<ParticleState> Particles { get; set; }
     public static Grid Grid { get; set; }
     public static PerformanceMonitor Performance { get; set; } = new();
+    public static AudioManager Audio { get; set; } = new();
 }

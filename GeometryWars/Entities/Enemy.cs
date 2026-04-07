@@ -107,14 +107,13 @@ public class Enemy : Entity
             PlayerStatus.AddPoints(PointValue);
             PlayerStatus.IncreaseMultiplier();
         }
-        Sound.Explosion.Play(0.5f, Random.Shared.NextFloat(-0.2f, 0.2f), 0);
+        GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 
-    // Behaviour methods use C#'s generator (yield return) as a simple coroutine.
+    // Behaviour methods use C#'s generator (yield return) as a simple 'Coroutine'.
     // Each call to MoveNext() runs the method up to the next yield, advancing the
-    // behaviour by one frame. This lets AI logic be written as a straight-line loop
-    // instead of a state machine, while still executing one step per frame.
-
+    // behaviour by one frame. This is a modular alternative to the State Pattern,
+    // allowing AI logic to be written as a simple sequential loop.
     IEnumerable<int> FollowPlayer(Func<Vector2> getTargetPosition, float acceleration)
     {
         while (true)
