@@ -3,10 +3,18 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
-    <PublishReadyToRun>false</PublishReadyToRun>
-    <TieredCompilation>false</TieredCompilation>
+    
+    <!-- Native AOT Settings -->
+    <!-- Compiles the C# code directly to a native Windows machine-code binary. -->
+    <PublishAot>true</PublishAot>
+    <!-- Generates warnings if AOT-incompatible code is found that might crash other PCs. -->
+    <IlcGenerateMetadataMessages>true</IlcGenerateMetadataMessages>
+    
+    <!-- Standard Standalone Publish Settings -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
+    <!-- Note: In AOT mode, managed DLLs are merged into the EXE, but 
+         Native DLLs (SDL2, OpenAL) and the Content folder must remain external. -->
     <PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
 
@@ -29,6 +37,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <!-- These directives prevent the AOT compiler from 'trimming' (deleting) 
+       reflection-based code inside MonoGame that is needed for Content.Load. -->
   <ItemGroup>
     <TrimmerRootAssembly Include="MonoGame.Framework" />
     <TrimmerRootAssembly Include="mscorlib" />
