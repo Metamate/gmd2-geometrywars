@@ -54,6 +54,12 @@ public abstract class GameCore : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        if (!IsActive)
+        {
+            base.Update(gameTime);
+            return;
+        }
+
         // 60Hz fixed logic step
         const double timeStep = 1.0 / 60.0;
         _accumulator += gameTime.ElapsedGameTime.TotalSeconds;
