@@ -1,15 +1,23 @@
-using System;
-using GeometryWars.Services;
 using Microsoft.Xna.Framework;
+using GeometryWars.Components;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Archetype for Bullets.
+/// Now just an "Assembler" class that adds the right components.
+/// Logic-free: all behaviour is in Components.
+/// </summary>
 public class Bullet : Entity
 {
     public Bullet()
     {
         Image    = Art.Bullet;
         Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
+
+        // Assembler: Plug in the specific behaviours of a Bullet
+        AddComponent(new BulletMovementBehaviour());
+        AddComponent(new BulletCollisionBehaviour());
     }
 
     public void Reset(Vector2 position, Vector2 velocity)
@@ -18,34 +26,5 @@ public class Bullet : Entity
         Velocity   = velocity;
         Orientation = velocity.ToAngle();
         IsExpired  = false;
-    }
-
-    // Collision response: expire on contact with an enemy or black hole.
-    // The other entity handles its own side of the collision (e.g. Enemy.OnCollision
-    // will call WasShot(); BlackHole.OnCollision will call WasShot()).
-    public override void OnCollision(Entity other)
-    {
-        if (other is Enemy || other is BlackHole)
-            IsExpired = true;
-    }
-
-    protected override void OnUpdate()
-    {
-        // Bullets manage their own movement (instead of using VelocityMover) because
-        // they need to handle the screen-boundary side-effect of spawning particles.
-        if (Velocity.LengthSquared() > 0)
-            Orientation = Velocity.ToAngle();
-
-        Position += Velocity;
-
-        if (!FrameContext.Viewport.Bounds.Contains(Position.ToPoint()))
-        {
-            IsExpired = true;
-            for (int i = 0; i < GameSettings.Visuals.BulletDeathParticles; i++)
-                GameServices.Particles.CreateParticle(Art.LineParticle, Position, Color.LightBlue, 50, 1,
-                    new ParticleState { Velocity = Random.Shared.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
-        }
-
-        GameServices.Grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * Velocity.Length(), Position, GameSettings.Physics.BulletGridRadius);
     }
 }

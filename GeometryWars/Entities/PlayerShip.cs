@@ -6,32 +6,33 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Archetype for the Player Ship.
+/// Composed of movement, input, visuals, and respawn components.
+/// </summary>
 public class PlayerShip : Entity
 {
-    private int _framesUntilRespawn = 0;
+    private readonly PlayerRespawnBehaviour _respawn;
 
-    public bool IsDead => _framesUntilRespawn > 0;
+    public bool IsDead => _respawn.IsDead;
 
     public PlayerShip()
     {
         Image    = Art.Player;
         Position = FrameContext.ScreenSize / 2;
 
-        // Damping = 0 clears velocity after each frame; player ship is input-driven,
-        // not physics-based — no momentum carries over between frames.
+        // Assembler: Plug in the specific behaviours of the Player
         AddComponent(new VelocityMover(damping: 0f, clampToScreen: true));
-        
-        // Component-based logic: handling input and visuals separately.
         AddComponent(new PlayerInputComponent());
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
+        
+        // Keep a reference to the respawn component so we can check IsDead
+        _respawn = AddComponent(new PlayerRespawnBehaviour());
 
         Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
     }
 
-    // Collision response: the player dies on contact with any active enemy or black hole.
-    // All enemies and black holes are cleared as part of the death sequence so the
-    // player does not score points from the explosion of their own death.
     public override void OnCollision(Entity other)
     {
         if (IsDead) return;
@@ -51,16 +52,6 @@ public class PlayerShip : Entity
         }
     }
 
-    protected override void OnUpdate()
-    {
-        if (IsDead)
-        {
-            if (--_framesUntilRespawn == 0 && !PlayerStatus.IsGameOver)
-                GameServices.Grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(Position, 0), 50);
-            return;
-        }
-    }
-
     public override void Draw(SpriteBatch spriteBatch)
     {
         if (!IsDead)
@@ -70,7 +61,9 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-        _framesUntilRespawn = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
+        
+        int frames = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
+        _respawn.Kill(frames);
 
         Color yellow = new(0.8f, 0.8f, 0.4f);
         for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)

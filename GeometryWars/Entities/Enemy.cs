@@ -5,10 +5,19 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Archetype for Enemies.
+/// Now just an "Assembler" class that adds the right components.
+/// Logic-free: all behaviour is in Components.
+/// </summary>
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    private int _timeUntilStart = GameSettings.Enemy.SpawnDelay;
+    
+    // Controlled by SpawnFadeBehaviour component
+    public bool IsActive { get; set; }
+
+    public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)
     {
@@ -17,16 +26,14 @@ public class Enemy : Entity
         Position = position;
         Tint     = Color.Transparent;
 
-        // Common movement: decelerate each frame and stay on screen.
+        // Common components for all enemies
         AddComponent(new VelocityMover(damping: GameSettings.Enemy.Damping, clampToScreen: true));
+        AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
+        AddComponent(new EnemyCollisionBehaviour());
 
         Collider = new CircleCollider(Image.Width / 2f);
     }
 
-    public bool IsActive => _timeUntilStart <= 0;
-    public int PointValue => _def.PointValue;
-
-    // Component-based assembly: we create a generic Enemy and "plug in" its AI.
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var def   = GameSettings.Enemy.Seeker;
@@ -43,33 +50,8 @@ public class Enemy : Entity
         return enemy;
     }
 
-    protected override void OnUpdate()
-    {
-        if (_timeUntilStart > 0)
-        {
-            _timeUntilStart--;
-            Tint = Color.White * (1 - _timeUntilStart / (float)GameSettings.Enemy.SpawnDelay);
-        }
-        
-        // Note: AI logic (Seeker/Wanderer) has been moved to dedicated components.
-        // Components only update if IsActive is true.
-    }
-
-    public override void OnCollision(Entity other)
-    {
-        if (other is Bullet || (other is BlackHole && IsActive))
-            WasShot();
-        else if (other is Enemy e)
-            HandleCollision(e);
-    }
-
-    public void HandleCollision(Enemy other)
-    {
-        var d = Position - other.Position;
-        Velocity += 10 * d / (d.LengthSquared() + 1);
-    }
-
-    public void WasShot(bool awardPoints = true)
+    // Helper for EntityManager mass-kill logic
+    public void Kill()
     {
         IsExpired = true;
 
@@ -90,11 +72,6 @@ public class Enemy : Entity
             GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
-        if (awardPoints)
-        {
-            PlayerStatus.AddPoints(PointValue);
-            PlayerStatus.IncreaseMultiplier();
-        }
         GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }

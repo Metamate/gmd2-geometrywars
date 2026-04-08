@@ -1,90 +1,44 @@
 using System;
+using GeometryWars.Components;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Archetype for Black Holes.
+/// Now just an "Assembler" class that adds the right components.
+/// Logic-free: all behaviour is in Components.
+/// </summary>
 public class BlackHole : Entity
 {
-    private int _hitpoints = GameSettings.Hazards.BlackHoleHitpoints;
-    private float _sprayAngle = 0;
+    // A black hole is "active" as soon as it exists (unlike enemies which have a spawn delay)
+    public bool IsActive => true;
 
     public BlackHole(Vector2 position)
     {
         Image    = Art.BlackHole;
         Position = position;
+        
+        // Assembler: Plug in the specific behaviours of a Black Hole
+        AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));
+        AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce));
+        AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange));
+        AddComponent(new BlackHoleCollisionBehaviour(GameSettings.Hazards.BlackHoleHitpoints));
+
         Collider = new CircleCollider(Image.Width / 2f);
-    }
-
-    // Collision response: only bullets damage the black hole.
-    // Enemy and player collisions are handled entirely on their own side.
-    public override void OnCollision(Entity other)
-    {
-        if (other is Bullet)
-            WasShot();
-    }
-
-    public void WasShot()
-    {
-        if (--_hitpoints <= 0)
-            IsExpired = true;
-
-        float hue = (float)(3 * FrameContext.TotalSeconds % 6);
-        Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
-        float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
-        for (int i = 0; i < GameSettings.Visuals.BlackHoleHitParticles; i++)
-        {
-            float speed = Random.Shared.NextFloat(GameSettings.Visuals.BlackHoleHitParticleMinSpeed, GameSettings.Visuals.BlackHoleHitParticleMaxSpeed);
-            Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / GameSettings.Visuals.BlackHoleHitParticles + startOffset, speed);
-            var state = new ParticleState
-            {
-                Velocity = sprayVel,
-                LengthMultiplier = 1,
-                Type = ParticleType.IgnoreGravity
-            };
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position + 2f * sprayVel, color,
-                GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
-        }
     }
 
     public void Kill() => IsExpired = true;
 
     public override void Draw(SpriteBatch spriteBatch)
     {
+        // Visual pulsing effect
         float scale = 1 + 0.1f * (float)Math.Sin(10 * FrameContext.TotalSeconds);
         spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, scale, 0, 0);
+        
+        // Call base to draw components (like the GlowOverlay)
         base.Draw(spriteBatch);
-    }
-
-    protected override void OnUpdate()
-    {
-        // Apply gravity and repulsion to nearby entities
-        foreach (var entity in EntityManager.GetNearbyEntities(Position, GameSettings.Hazards.BlackHoleGravityRange))
-        {
-            if (entity is Enemy enemy && !enemy.IsActive)
-                continue;
-
-            if (entity is Bullet)
-                entity.Velocity += (entity.Position - Position).ScaleTo(0.3f);
-            else
-            {
-                var dPos = Position - entity.Position;
-                entity.Velocity += dPos.ScaleTo(MathHelper.Lerp(GameSettings.Hazards.BlackHoleGravityForce, 0, dPos.Length() / GameSettings.Hazards.BlackHoleGravityRange));
-            }
-        }
-
-        // Orbital particle spray toggles every quarter second
-        if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
-        {
-            Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));
-            Color color = ColorUtil.HSVToColor(5, 0.5f, 0.8f);
-            Vector2 pos = Position + 2f * new Vector2(sprayVel.Y, -sprayVel.X) + Random.Shared.NextVector2(4, 8);
-            GameServices.Particles.CreateParticle(Art.LineParticle, pos, color, 190, 1.5f,
-                new ParticleState { Velocity = sprayVel, LengthMultiplier = 1, Type = ParticleType.Enemy });
-        }
-
-        _sprayAngle -= MathHelper.TwoPi / 50f;
-        GameServices.Grid.ApplyImplosiveForce((float)Math.Sin(_sprayAngle / 2) * 10 + 20, Position, GameSettings.Hazards.BlackHoleGridRange);
     }
 }

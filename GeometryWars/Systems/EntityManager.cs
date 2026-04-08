@@ -49,7 +49,7 @@ static class EntityManager
     public static void KillAllEnemies()
     {
         for (int i = 0; i < enemies.Count; i++)
-            enemies[i].WasShot(awardPoints: false);
+            enemies[i].Kill();
     }
 
     public static void KillAllBlackHoles()
