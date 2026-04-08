@@ -7,10 +7,6 @@ namespace GeometryWars.Systems;
 /// <summary>
 /// Tracks FPS, heap memory, and entity count.
 /// Toggle display on/off with F3 during play.
-///
-/// Useful for comparing the baseline Grid/ParticleManager against their
-/// Optimized counterparts: swap the implementation in Game1.Initialize(),
-/// run the game, press F3, and watch the FPS and RAM numbers change.
 /// </summary>
 public sealed class PerformanceMonitor
 {
@@ -19,7 +15,6 @@ public sealed class PerformanceMonitor
     private int _fps;
     private long _totalMemory;
 
-    // Press F3 in play to reveal — useful when benchmarking DOD optimisations.
     public bool IsVisible { get; private set; } = false;
 
     public void Toggle() => IsVisible = !IsVisible;
@@ -37,9 +32,6 @@ public sealed class PerformanceMonitor
             _fps = _frameCounter;
             _frameCounter = 0;
             _elapsedTime -= 1.0f;
-
-            // GC.GetTotalMemory(false) returns a snapshot of current heap usage.
-            // Watch this number rise if you introduce allocations in the hot path
             _totalMemory = GC.GetTotalMemory(false);
         }
     }

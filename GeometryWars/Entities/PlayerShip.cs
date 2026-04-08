@@ -9,7 +9,6 @@ namespace GeometryWars;
 public class PlayerShip : Entity
 {
     private int _framesUntilRespawn = 0;
-    private int _cooldownRemaining = 0;
 
     public bool IsDead => _framesUntilRespawn > 0;
 
@@ -21,6 +20,11 @@ public class PlayerShip : Entity
         // Damping = 0 clears velocity after each frame; player ship is input-driven,
         // not physics-based — no momentum carries over between frames.
         AddComponent(new VelocityMover(damping: 0f, clampToScreen: true));
+        
+        // Component-based logic: handling input and visuals separately.
+        AddComponent(new PlayerInputComponent());
+        AddComponent(new ExhaustFireComponent());
+        AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
 
         Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
     }
@@ -55,34 +59,6 @@ public class PlayerShip : Entity
                 GameServices.Grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(Position, 0), 50);
             return;
         }
-
-        Velocity += GameSettings.Player.Speed * GameController.Movement;
-
-        if (Velocity.LengthSquared() > 0)
-            Orientation = Velocity.ToAngle();
-
-        MakeExhaustFire();
-
-        var aim = GameController.AimDirection(Position);
-        if (GameController.IsShooting && _cooldownRemaining <= 0)
-        {
-            _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
-            float aimAngle = aim.ToAngle();
-            Quaternion aimQuat = Quaternion.CreateFromYawPitchRoll(0, 0, aimAngle);
-            float randomSpread = Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread)
-                               + Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread);
-            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.Bullets.Speed);
-
-            Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
-            Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetA, aimQuat), vel));
-            EntityManager.Add(EntityManager.GetBullet(Position + Vector2.Transform(offsetB, aimQuat), vel));
-
-            GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
-        }
-
-        if (_cooldownRemaining > 0)
-            _cooldownRemaining--;
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -104,39 +80,5 @@ public class PlayerShip : Entity
             GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize,
                 new ParticleState { Velocity = Random.Shared.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });
         }
-    }
-
-    private void MakeExhaustFire()
-    {
-        if (Velocity.LengthSquared() <= 0.1f)
-            return;
-
-        Orientation = Velocity.ToAngle();
-        Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, Orientation);
-        double t = FrameContext.TotalSeconds;
-
-        Vector2 baseVel = Velocity.ScaleTo(-3);
-        Vector2 perpVel = new Vector2(baseVel.Y, -baseVel.X) * (0.6f * (float)Math.Sin(t * 10));
-        Color sideColor = new Color(200, 38, 9);
-        Color midColor = new Color(255, 187, 30);
-        Vector2 pos = Position + Vector2.Transform(new Vector2(-25, 0), rot);
-        const float alpha = 0.7f;
-
-        Vector2 velMid = baseVel + Random.Shared.NextVector2(0, 1);
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(velMid, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, midColor * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(velMid, ParticleType.Enemy));
-
-        Vector2 vel1 = baseVel + perpVel + Random.Shared.NextVector2(0, 0.3f);
-        Vector2 vel2 = baseVel - perpVel + Random.Shared.NextVector2(0, 0.3f);
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(vel1, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(vel2, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(vel1, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
-            new ParticleState(vel2, ParticleType.Enemy));
     }
 }

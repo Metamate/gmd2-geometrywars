@@ -1,0 +1,50 @@
+using System;
+using GeometryWars.Services;
+using Microsoft.Xna.Framework;
+
+namespace GeometryWars.Components;
+
+/// <summary>
+/// Component that handles player movement and shooting based on controller input.
+/// Demonstrates how logic can be moved out of the main Entity class.
+/// </summary>
+public sealed class PlayerInputComponent : IComponent
+{
+    private int _cooldownRemaining = 0;
+
+    public void Update(Entity owner)
+    {
+        if (owner is not PlayerShip player || player.IsDead)
+            return;
+
+        // 1. Movement
+        owner.Velocity += GameSettings.Player.Speed * GameController.Movement;
+
+        if (owner.Velocity.LengthSquared() > 0)
+            owner.Orientation = owner.Velocity.ToAngle();
+
+        // 2. Shooting
+        var aim = GameController.AimDirection(owner.Position);
+        if (GameController.IsShooting && _cooldownRemaining <= 0)
+        {
+            _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
+            float aimAngle = aim.ToAngle();
+            Quaternion aimQuat = Quaternion.CreateFromYawPitchRoll(0, 0, aimAngle);
+            
+            float randomSpread = Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread)
+                               + Random.Shared.NextFloat(-GameSettings.Bullets.Spread, GameSettings.Bullets.Spread);
+            Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.Bullets.Speed);
+
+            Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
+            Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
+            
+            EntityManager.Add(EntityManager.GetBullet(owner.Position + Vector2.Transform(offsetA, aimQuat), vel));
+            EntityManager.Add(EntityManager.GetBullet(owner.Position + Vector2.Transform(offsetB, aimQuat), vel));
+
+            GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
+        }
+
+        if (_cooldownRemaining > 0)
+            _cooldownRemaining--;
+    }
+}

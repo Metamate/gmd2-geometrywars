@@ -12,8 +12,8 @@ public static class GameSettings
 
     public static class Performance
     {
-        public const int MaxParticles  = 1024 * 20;
-        public const int MaxGridPoints = 1600;
+        public const int MaxParticles  = 1024 * 20; 
+        public const int MaxGridPoints = 1600;      
         public const int MaxEntities   = 200;
     }
 

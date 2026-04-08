@@ -35,8 +35,6 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
 
         if (particle.State.Type != ParticleType.IgnoreGravity)
         {
-            // Particles are attracted to black holes — read the live black hole list
-            // from the entity manager each frame.
             foreach (var blackHole in EntityManager.BlackHoles)
             {
                 var dPos     = blackHole.Position - pos;
@@ -58,15 +56,11 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
         particle.State.Velocity = vel;
     }
 
-    // The same simulation logic as UpdateParticle, written for ParticleManagerOptimized.
-    // The key difference is the 'ref Particle' parameter: the struct is passed by reference
-    // so this method modifies it directly in the array — no copy, no allocation.
-    // Compare the two signatures to see why the optimized manager needs a different delegate.
     public static void UpdateParticleOptimized(ref ParticleManagerOptimized<ParticleState>.Particle particle)
     {
         var vel = particle.State.Velocity;
-        particle.Position   += vel;
-        particle.Orientation = vel.ToAngle();
+        particle.Position    += vel;
+        particle.Orientation  = vel.ToAngle();
 
         float speed = vel.Length();
         float alpha = Math.Min(1, Math.Min(particle.PercentLife * 2, speed * 1f));
