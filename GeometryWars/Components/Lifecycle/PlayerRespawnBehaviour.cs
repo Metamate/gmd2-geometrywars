@@ -1,8 +1,13 @@
-using Microsoft.Xna.Framework;
+using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using GeometryWars.Services;
+using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Lifecycle;
 
+/// <summary>
+/// Handles the player ship's death timer and respawn effects.
+/// </summary>
 public sealed class PlayerRespawnBehaviour : Component
 {
     private int _framesUntilRespawn = 0;

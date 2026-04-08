@@ -1,8 +1,11 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Visuals;
 
 public sealed class ExhaustFireComponent : Component
 {

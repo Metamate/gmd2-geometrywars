@@ -1,19 +1,22 @@
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Components.Visuals;
+using GeometryWars.Components.Combat;
 using Microsoft.Xna.Framework;
-using GeometryWars.Components;
 
-namespace GeometryWars;
+namespace GeometryWars.Entities;
 
 /// <summary>
 /// Archetype for player bullets.
 /// </summary>
 public class Bullet : Entity
 {
-    private readonly RigidbodyComponent _rigidbody;
+    private RigidbodyComponent _rigidbody;
 
     public Bullet()
     {
+        // Assembler: Plug in components
         _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
-        
         AddComponent(new SpriteComponent(Art.Bullet));
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());
@@ -24,8 +27,14 @@ public class Bullet : Entity
     {
         IsExpired  = false;
         
+        _rigidbody ??= GetComponent<RigidbodyComponent>();
+
         Transform.Position = position;
         Transform.Orientation = velocity.ToAngle();
-        _rigidbody.Velocity = velocity;
+        
+        if (_rigidbody != null)
+        {
+            _rigidbody.Velocity = velocity;
+        }
     }
 }

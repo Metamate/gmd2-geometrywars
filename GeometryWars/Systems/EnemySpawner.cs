@@ -1,27 +1,35 @@
 using System;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Handles the timing and positioning of enemy spawns.
+/// </summary>
 public static class EnemySpawner
 {
     private static float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 
     public static void Update(bool playerActive, Func<Vector2> getPlayerPosition)
     {
+        // 1. Difficulty Scaling
         if (_inverseSpawnChance > GameSettings.Enemy.Spawning.ChanceMin)
             _inverseSpawnChance -= GameSettings.Enemy.Spawning.ChanceDecay;
 
+        // 2. Early Gates
         if (!playerActive) return;
         if (EntityManager.Count >= GameSettings.Performance.MaxEntities) return;
 
-        SpawnEnemies(getPlayerPosition);
-        SpawnBlackHoles(getPlayerPosition);
+        // 3. Spawning Logic
+        UpdateEnemySpawns(getPlayerPosition);
+        UpdateBlackHoleSpawns(getPlayerPosition);
     }
 
-    private static void SpawnEnemies(Func<Vector2> getPlayerPosition)
+    private static void UpdateEnemySpawns(Func<Vector2> getPlayerPosition)
     {
+        // 1. Wanderer Roll
         if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
@@ -29,6 +37,7 @@ public static class EnemySpawner
             GameServices.Audio.Play(Sound.Spawn, 0.15f);
         }
 
+        // 2. Seeker Roll
         if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
@@ -37,7 +46,7 @@ public static class EnemySpawner
         }
     }
 
-    private static void SpawnBlackHoles(Func<Vector2> getPlayerPosition)
+    private static void UpdateBlackHoleSpawns(Func<Vector2> getPlayerPosition)
     {
         if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles && 
             Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)

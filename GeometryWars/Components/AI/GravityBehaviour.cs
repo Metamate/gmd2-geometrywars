@@ -1,7 +1,13 @@
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.AI;
 
+/// <summary>
+/// Component that applies gravitational forces to nearby entities.
+/// </summary>
 public sealed class GravityBehaviour : Component
 {
     private readonly float _range;
@@ -29,6 +35,8 @@ public sealed class GravityBehaviour : Component
             var targetRigidbody = entity.GetComponent<RigidbodyComponent>();
             
             if (targetTransform == null || targetRigidbody == null) continue;
+
+            if (!targetRigidbody.IsActive) continue;
 
             if (entity is Bullet)
             {

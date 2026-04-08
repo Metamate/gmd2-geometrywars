@@ -1,7 +1,14 @@
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Visuals;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Lifecycle;
 
+/// <summary>
+/// Component that handles the initial fade-in.
+/// It keeps other components inactive until the fade is complete.
+/// </summary>
 public sealed class SpawnFadeBehaviour : Component
 {
     private int _timeUntilStart;
@@ -18,8 +25,9 @@ public sealed class SpawnFadeBehaviour : Component
     {
         _sprite = owner.GetComponent<SpriteComponent>();
         
+        // GATING: Disable all sibling components while spawning.
         owner.SetAllComponentsActive(false);
-        IsActive = true; 
+        this.IsActive = true; 
         
         if (_sprite != null) _sprite.IsActive = true;
     }
@@ -37,8 +45,11 @@ public sealed class SpawnFadeBehaviour : Component
 
             if (_timeUntilStart <= 0)
             {
+                // Birth complete: activate all capabilities
                 owner.SetAllComponentsActive(true);
-                IsActive = false; 
+                
+                // We are no longer needed
+                this.IsActive = false; 
             }
         }
     }

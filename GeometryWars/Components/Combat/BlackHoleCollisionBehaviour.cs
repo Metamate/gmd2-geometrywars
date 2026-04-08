@@ -1,9 +1,14 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Combat;
 
+/// <summary>
+/// Handles damage and visual effects when a black hole is hit.
+/// </summary>
 public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
 {
     private int _hitpoints;

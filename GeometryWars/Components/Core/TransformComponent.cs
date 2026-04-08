@@ -1,6 +1,7 @@
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Core;
 
 public sealed class TransformComponent : Component
 {

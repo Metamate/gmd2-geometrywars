@@ -1,8 +1,14 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.AI;
 
+/// <summary>
+/// AI component that steers an entity towards a target position.
+/// </summary>
 public sealed class SeekBehaviour : Component
 {
     private readonly Func<Vector2> _getTargetPosition;

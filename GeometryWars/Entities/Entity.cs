@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
-using GeometryWars.Components;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Combat;
+using GeometryWars.Components.Visuals;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars;
+namespace GeometryWars.Entities;
 
+/// <summary>
+/// Base class for all game objects. 
+/// Every entity is a container for components and has a foundational Transform.
+/// </summary>
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];

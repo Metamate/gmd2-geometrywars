@@ -1,9 +1,15 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Combat;
 
+/// <summary>
+/// Handles collision response for enemies, including death effects and score.
+/// </summary>
 public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
 {
     private RigidbodyComponent _rigidbody;
@@ -28,7 +34,8 @@ public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
         else if (other is Enemy e)
         {
             var otherTransform = e.Transform;
-            if (otherTransform == null) return;
+            var otherRigidbody = e.GetComponent<RigidbodyComponent>();
+            if (otherTransform == null || otherRigidbody == null) return;
 
             var d = _transform.Position - otherTransform.Position;
             _rigidbody.AddForce(10 * d / (d.LengthSquared() + 1));

@@ -1,8 +1,14 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.AI;
 
+/// <summary>
+/// AI component that steers an entity in random directions.
+/// </summary>
 public sealed class WanderBehaviour : Component
 {
     private float _direction;
@@ -24,6 +30,9 @@ public sealed class WanderBehaviour : Component
 
     public override void Update(Entity owner)
     {
+        if (owner is not Enemy enemy || !enemy.IsActive)
+            return;
+
         if (_stepCounter-- <= 0)
         {
             _stepCounter = GameSettings.Enemy.WandererStepsPerTick;

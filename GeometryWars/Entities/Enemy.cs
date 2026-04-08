@@ -1,13 +1,22 @@
 using System;
-using GeometryWars.Components;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Components.Visuals;
+using GeometryWars.Components.Combat;
+using GeometryWars.Components.AI;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars;
+namespace GeometryWars.Entities;
 
+/// <summary>
+/// Archetype for enemy units.
+/// </summary>
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
+    public bool IsActiveLocal { get; set; } // Local flag if needed, otherwise use Entity.IsActive
     public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)
@@ -18,6 +27,7 @@ public class Enemy : Entity
         var tex = def.GetTexture();
         Vector2 size = new(tex.Width, tex.Height);
 
+        // Assembler: Composition of specific capabilities
         AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         AddComponent(new ScreenClampBehaviour(size));
         
@@ -48,6 +58,7 @@ public class Enemy : Entity
     public void Kill()
     {
         IsExpired = true;
+        var pos = Transform.Position;
 
         float hue1 = Random.Shared.NextFloat(0, 6);
         float hue2 = (hue1 + Random.Shared.NextFloat(0, 2)) % 6f;
@@ -63,7 +74,7 @@ public class Enemy : Entity
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
         GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));

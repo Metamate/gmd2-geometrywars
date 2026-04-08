@@ -1,8 +1,9 @@
-using GeometryWars.Components;
+using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Visuals;
 
 public sealed class SpriteComponent : Component, IDrawableComponent
 {

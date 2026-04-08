@@ -1,11 +1,14 @@
 using GMDCore;
-using GeometryWars;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.States;
 
+/// <summary>
+/// State displayed when the player has no lives remaining.
+/// </summary>
 public sealed class GameOverState : GameStateBase
 {
     private readonly Game1 _game;

@@ -1,14 +1,22 @@
-using GeometryWars.Components;
+using GeometryWars.Components.Core;
+using GeometryWars.Components.Physics;
+using GeometryWars.Components.Visuals;
+using GeometryWars.Components.Combat;
+using GeometryWars.Components.AI;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars;
+namespace GeometryWars.Entities;
 
+/// <summary>
+/// Archetype for black hole hazards.
+/// </summary>
 public class BlackHole : Entity
 {
     public BlackHole(Vector2 position)
     {
         Transform.Position = position;
         
+        // Assembler: Plug in components
         AddComponent(new RigidbodyComponent()); 
         AddComponent(new SpriteComponent(Art.BlackHole));
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));

@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Physics;
 
 public sealed class BoxColliderComponent : ColliderComponent
 {

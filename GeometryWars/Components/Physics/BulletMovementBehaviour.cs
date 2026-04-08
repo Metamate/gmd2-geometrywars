@@ -1,8 +1,10 @@
 using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components;
+namespace GeometryWars.Components.Physics;
 
 public sealed class BulletMovementBehaviour : Component
 {
