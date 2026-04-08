@@ -6,19 +6,25 @@ namespace GeometryWars.Components;
 
 public sealed class ExhaustFireComponent : IComponent
 {
+    private MovementComponent _movement;
+
+    public void OnAdded(Entity owner)
+    {
+        _movement = owner.Movement;
+    }
+
     public void Update(Entity owner)
     {
-        if (owner is not PlayerShip player || player.IsDead)
+        if (owner is not PlayerShip player || player.IsDead || _movement == null)
             return;
 
-        var movement = owner.GetComponent<MovementComponent>();
-        if (movement == null || movement.Velocity.LengthSquared() <= 0.1f)
+        if (_movement.Velocity.LengthSquared() <= 0.1f)
             return;
 
-        Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, movement.Orientation);
+        Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, _movement.Orientation);
         double t = FrameContext.TotalSeconds;
 
-        Vector2 baseVel = movement.Velocity.ScaleTo(-3);
+        Vector2 baseVel = _movement.Velocity.ScaleTo(-3);
         Vector2 perpVel = new Vector2(baseVel.Y, -baseVel.X) * (0.6f * (float)Math.Sin(t * 10));
         Color sideColor = new Color(200, 38, 9);
         Color midColor = new Color(255, 187, 30);

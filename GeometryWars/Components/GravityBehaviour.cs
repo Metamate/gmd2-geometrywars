@@ -14,6 +14,8 @@ public sealed class GravityBehaviour : IComponent
         _force = force;
     }
 
+    public void OnAdded(Entity owner) { }
+
     public void Update(Entity owner)
     {
         foreach (var entity in EntityManager.GetNearbyEntities(owner.Position, _range))
@@ -23,8 +25,7 @@ public sealed class GravityBehaviour : IComponent
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
 
-            // Find the movement component of the entity we want to pull
-            var movement = entity.GetComponent<MovementComponent>();
+            var movement = entity.Movement;
             if (movement == null) continue;
 
             if (entity is Bullet)

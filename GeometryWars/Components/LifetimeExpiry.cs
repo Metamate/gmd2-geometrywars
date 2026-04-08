@@ -1,23 +1,24 @@
 namespace GeometryWars.Components;
 
-// Expires the entity automatically after a fixed number of frames.
-// Replaces manual countdown fields on entities that have a fixed lifespan,
-// keeping the entity class free of timer boilerplate.
-//
-// Usage: AddComponent(new LifetimeExpiry(frames: 180)); // 3 seconds at 60 fps
-//
-// Good for: power-ups that disappear after a few seconds, temporary explosion
-// debris, timed obstacles, or any entity that should self-destruct on a timer.
-// Combine with VelocityMover for a self-propelled temporary entity.
+/// <summary>
+/// Component that automatically marks an entity as expired after a set duration.
+/// </summary>
 public sealed class LifetimeExpiry : IComponent
 {
-    private int _framesLeft;
+    private int _framesRemaining;
 
-    public LifetimeExpiry(int frames) => _framesLeft = frames;
+    public LifetimeExpiry(int frames)
+    {
+        _framesRemaining = frames;
+    }
+
+    public void OnAdded(Entity owner) { }
 
     public void Update(Entity owner)
     {
-        if (--_framesLeft <= 0)
+        if (--_framesRemaining <= 0)
+        {
             owner.IsExpired = true;
+        }
     }
 }

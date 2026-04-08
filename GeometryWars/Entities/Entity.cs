@@ -17,8 +17,7 @@ public abstract class Entity
     public bool IsExpired { get; set; }
 
     // PERFORMANCE CACHE: 
-    // Since movement is the most accessed component in the game, 
-    // we store a direct reference to avoid searching the list every frame.
+    // Direct reference to the primary movement component.
     public MovementComponent Movement { get; private set; }
 
     public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
@@ -45,18 +44,19 @@ public abstract class Entity
     {
         _components.Add(component);
         
-        // Caching: if this is a movement component, store the ref for fast access
+        // Internal cache for the manager/renderer
         if (component is MovementComponent mc)
             Movement = mc;
+
+        // LIFECYCLE: Notify the component it has been attached so it can initialize.
+        component.OnAdded(this);
 
         return component;
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
-        // Use the cached reference for O(1) access to orientation
         float orientation = Movement?.Orientation ?? 0f;
-
         spriteBatch.Draw(Image, Position, null, Tint, orientation, Size / 2f, 1f, 0, 0);
 
         foreach (var comp in _components)

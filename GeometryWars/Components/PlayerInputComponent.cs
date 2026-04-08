@@ -7,37 +7,38 @@ namespace GeometryWars.Components;
 public sealed class PlayerInputComponent : IComponent
 {
     private int _cooldownRemaining = 0;
+    private MovementComponent _movement;
+
+    public void OnAdded(Entity owner)
+    {
+        // CACHING: Find the sibling component exactly once at birth
+        _movement = owner.Movement;
+    }
 
     public void Update(Entity owner)
     {
-        if (owner is not PlayerShip player || player.IsDead)
+        if (owner is not PlayerShip player || player.IsDead || _movement == null)
             return;
 
-        // PERFORMANCE: Using the cached property on Entity instead of GetComponent
-        var movement = owner.Movement;
-        if (movement == null) return;
-
         // 1. Movement
-        movement.Velocity += GameSettings.Player.Speed * GameController.Movement;
+        _movement.Velocity += GameSettings.Player.Speed * GameController.Movement;
 
         // 2. Shooting & Orientation
         var aim = GameController.AimDirection(owner.Position);
         
         if (GameController.IsShooting)
         {
-            // Face the direction of aim
-            movement.Orientation = aim.ToAngle();
+            _movement.Orientation = aim.ToAngle();
 
             if (_cooldownRemaining <= 0)
             {
                 _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
-                Shoot(owner, aim, movement.Orientation);
+                Shoot(owner, aim, _movement.Orientation);
             }
         }
-        else if (movement.Velocity.LengthSquared() > 0.01f)
+        else if (_movement.Velocity.LengthSquared() > 0.01f)
         {
-            // Face the direction of travel
-            movement.Orientation = movement.Velocity.ToAngle();
+            _movement.Orientation = _movement.Velocity.ToAngle();
         }
 
         if (_cooldownRemaining > 0)

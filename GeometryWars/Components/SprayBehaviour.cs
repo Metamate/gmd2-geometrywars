@@ -4,9 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that spawns rotating particles and distorts the grid.
-/// </summary>
 public sealed class SprayBehaviour : IComponent
 {
     private float _sprayAngle = 0;
@@ -17,9 +14,10 @@ public sealed class SprayBehaviour : IComponent
         _gridRange = gridRange;
     }
 
+    public void OnAdded(Entity owner) { }
+
     public void Update(Entity owner)
     {
-        // Orbital particle spray toggles every quarter second
         if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
         {
             Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));

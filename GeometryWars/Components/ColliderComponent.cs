@@ -9,5 +9,7 @@ public abstract class ColliderComponent : IComponent
 {
     public bool IsActive { get; set; } = true;
 
+    public void OnAdded(Entity owner) { }
+
     public void Update(Entity owner) { }
 }

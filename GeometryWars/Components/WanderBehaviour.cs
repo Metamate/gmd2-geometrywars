@@ -8,19 +8,22 @@ public sealed class WanderBehaviour : IComponent
 {
     private float _direction;
     private int _stepCounter;
+    private MovementComponent _movement;
 
     public WanderBehaviour()
     {
         _direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
     }
 
+    public void OnAdded(Entity owner)
+    {
+        _movement = owner.Movement;
+    }
+
     public void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive)
+        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null)
             return;
-
-        var movement = owner.Movement;
-        if (movement == null) return;
 
         if (_stepCounter-- <= 0)
         {
@@ -37,9 +40,7 @@ public sealed class WanderBehaviour : IComponent
                              Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
         }
 
-        movement.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
-        
-        // Face the wander direction
-        movement.Orientation = _direction;
+        _movement.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
+        _movement.Orientation = _direction;
     }
 }

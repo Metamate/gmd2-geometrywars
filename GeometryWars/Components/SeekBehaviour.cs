@@ -7,6 +7,7 @@ public sealed class SeekBehaviour : IComponent
 {
     private readonly Func<Vector2> _getTargetPosition;
     private readonly float _acceleration;
+    private MovementComponent _movement;
 
     public SeekBehaviour(Func<Vector2> getTargetPosition, float acceleration)
     {
@@ -14,18 +15,16 @@ public sealed class SeekBehaviour : IComponent
         _acceleration = acceleration;
     }
 
+    public void OnAdded(Entity owner)
+    {
+        _movement = owner.Movement;
+    }
+
     public void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive)
+        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null)
             return;
 
-        // PERFORMANCE: Direct cached access
-        var movement = owner.Movement;
-        if (movement == null) return;
-
-        movement.Velocity += (_getTargetPosition() - owner.Position).ScaleTo(_acceleration);
-        
-        if (movement.Velocity.LengthSquared() > 0.01f)
-            movement.Orientation = movement.Velocity.ToAngle();
+        _movement.Velocity += (_getTargetPosition() - owner.Position).ScaleTo(_acceleration);
     }
 }

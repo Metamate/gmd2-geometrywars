@@ -3,29 +3,23 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-// Teleports the entity to the opposite screen edge when it crosses a boundary.
-//
-// This is an alternative to VelocityMover(clampToScreen: true):
-//   clampToScreen → entity stops at the edge and cannot leave
-//   ScreenWrap    → entity exits one side and re-enters from the other
-//
-// The entity visually disappears for one frame as it crosses, which is acceptable
-// for fast-moving objects (bullets, certain enemies).
-//
-// Usage: AddComponent(new ScreenWrap());
+/// <summary>
+/// Component that wraps an entity around screen edges if it leaves the viewport.
+/// </summary>
 public sealed class ScreenWrap : IComponent
 {
+    public void OnAdded(Entity owner) { }
+
     public void Update(Entity owner)
     {
-        var screen = FrameContext.ScreenSize;
-        var half   = owner.Size / 2f;
-        var pos    = owner.Position;
+        var pos = owner.Position;
+        var size = FrameContext.ScreenSize;
 
-        if (pos.X < -half.X)          pos.X += screen.X + owner.Size.X;
-        else if (pos.X > screen.X + half.X) pos.X -= screen.X + owner.Size.X;
+        if (pos.X < 0) pos.X += size.X;
+        else if (pos.X > size.X) pos.X -= size.X;
 
-        if (pos.Y < -half.Y)          pos.Y += screen.Y + owner.Size.Y;
-        else if (pos.Y > screen.Y + half.Y) pos.Y -= screen.Y + owner.Size.Y;
+        if (pos.Y < 0) pos.Y += size.Y;
+        else if (pos.Y > size.Y) pos.Y -= size.Y;
 
         owner.Position = pos;
     }

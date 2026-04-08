@@ -2,9 +2,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that handles the initial fade-in and state activation.
-/// </summary>
 public sealed class SpawnFadeBehaviour : IComponent
 {
     private int _timeUntilStart;
@@ -16,6 +13,8 @@ public sealed class SpawnFadeBehaviour : IComponent
         _timeUntilStart = spawnDelay;
     }
 
+    public void OnAdded(Entity owner) { }
+
     public void Update(Entity owner)
     {
         if (_timeUntilStart > 0)
@@ -24,7 +23,6 @@ public sealed class SpawnFadeBehaviour : IComponent
             owner.Tint = Color.White * (1 - _timeUntilStart / (float)_spawnDelay);
         }
         
-        // Notify the owner (if it's an Enemy) about its activation state
         if (owner is Enemy enemy)
         {
             enemy.IsActive = _timeUntilStart <= 0;

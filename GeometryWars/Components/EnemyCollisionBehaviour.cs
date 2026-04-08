@@ -6,6 +6,13 @@ namespace GeometryWars.Components;
 
 public sealed class EnemyCollisionBehaviour : ICollisionComponent
 {
+    private MovementComponent _movement;
+
+    public void OnAdded(Entity owner)
+    {
+        _movement = owner.Movement;
+    }
+
     public void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
@@ -18,11 +25,10 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         }
         else if (other is Enemy e)
         {
-            var movement = owner.GetComponent<MovementComponent>();
-            if (movement == null) return;
+            if (_movement == null) return;
 
             var d = owner.Position - e.Position;
-            movement.Velocity += 10 * d / (d.LengthSquared() + 1);
+            _movement.Velocity += 10 * d / (d.LengthSquared() + 1);
         }
     }
 
