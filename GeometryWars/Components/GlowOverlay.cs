@@ -3,15 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Draws a secondary texture centered on the entity.
-/// Demonstrates visual overlays as components.
-/// </summary>
 public sealed class GlowOverlay : IComponent, IDrawableComponent
 {
     private readonly Texture2D _texture;
     private readonly Color _color;
-    private MovementComponent _movement;
+    private TransformComponent _transform;
 
     public GlowOverlay(Texture2D texture, Color color)
     {
@@ -21,15 +17,16 @@ public sealed class GlowOverlay : IComponent, IDrawableComponent
 
     public void OnAdded(Entity owner)
     {
-        _movement = owner.Movement;
+        _transform = owner.GetComponent<TransformComponent>();
     }
 
     public void Update(Entity owner) { }
 
     public void Draw(Entity owner, SpriteBatch spriteBatch)
     {
+        if (_transform == null) return;
+
         Vector2 origin = new(_texture.Width / 2f, _texture.Height / 2f);
-        float orientation = _movement?.Orientation ?? 0f;
-        spriteBatch.Draw(_texture, owner.Position, null, _color, orientation, origin, 1f, 0, 0);
+        spriteBatch.Draw(_texture, _transform.Position, null, _color, _transform.Orientation, origin, _transform.Scale, SpriteEffects.None, 0f);
     }
 }

@@ -7,17 +7,19 @@ namespace GeometryWars.Components;
 public sealed class EnemyCollisionBehaviour : ICollisionComponent
 {
     private MovementComponent _movement;
+    private TransformComponent _transform;
 
     public void OnAdded(Entity owner)
     {
-        _movement = owner.Movement;
+        _movement = owner.GetComponent<MovementComponent>();
+        _transform = owner.GetComponent<TransformComponent>();
     }
 
     public void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {
-        if (owner is not Enemy enemy) return;
+        if (owner is not Enemy enemy || _transform == null || _movement == null) return;
 
         if (other is Bullet || (other is BlackHole bh && bh.IsActive))
         {
@@ -25,9 +27,10 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         }
         else if (other is Enemy e)
         {
-            if (_movement == null) return;
+            var otherTransform = e.GetComponent<TransformComponent>();
+            if (otherTransform == null) return;
 
-            var d = owner.Position - e.Position;
+            var d = _transform.Position - otherTransform.Position;
             _movement.Velocity += 10 * d / (d.LengthSquared() + 1);
         }
     }
@@ -50,7 +53,7 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, enemy.Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, _transform.Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
         PlayerStatus.AddPoints(enemy.PointValue);

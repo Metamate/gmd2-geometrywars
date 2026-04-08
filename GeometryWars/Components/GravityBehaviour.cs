@@ -7,6 +7,7 @@ public sealed class GravityBehaviour : IComponent
 {
     private readonly float _range;
     private readonly float _force;
+    private TransformComponent _transform;
 
     public GravityBehaviour(float range, float force)
     {
@@ -14,28 +15,35 @@ public sealed class GravityBehaviour : IComponent
         _force = force;
     }
 
-    public void OnAdded(Entity owner) { }
+    public void OnAdded(Entity owner)
+    {
+        _transform = owner.GetComponent<TransformComponent>();
+    }
 
     public void Update(Entity owner)
     {
-        foreach (var entity in EntityManager.GetNearbyEntities(owner.Position, _range))
+        if (_transform == null) return;
+
+        foreach (var entity in EntityManager.GetNearbyEntities(_transform.Position, _range))
         {
             if (entity == owner) continue;
 
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
 
-            var movement = entity.Movement;
-            if (movement == null) continue;
+            var targetTransform = entity.GetComponent<TransformComponent>();
+            var targetMovement = entity.GetComponent<MovementComponent>();
+            
+            if (targetTransform == null || targetMovement == null) continue;
 
             if (entity is Bullet)
             {
-                movement.Velocity += (entity.Position - owner.Position).ScaleTo(0.3f);
+                targetMovement.Velocity += (targetTransform.Position - _transform.Position).ScaleTo(0.3f);
             }
             else
             {
-                var dPos = owner.Position - entity.Position;
-                movement.Velocity += dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range));
+                var dPos = _transform.Position - targetTransform.Position;
+                targetMovement.Velocity += dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range));
             }
         }
     }

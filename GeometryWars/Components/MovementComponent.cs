@@ -3,33 +3,36 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
+/// <summary>
+/// Component that handles physics integration (Velocity).
+/// Interacts with the TransformComponent to update Position.
+/// </summary>
 public sealed class MovementComponent : IComponent
 {
     public Vector2 Velocity;
-    public float Orientation;
     
+    private TransformComponent _transform; // Cached
     private readonly float _damping;
-    private readonly bool _clampToScreen;
 
-    public MovementComponent(float damping = 1f, bool clampToScreen = false)
+    public MovementComponent(float damping = 1f)
     {
         _damping = damping;
-        _clampToScreen = clampToScreen;
     }
 
-    public void OnAdded(Entity owner) { }
+    public void OnAdded(Entity owner)
+    {
+        _transform = owner.Transform;
+    }
 
     public void Update(Entity owner)
     {
-        owner.Position += Velocity;
+        _transform ??= owner.Transform;
+        if (_transform == null) return;
 
-        if (_clampToScreen)
-        {
-            owner.Position = Vector2.Clamp(owner.Position,
-                owner.Size / 2,
-                FrameContext.ScreenSize - owner.Size / 2);
-        }
+        // 1. Integration
+        _transform.Position += Velocity;
 
+        // 2. Friction
         Velocity *= _damping;
     }
 }

@@ -5,31 +5,30 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars;
 
-/// <summary>
-/// Archetype for Enemies.
-/// Composed of movement, spawning, collision, and AI components.
-/// </summary>
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    
-    // Controlled by SpawnFadeBehaviour component
     public bool IsActive { get; set; }
-
     public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)
     {
         _def     = def;
-        Image    = def.GetTexture();
-        Position = position;
-        Tint     = Color.Transparent;
 
-        // Assembler: Plug in components. Note that MovementComponent now owns Velocity.
-        AddComponent(new MovementComponent(damping: GameSettings.Enemy.Damping, clampToScreen: true));
+        var tex = def.GetTexture();
+        Vector2 size = new(tex.Width, tex.Height);
+
+        // Assembler: Composition of specific capabilities
+        AddComponent(new TransformComponent(position));
+        AddComponent(new MovementComponent(damping: GameSettings.Enemy.Damping));
+        AddComponent(new ScreenClampBehaviour(size));
+        
+        var sprite = AddComponent(new SpriteComponent(tex));
+        sprite.Tint = Color.Transparent; // Initial state for SpawnFade
+
         AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());
-        AddComponent(new CircleColliderComponent(Image.Width / 2f));
+        AddComponent(new CircleColliderComponent(size.X / 2f));
     }
 
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
@@ -51,6 +50,7 @@ public class Enemy : Entity
     public void Kill()
     {
         IsExpired = true;
+        var pos = Transform?.Position ?? Vector2.Zero;
 
         float hue1 = Random.Shared.NextFloat(0, 6);
         float hue2 = (hue1 + Random.Shared.NextFloat(0, 2)) % 6f;
@@ -66,7 +66,7 @@ public class Enemy : Entity
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
+            GameServices.Particles.CreateParticle(Art.LineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
         GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));

@@ -8,37 +8,35 @@ public sealed class PlayerInputComponent : IComponent
 {
     private int _cooldownRemaining = 0;
     private MovementComponent _movement;
+    private TransformComponent _transform;
 
     public void OnAdded(Entity owner)
     {
-        // CACHING: Find the sibling component exactly once at birth
-        _movement = owner.Movement;
+        _movement = owner.GetComponent<MovementComponent>();
+        _transform = owner.GetComponent<TransformComponent>();
     }
 
     public void Update(Entity owner)
     {
-        if (owner is not PlayerShip player || player.IsDead || _movement == null)
+        if (owner is not PlayerShip player || player.IsDead || _movement == null || _transform == null)
             return;
 
-        // 1. Movement
         _movement.Velocity += GameSettings.Player.Speed * GameController.Movement;
 
-        // 2. Shooting & Orientation
-        var aim = GameController.AimDirection(owner.Position);
-        
+        var aim = GameController.AimDirection(_transform.Position);
         if (GameController.IsShooting)
         {
-            _movement.Orientation = aim.ToAngle();
+            _transform.Orientation = aim.ToAngle();
 
             if (_cooldownRemaining <= 0)
             {
                 _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
-                Shoot(owner, aim, _movement.Orientation);
+                Shoot(owner, aim, _transform.Orientation);
             }
         }
         else if (_movement.Velocity.LengthSquared() > 0.01f)
         {
-            _movement.Orientation = _movement.Velocity.ToAngle();
+            _transform.Orientation = _movement.Velocity.ToAngle();
         }
 
         if (_cooldownRemaining > 0)
@@ -55,8 +53,8 @@ public sealed class PlayerInputComponent : IComponent
         Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
         Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
         
-        EntityManager.Add(EntityManager.GetBullet(owner.Position + Vector2.Transform(offsetA, aimQuat), vel));
-        EntityManager.Add(EntityManager.GetBullet(owner.Position + Vector2.Transform(offsetB, aimQuat), vel));
+        EntityManager.Add(EntityManager.GetBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel));
+        EntityManager.Add(EntityManager.GetBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel));
 
         GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }

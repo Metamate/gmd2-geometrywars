@@ -7,13 +7,17 @@ namespace GeometryWars.Components;
 public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 {
     private int _hitpoints;
+    private TransformComponent _transform;
 
     public BlackHoleCollisionBehaviour(int hitpoints)
     {
         _hitpoints = hitpoints;
     }
 
-    public void OnAdded(Entity owner) { }
+    public void OnAdded(Entity owner)
+    {
+        _transform = owner.GetComponent<TransformComponent>();
+    }
 
     public void Update(Entity owner) { }
 
@@ -27,6 +31,8 @@ public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 
     private void WasShot(Entity owner)
     {
+        if (_transform == null) return;
+
         if (--_hitpoints <= 0)
             owner.IsExpired = true;
 
@@ -44,7 +50,7 @@ public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            GameServices.Particles.CreateParticle(Art.LineParticle, owner.Position + 2f * sprayVel, color,
+            GameServices.Particles.CreateParticle(Art.LineParticle, _transform.Position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }

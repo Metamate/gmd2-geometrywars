@@ -7,20 +7,22 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars;
 
 // Base class for all game entities.
+//
+// PURE COMPONENT ARCHITECTURE:
+// The entity has zero built-in logic or spatial data. 
+// It is simply a container for a list of Components.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
 
-    public Texture2D Image { get; set; }
-    public Color Tint { get; set; } = Color.White;
-    public Vector2 Position { get; set; }
     public bool IsExpired { get; set; }
 
-    // PERFORMANCE CACHE: 
-    // Direct reference to the primary movement component.
+    // PERFORMANCE CACHE: Direct references to common components.
+    public TransformComponent Transform { get; private set; }
     public MovementComponent Movement { get; private set; }
 
-    public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
+    // Convenience helpers
+    public Vector2 Position => Transform?.Position ?? Vector2.Zero;
 
     public T GetComponent<T>() where T : class, IComponent 
         => _components.OfType<T>().FirstOrDefault();
@@ -44,21 +46,15 @@ public abstract class Entity
     {
         _components.Add(component);
         
-        // Internal cache for the manager/renderer
-        if (component is MovementComponent mc)
-            Movement = mc;
+        if (component is TransformComponent tc) Transform = tc;
+        else if (component is MovementComponent mc) Movement = mc;
 
-        // LIFECYCLE: Notify the component it has been attached so it can initialize.
         component.OnAdded(this);
-
         return component;
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
-        float orientation = Movement?.Orientation ?? 0f;
-        spriteBatch.Draw(Image, Position, null, Tint, orientation, Size / 2f, 1f, 0, 0);
-
         foreach (var comp in _components)
             if (comp is IDrawableComponent dc)
                 dc.Draw(this, spriteBatch);

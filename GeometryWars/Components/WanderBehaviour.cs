@@ -8,6 +8,8 @@ public sealed class WanderBehaviour : IComponent
 {
     private float _direction;
     private int _stepCounter;
+    
+    private TransformComponent _transform;
     private MovementComponent _movement;
 
     public WanderBehaviour()
@@ -17,12 +19,13 @@ public sealed class WanderBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _movement = owner.Movement;
+        _transform = owner.GetComponent<TransformComponent>();
+        _movement = owner.GetComponent<MovementComponent>();
     }
 
     public void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null)
+        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null || _transform == null)
             return;
 
         if (_stepCounter-- <= 0)
@@ -33,14 +36,13 @@ public sealed class WanderBehaviour : IComponent
             _direction = MathHelper.WrapAngle(_direction);
 
             var bounds = FrameContext.Viewport.Bounds;
-            bounds.Inflate(-owner.Size.X, -owner.Size.Y);
             
-            if (!bounds.Contains(owner.Position.ToPoint()))
-                _direction = (FrameContext.ScreenSize / 2 - owner.Position).ToAngle() + 
+            if (!bounds.Contains(_transform.Position.ToPoint()))
+                _direction = (FrameContext.ScreenSize / 2 - _transform.Position).ToAngle() + 
                              Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
         }
 
         _movement.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
-        _movement.Orientation = _direction;
+        _transform.Orientation = _direction;
     }
 }
