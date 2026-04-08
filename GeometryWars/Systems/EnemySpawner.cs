@@ -13,7 +13,6 @@ public static class EnemySpawner
         if (_inverseSpawnChance > GameSettings.Enemy.Spawning.ChanceMin)
             _inverseSpawnChance -= GameSettings.Enemy.Spawning.ChanceDecay;
 
-
         if (!playerActive) return;
         if (EntityManager.Count >= GameSettings.Performance.MaxEntities) return;
 

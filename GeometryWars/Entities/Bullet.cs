@@ -3,32 +3,33 @@ using GeometryWars.Components;
 
 namespace GeometryWars;
 
+/// <summary>
+/// Archetype for player bullets.
+/// </summary>
 public class Bullet : Entity
 {
-    private RigidbodyComponent _rigidbody;
+    private readonly RigidbodyComponent _rigidbody;
 
     public Bullet()
     {
+        // Rigidbody is cached immediately during construction
         _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
+        
         AddComponent(new SpriteComponent(Art.Bullet));
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
     }
 
+    /// <summary>
+    /// Re-initializes a pooled bullet with a new position and velocity.
+    /// </summary>
     public void Reset(Vector2 position, Vector2 velocity)
     {
         IsExpired  = false;
         
-        // Lazy find our own component for the Reset helper
-        _rigidbody ??= GetComponent<RigidbodyComponent>();
-
         Transform.Position = position;
         Transform.Orientation = velocity.ToAngle();
-        
-        if (_rigidbody != null)
-        {
-            _rigidbody.Velocity = velocity;
-        }
+        _rigidbody.Velocity = velocity;
     }
 }
