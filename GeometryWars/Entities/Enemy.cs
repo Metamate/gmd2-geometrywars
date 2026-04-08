@@ -7,8 +7,7 @@ namespace GeometryWars;
 
 /// <summary>
 /// Archetype for Enemies.
-/// Now just an "Assembler" class that adds the right components.
-/// Logic-free: all behaviour is in Components.
+/// Composed of movement, spawning, collision, and AI components.
 /// </summary>
 public class Enemy : Entity
 {
@@ -26,12 +25,11 @@ public class Enemy : Entity
         Position = position;
         Tint     = Color.Transparent;
 
-        // Common components for all enemies
+        // Assembler: Common components for all enemies
         AddComponent(new VelocityMover(damping: GameSettings.Enemy.Damping, clampToScreen: true));
         AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());
-
-        Collider = new CircleCollider(Image.Width / 2f);
+        AddComponent(new CircleColliderComponent(Image.Width / 2f));
     }
 
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)

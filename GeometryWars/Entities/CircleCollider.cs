@@ -1,14 +1,22 @@
+using GeometryWars.Components;
+
 namespace GeometryWars;
 
-// Data record struct describing an entity's collision shape.
-// Detection is handled centrally by EntityManager (O(n²) circle-pair test).
-// When two colliders overlap, EntityManager calls OnCollision(other) on both entities.
-// Each entity defines its own response by overriding Entity.OnCollision().
-//
-// Refactored to a record struct to ensure data locality within the Entity class
-// and to provide built-in value equality and better debugging (ToString).
-public readonly record struct CircleCollider(float Radius)
+/// <summary>
+/// Component that defines a circular collision volume for an entity.
+/// Systems like EntityManager use this component to perform collision checks.
+/// </summary>
+public sealed class CircleColliderComponent : IComponent
 {
-    // A radius > 0 indicates this entity is collidable.
-    public bool IsActive => Radius > 0;
+    public float Radius { get; set; }
+    
+    // An optional flag to temporarily disable collision without removing the component.
+    public bool IsActive { get; set; } = true;
+
+    public CircleColliderComponent(float radius)
+    {
+        Radius = radius;
+    }
+
+    public void Update(Entity owner) { }
 }

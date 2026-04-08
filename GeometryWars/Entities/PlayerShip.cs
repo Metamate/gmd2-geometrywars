@@ -26,11 +26,10 @@ public class PlayerShip : Entity
         AddComponent(new PlayerInputComponent());
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
+        AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         
         // Keep a reference to the respawn component so we can check IsDead
         _respawn = AddComponent(new PlayerRespawnBehaviour());
-
-        Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
     }
 
     public override void OnCollision(Entity other)

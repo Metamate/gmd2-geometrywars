@@ -8,12 +8,11 @@ namespace GeometryWars;
 
 /// <summary>
 /// Archetype for Black Holes.
-/// Now just an "Assembler" class that adds the right components.
-/// Logic-free: all behaviour is in Components.
+/// Composed of visual, spatial, and collision components.
 /// </summary>
 public class BlackHole : Entity
 {
-    // A black hole is "active" as soon as it exists (unlike enemies which have a spawn delay)
+    // A black hole is "active" as soon as it exists
     public bool IsActive => true;
 
     public BlackHole(Vector2 position)
@@ -26,8 +25,7 @@ public class BlackHole : Entity
         AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce));
         AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange));
         AddComponent(new BlackHoleCollisionBehaviour(GameSettings.Hazards.BlackHoleHitpoints));
-
-        Collider = new CircleCollider(Image.Width / 2f);
+        AddComponent(new CircleColliderComponent(Image.Width / 2f));
     }
 
     public void Kill() => IsExpired = true;

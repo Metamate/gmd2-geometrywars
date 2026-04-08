@@ -5,8 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars;
 
 // Manages entity lifecycle: add, update, draw, remove.
-//
-// Optimized for zero-allocation in hot paths (GetNearbyEntities, Collisions).
 static class EntityManager
 {
     private static readonly List<Entity> entities = [];
@@ -14,10 +12,14 @@ static class EntityManager
     private static readonly List<Bullet> bullets = [];
     private static readonly List<BlackHole> blackHoles = [];
     private static readonly List<Entity> pendingAdd = [];
+    
+    // Fast path for collision detection: 
+    // We only keep track of entities that have a collider component.
+    private static readonly List<(Entity Entity, CircleColliderComponent Collider)> collidables = [];
+
     private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);
     private static bool isUpdating;
 
-    // Pre-allocated list for proximity queries to avoid per-query heap allocations.
     private static readonly List<Entity> nearbyEntitiesBuffer = [];
 
     public static List<BlackHole> BlackHoles => blackHoles;
@@ -44,6 +46,7 @@ static class EntityManager
         bullets.Clear();
         blackHoles.Clear();
         pendingAdd.Clear();
+        collidables.Clear();
     }
 
     public static void KillAllEnemies()
@@ -77,6 +80,7 @@ static class EntityManager
         bullets.RemoveAll(b => b.IsExpired);
         enemies.RemoveAll(e => e.IsExpired);
         blackHoles.RemoveAll(bh => bh.IsExpired);
+        collidables.RemoveAll(c => c.Entity.IsExpired);
     }
 
     public static void Draw(SpriteBatch spriteBatch)
@@ -91,38 +95,39 @@ static class EntityManager
         if (entity is Bullet b) bullets.Add(b);
         else if (entity is BlackHole bh) blackHoles.Add(bh);
         else if (entity is Enemy e) enemies.Add(e);
+
+        // SYSTEM QUERY: Check if the new entity has a Collider component.
+        // If it does, we register it for the collision system.
+        var collider = entity.GetComponent<CircleColliderComponent>();
+        if (collider != null)
+        {
+            collidables.Add((entity, collider));
+        }
     }
 
     private static void HandleCollisions()
     {
-        for (int i = 0; i < entities.Count; i++)
+        // Use our specialized 'collidables' list for O(n²) checks
+        for (int i = 0; i < collidables.Count; i++)
         {
-            var a = entities[i];
-            if (a.IsExpired || !a.Collider.IsActive) continue;
+            var a = collidables[i];
+            if (a.Entity.IsExpired || !a.Collider.IsActive) continue;
 
-            for (int j = i + 1; j < entities.Count; j++)
+            for (int j = i + 1; j < collidables.Count; j++)
             {
-                var b = entities[j];
-                if (b.IsExpired || !b.Collider.IsActive) continue;
+                var b = collidables[j];
+                if (b.Entity.IsExpired || !b.Collider.IsActive) continue;
 
                 float r = a.Collider.Radius + b.Collider.Radius;
-                if (Vector2.DistanceSquared(a.Position, b.Position) < r * r)
+                if (Vector2.DistanceSquared(a.Entity.Position, b.Entity.Position) < r * r)
                 {
-                    a.OnCollision(b);
-                    b.OnCollision(a);
+                    a.Entity.OnCollision(b.Entity);
+                    b.Entity.OnCollision(a.Entity);
                 }
             }
         }
     }
 
-    /// <summary>
-    /// Returns entities within a radius using a shared reusable buffer. 
-    /// 
-    /// ARCHITECTURAL NOTE (Temporal Coupling): 
-    /// This method is optimized for zero-allocation. The returned list is 
-    /// shared across all callers. You MUST process the results immediately; 
-    /// do not store the list, as it will be cleared by the next caller!
-    /// </summary>
     public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
     {
         nearbyEntitiesBuffer.Clear();

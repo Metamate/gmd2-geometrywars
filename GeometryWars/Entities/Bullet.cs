@@ -5,19 +5,18 @@ namespace GeometryWars;
 
 /// <summary>
 /// Archetype for Bullets.
-/// Now just an "Assembler" class that adds the right components.
-/// Logic-free: all behaviour is in Components.
+/// Composed of movement, collision, and collider components.
 /// </summary>
 public class Bullet : Entity
 {
     public Bullet()
     {
         Image    = Art.Bullet;
-        Collider = new CircleCollider(GameSettings.Bullets.ColliderRadius);
 
         // Assembler: Plug in the specific behaviours of a Bullet
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());
+        AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
     }
 
     public void Reset(Vector2 position, Vector2 velocity)

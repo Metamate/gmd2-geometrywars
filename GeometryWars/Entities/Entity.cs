@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using GeometryWars.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,8 +9,7 @@ namespace GeometryWars;
 // Base class for all game entities.
 //
 // Component system: AddComponent() registers an IComponent to run each frame.
-// Every piece of logic (AI, Input, Physics) is a component. 
-// Entities are simply containers for components and shared data (Position, Velocity).
+// Every piece of logic (AI, Input, Physics) and Data (Colliders) is a component.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
@@ -23,14 +23,15 @@ public abstract class Entity
 
     public bool IsExpired { get; set; }
 
-    public CircleCollider Collider { get; protected set; } = new(0);
-
     public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
+
+    // Helper to find the first component of a specific type.
+    // For performance-critical systems, consider pre-caching these references.
+    public T GetComponent<T>() where T : class, IComponent 
+        => _components.OfType<T>().FirstOrDefault();
 
     public void Update()
     {
-        // Pure Component Architecture: the entity has no logic of its own.
-        // It simply delegates all work to its components.
         foreach (var comp in _components)
             comp.Update(this);
     }
