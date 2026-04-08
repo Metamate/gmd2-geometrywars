@@ -10,13 +10,13 @@ public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
 
+    public bool IsActive { get; set; } = true;
     public bool IsExpired { get; set; }
 
     public TransformComponent Transform { get; private set; }
-
-    public bool IsActive => Transform.IsActive;
-
     public Vector2 Position => Transform.Position;
+
+    public IReadOnlyList<IComponent> Components => _components;
 
     protected Entity()
     {
@@ -28,10 +28,8 @@ public abstract class Entity
 
     public void Update()
     {
-        // PERFORMANCE: If the entity is dormant (e.g. still spawning), we still need
-        // to update its "Lifecycle" components, but we skip everything else.
-        // We iterate through all components because lifecycle components like 
-        // SpawnFadeBehaviour manage the IsActive state from the inside.
+        if (!IsActive) return;
+
         for (int i = 0; i < _components.Count; i++)
         {
             if (_components[i].IsActive)

@@ -21,7 +21,7 @@ public sealed class PlayerInputComponent : Component
         if (owner is not PlayerShip player || player.IsDead)
             return;
 
-        _rigidbody.Velocity += GameSettings.Player.Speed * GameController.Movement;
+        _rigidbody.AddForce(GameSettings.Player.Speed * GameController.Movement);
 
         var aim = GameController.AimDirection(_transform.Position);
         if (GameController.IsShooting)

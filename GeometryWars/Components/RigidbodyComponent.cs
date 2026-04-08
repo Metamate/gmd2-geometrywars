@@ -19,6 +19,12 @@ public sealed class RigidbodyComponent : Component
         _transform = owner.Transform;
     }
 
+    public void AddForce(Vector2 force)
+    {
+        if (!IsActive) return;
+        Velocity += force;
+    }
+
     public override void Update(Entity owner)
     {
         _transform.Position += Velocity;

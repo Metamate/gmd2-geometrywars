@@ -1,5 +1,4 @@
 using System;
-using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
@@ -25,9 +24,6 @@ public sealed class WanderBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive)
-            return;
-
         if (_stepCounter-- <= 0)
         {
             _stepCounter = GameSettings.Enemy.WandererStepsPerTick;
@@ -45,7 +41,7 @@ public sealed class WanderBehaviour : Component
             }
         }
 
-        _rigidbody.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
+        _rigidbody.AddForce(MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity));
         _transform.Orientation -= GameSettings.Enemy.WandererOrientationDecay;
     }
 }

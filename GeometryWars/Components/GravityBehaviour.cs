@@ -1,4 +1,3 @@
-using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
@@ -31,16 +30,14 @@ public sealed class GravityBehaviour : Component
             
             if (targetTransform == null || targetRigidbody == null) continue;
 
-            if (!targetRigidbody.IsActive) continue;
-
             if (entity is Bullet)
             {
-                targetRigidbody.Velocity += (targetTransform.Position - _transform.Position).ScaleTo(0.3f);
+                targetRigidbody.AddForce((targetTransform.Position - _transform.Position).ScaleTo(0.3f));
             }
             else
             {
                 var dPos = _transform.Position - targetTransform.Position;
-                targetRigidbody.Velocity += dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range));
+                targetRigidbody.AddForce(dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range)));
             }
         }
     }

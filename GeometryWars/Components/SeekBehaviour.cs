@@ -28,7 +28,7 @@ public sealed class SeekBehaviour : Component
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
-        _rigidbody.Velocity += (_getTargetPosition() - _transform.Position).ScaleTo(_acceleration);
+        _rigidbody.AddForce((_getTargetPosition() - _transform.Position).ScaleTo(_acceleration));
 
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)
             _transform.Orientation = _rigidbody.Velocity.ToAngle();

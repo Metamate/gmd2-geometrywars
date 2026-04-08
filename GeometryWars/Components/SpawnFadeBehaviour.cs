@@ -38,7 +38,6 @@ public sealed class SpawnFadeBehaviour : Component
             if (_timeUntilStart <= 0)
             {
                 owner.SetAllComponentsActive(true);
-                
                 IsActive = false; 
             }
         }
