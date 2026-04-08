@@ -12,7 +12,6 @@ public class Bullet : Entity
 
     public Bullet()
     {
-        // Rigidbody is cached immediately during construction
         _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
         
         AddComponent(new SpriteComponent(Art.Bullet));
@@ -21,9 +20,6 @@ public class Bullet : Entity
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
     }
 
-    /// <summary>
-    /// Re-initializes a pooled bullet with a new position and velocity.
-    /// </summary>
     public void Reset(Vector2 position, Vector2 velocity)
     {
         IsExpired  = false;
