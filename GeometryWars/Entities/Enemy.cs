@@ -7,46 +7,43 @@ using GeometryWars.Components.Lifecycle;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Entities;
 
 // Archetype for enemy units.
 public class Enemy : Entity
 {
-    private readonly EnemyDef _def;
-    public int PointValue => _def.PointValue;
+    public int PointValue { get; }
 
-    public Enemy(EnemyDef def, Vector2 position)
+    public Enemy(Texture2D texture, int pointValue, Vector2 position)
     {
-        _def = def;
+        PointValue = pointValue;
         Transform.Position = position;
-        
-        var tex = def.GetTexture();
-        Vector2 size = new(tex.Width, tex.Height);
+
+        Vector2 size = new(texture.Width, texture.Height);
 
         AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         AddComponent(new ScreenClampBehaviour(size));
-        
-        var sprite = AddComponent(new SpriteComponent(tex));
+
+        var sprite = AddComponent(new SpriteComponent(texture));
         sprite.Tint = Color.Transparent;
 
-        AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());
         AddComponent(new CircleColliderComponent(size.X / 2f));
+        AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
     }
 
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var def   = GameSettings.Enemy.Seeker;
-        var enemy = new Enemy(def, position);
-        enemy.AddComponent(new SeekBehaviour(getTargetPosition, def.Acceleration));
+        var enemy = new Enemy(Art.Seeker, GameSettings.Enemy.SeekerPointValue, position);
+        enemy.AddComponent(new SeekBehaviour(getTargetPosition, GameSettings.Enemy.SeekerAcceleration));
         return enemy;
     }
 
     public static Enemy CreateWanderer(Vector2 position)
     {
-        var def   = GameSettings.Enemy.Wanderer;
-        var enemy = new Enemy(def, position);
+        var enemy = new Enemy(Art.Wanderer, GameSettings.Enemy.WandererPointValue, position);
         enemy.AddComponent(new WanderBehaviour());
         return enemy;
     }

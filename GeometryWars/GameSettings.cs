@@ -1,5 +1,3 @@
-using Microsoft.Xna.Framework;
-
 namespace GeometryWars;
 
 public static class GameSettings
@@ -47,8 +45,9 @@ public static class GameSettings
         public const float WandererOrientationDecay = 0.05f;
         public const int WandererStepsPerTick = 6;
 
-        public static readonly EnemyDef Seeker = new(() => Art.Seeker, 2, 1f);
-        public static readonly EnemyDef Wanderer = new(() => Art.Wanderer, 1, 0f);
+        public const int   SeekerPointValue   = 2;
+        public const float SeekerAcceleration = 1f;
+        public const int   WandererPointValue  = 1;
 
         public static class Spawning
         {
