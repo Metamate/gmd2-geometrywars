@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GeometryWars;
+namespace GeometryWars.Systems;
 
 // Generic stack-based object pool. Avoids per-frame heap allocations for
 // frequently created/destroyed objects (e.g. Bullet).

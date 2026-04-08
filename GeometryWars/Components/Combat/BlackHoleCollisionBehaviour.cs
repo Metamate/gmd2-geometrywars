@@ -2,13 +2,12 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
 
-/// <summary>
-/// Handles damage and visual effects when a black hole is hit.
-/// </summary>
+// Handles damage and effects when a black hole is hit.
 public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
 {
     private int _hitpoints;
@@ -42,7 +41,7 @@ public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
         float hue = (float)(3 * FrameContext.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
-        
+
         for (int i = 0; i < GameSettings.Visuals.BlackHoleHitParticles; i++)
         {
             float speed = Random.Shared.NextFloat(GameSettings.Visuals.BlackHoleHitParticleMinSpeed, GameSettings.Visuals.BlackHoleHitParticleMaxSpeed);

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Visuals;
 
+// Renders a texture at the entity's position.
 public sealed class SpriteComponent : Component, IDrawableComponent
 {
     private readonly Texture2D _texture;

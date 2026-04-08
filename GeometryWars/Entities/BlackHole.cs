@@ -7,16 +7,13 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Entities;
 
-/// <summary>
-/// Archetype for black hole hazards.
-/// </summary>
+// Archetype for black hole hazards.
 public class BlackHole : Entity
 {
     public BlackHole(Vector2 position)
     {
         Transform.Position = position;
         
-        // Assembler: Plug in components
         AddComponent(new RigidbodyComponent()); 
         AddComponent(new SpriteComponent(Art.BlackHole));
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));

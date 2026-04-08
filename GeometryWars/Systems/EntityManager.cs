@@ -1,17 +1,12 @@
 using System.Collections.Generic;
-using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
-using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars;
+namespace GeometryWars.Systems;
 
-/// <summary>
-/// Manages the lifecycle, updates, and rendering of all game entities.
-/// Handles collision detection and entity pooling.
-/// </summary>
+// Manages the lifecycle, updates, and rendering of all game entities.
 static class EntityManager
 {
     private static readonly List<Entity> _entities = [];

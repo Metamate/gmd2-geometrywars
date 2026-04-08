@@ -6,17 +6,14 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Entities;
 
-/// <summary>
-/// Archetype for player bullets.
-/// </summary>
+// Archetype for player bullets.
 public class Bullet : Entity
 {
     private RigidbodyComponent _rigidbody;
 
     public Bullet()
     {
-        // Assembler: Plug in components
-        _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
+        AddComponent(new RigidbodyComponent(damping: 1f));
         AddComponent(new SpriteComponent(Art.Bullet));
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());

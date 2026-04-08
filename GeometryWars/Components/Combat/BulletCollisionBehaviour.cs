@@ -3,9 +3,7 @@ using GeometryWars.Entities;
 
 namespace GeometryWars.Components.Combat;
 
-/// <summary>
-/// Handles collision logic for bullets.
-/// </summary>
+// Handles collision logic for bullets.
 public sealed class BulletCollisionBehaviour : Component, ICollisionComponent
 {
     public override void Update(Entity owner) { }

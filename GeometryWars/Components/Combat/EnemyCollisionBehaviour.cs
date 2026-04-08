@@ -3,13 +3,12 @@ using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
 
-/// <summary>
-/// Handles collision response for enemies, including death effects and score.
-/// </summary>
+// Handles collision response for enemies.
 public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
 {
     private RigidbodyComponent _rigidbody;

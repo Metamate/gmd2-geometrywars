@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Visuals;
 
+// Renders a glow effect centered on the entity.
 public sealed class GlowOverlay : Component, IDrawableComponent
 {
     private readonly Texture2D _texture;

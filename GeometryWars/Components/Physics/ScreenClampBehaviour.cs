@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Physics;
 
+// Prevents an entity from leaving the screen.
 public sealed class ScreenClampBehaviour : Component
 {
     private TransformComponent _transform;

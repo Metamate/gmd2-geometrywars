@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Physics;
 
+// Wraps an entity around screen edges if it goes off-screen.
 public sealed class ScreenWrap : Component
 {
     private TransformComponent _transform;

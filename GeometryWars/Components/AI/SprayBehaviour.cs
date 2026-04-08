@@ -2,13 +2,12 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
 
-/// <summary>
-/// Component that spawns orbital particles and applies grid distortion.
-/// </summary>
+// Spawns orbital particles and applies grid distortion.
 public sealed class SprayBehaviour : Component
 {
     private float _sprayAngle = 0;

@@ -1,7 +1,8 @@
 using System.IO;
 
-namespace GeometryWars;
+namespace GeometryWars.Systems;
 
+// Manages player score, lives, and score multiplier.
 public static class PlayerStatus
 {
     private static int _score;

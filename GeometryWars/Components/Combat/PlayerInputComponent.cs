@@ -7,9 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
 
-/// <summary>
-/// Component that translates user input into movement and combat actions.
-/// </summary>
+// Translates user input into movement and combat actions.
 public sealed class PlayerInputComponent : Component
 {
     private int _cooldownRemaining = 0;

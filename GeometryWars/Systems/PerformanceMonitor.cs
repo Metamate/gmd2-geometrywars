@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Systems;
 
+// Tracks and displays FPS and memory usage.
 public sealed class PerformanceMonitor
 {
     private int _frameCounter;

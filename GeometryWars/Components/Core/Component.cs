@@ -2,6 +2,7 @@ using GeometryWars.Entities;
 
 namespace GeometryWars.Components.Core;
 
+// Provides default activation and lifecycle hooks for all components.
 public abstract class Component : IComponent
 {
     public bool IsActive { get; set; } = true;

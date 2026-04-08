@@ -5,10 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Lifecycle;
 
-/// <summary>
-/// Component that handles the initial fade-in.
-/// It keeps other components inactive until the fade is complete.
-/// </summary>
+// Handles the initial fade-in and component activation.
 public sealed class SpawnFadeBehaviour : Component
 {
     private int _timeUntilStart;
@@ -25,11 +22,14 @@ public sealed class SpawnFadeBehaviour : Component
     {
         _sprite = owner.GetComponent<SpriteComponent>();
         
-        // GATING: Disable all sibling components while spawning.
-        owner.SetAllComponentsActive(false);
-        this.IsActive = true; 
-        
-        if (_sprite != null) _sprite.IsActive = true;
+        // Disable sibling components while spawning.
+        foreach (var comp in owner.Components)
+        {
+            if (comp == this || comp is SpriteComponent || comp is TransformComponent) 
+                continue;
+            
+            comp.IsActive = false;
+        }
     }
 
     public override void Update(Entity owner)
@@ -45,10 +45,12 @@ public sealed class SpawnFadeBehaviour : Component
 
             if (_timeUntilStart <= 0)
             {
-                // Birth complete: activate all capabilities
-                owner.SetAllComponentsActive(true);
+                // Re-enable all components once birth is complete.
+                foreach (var comp in owner.Components)
+                {
+                    comp.IsActive = true;
+                }
                 
-                // We are no longer needed
                 this.IsActive = false; 
             }
         }

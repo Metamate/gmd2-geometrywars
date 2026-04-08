@@ -2,13 +2,12 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
 
-/// <summary>
-/// AI component that steers an entity in random directions.
-/// </summary>
+// Steers an entity in random directions.
 public sealed class WanderBehaviour : Component
 {
     private float _direction;

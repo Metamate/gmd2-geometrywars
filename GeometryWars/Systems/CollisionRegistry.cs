@@ -1,16 +1,12 @@
 using System;
 using System.Collections.Generic;
-using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
 
-/// <summary>
-/// A registry that maps pairs of Collider types to their specific collision math.
-/// This allows the system to be extensible without modifying existing code.
-/// </summary>
+// Maps pairs of Collider types to their specific collision math.
 public static class CollisionRegistry
 {
     public delegate bool CollisionHandler(Entity a, ColliderComponent colA, Entity b, ColliderComponent colB);

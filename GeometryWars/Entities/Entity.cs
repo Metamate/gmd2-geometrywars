@@ -8,10 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Entities;
 
-/// <summary>
-/// Base class for all game objects. 
-/// Every entity is a container for components and has a foundational Transform.
-/// </summary>
+// Base class for all game objects.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
@@ -19,6 +16,7 @@ public abstract class Entity
     public bool IsActive { get; set; } = true;
     public bool IsExpired { get; set; }
 
+    // Direct access to spatial identity.
     public TransformComponent Transform { get; private set; }
     public Vector2 Position => Transform.Position;
 
@@ -43,6 +41,7 @@ public abstract class Entity
         }
     }
 
+    // Broadcasts collision events to all active components.
     public virtual void OnCollision(Entity other) 
     {
         if (!IsActive) return;

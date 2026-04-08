@@ -2,10 +2,12 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Physics;
 
+// Handles bullet-specific movement, screen bounds, and grid effects.
 public sealed class BulletMovementBehaviour : Component
 {
     private TransformComponent _transform;

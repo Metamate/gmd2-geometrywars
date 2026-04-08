@@ -7,12 +7,11 @@ using GeometryWars.Components.Lifecycle;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using GeometryWars.Systems;
 
 namespace GeometryWars.Entities;
 
-/// <summary>
-/// Archetype for the player-controlled ship.
-/// </summary>
+// Archetype for the player-controlled ship.
 public class PlayerShip : Entity
 {
     private readonly PlayerRespawnBehaviour _respawn;
@@ -24,7 +23,6 @@ public class PlayerShip : Entity
         Transform.Position = FrameContext.ScreenSize / 2;
         Vector2 size = new(Art.Player.Width, Art.Player.Height);
 
-        // Assembler: Composition of specific capabilities
         AddComponent(new RigidbodyComponent(damping: 0f));
         AddComponent(new ScreenClampBehaviour(size));
         AddComponent(new SpriteComponent(Art.Player));
@@ -32,7 +30,7 @@ public class PlayerShip : Entity
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
-        
+
         _respawn = AddComponent(new PlayerRespawnBehaviour());
     }
 
@@ -64,7 +62,7 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-        
+
         int frames = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
         _respawn.Kill(frames);
 

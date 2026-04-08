@@ -3,11 +3,9 @@ using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars;
+namespace GeometryWars.Systems;
 
-/// <summary>
-/// Handles the timing and positioning of enemy spawns.
-/// </summary>
+// Handles the timing and positioning of enemy spawns.
 public static class EnemySpawner
 {
     private static float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
@@ -29,7 +27,6 @@ public static class EnemySpawner
 
     private static void UpdateEnemySpawns(Func<Vector2> getPlayerPosition)
     {
-        // 1. Wanderer Roll
         if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
@@ -37,7 +34,6 @@ public static class EnemySpawner
             GameServices.Audio.Play(Sound.Spawn, 0.15f);
         }
 
-        // 2. Seeker Roll
         if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());

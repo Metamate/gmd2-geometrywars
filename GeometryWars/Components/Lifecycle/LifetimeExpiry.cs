@@ -3,9 +3,7 @@ using GeometryWars.Entities;
 
 namespace GeometryWars.Components.Lifecycle;
 
-/// <summary>
-/// Component that automatically marks an entity as expired after a set duration.
-/// </summary>
+// Automatically marks an entity as expired after a duration.
 public sealed class LifetimeExpiry : Component
 {
     private int _framesRemaining;

@@ -3,9 +3,7 @@ using GeometryWars.Entities;
 
 namespace GeometryWars.Components.Physics;
 
-/// <summary>
-/// Base class for all collision volumes.
-/// </summary>
+// Base class for all physical collision boundaries.
 public abstract class ColliderComponent : Component
 {
     public override void Update(Entity owner) { }

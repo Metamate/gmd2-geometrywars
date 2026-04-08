@@ -3,10 +3,12 @@ using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Visuals;
 
+// Spawns fire particles behind a moving entity.
 public sealed class ExhaustFireComponent : Component
 {
     private RigidbodyComponent _rigidbody;

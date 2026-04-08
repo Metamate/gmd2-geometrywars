@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Core;
 
+// Defines an entity's position, rotation, and scale.
 public sealed class TransformComponent : Component
 {
     public Vector2 Position { get; set; }

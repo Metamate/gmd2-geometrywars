@@ -5,9 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Lifecycle;
 
-/// <summary>
-/// Handles the player ship's death timer and respawn effects.
-/// </summary>
+// Handles the player ship's death timer and respawn effect.
 public sealed class PlayerRespawnBehaviour : Component
 {
     private int _framesUntilRespawn = 0;

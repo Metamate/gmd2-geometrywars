@@ -1,13 +1,12 @@
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
 
-/// <summary>
-/// Component that applies gravitational forces to nearby entities.
-/// </summary>
+// Applies gravitational forces to nearby entities.
 public sealed class GravityBehaviour : Component
 {
     private readonly float _range;
