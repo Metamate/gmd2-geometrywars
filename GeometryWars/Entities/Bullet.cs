@@ -5,13 +5,13 @@ namespace GeometryWars;
 
 public class Bullet : Entity
 {
-    private readonly RigidbodyComponent _rigidbody;
+    private RigidbodyComponent _rigidbody;
 
     public Bullet()
     {
         // Assembler: Plug in components
         AddComponent(new TransformComponent(Vector2.Zero));
-        _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
+        AddComponent(new RigidbodyComponent(damping: 1f));
         AddComponent(new SpriteComponent(Art.Bullet));
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());
@@ -22,12 +22,18 @@ public class Bullet : Entity
     {
         IsExpired  = false;
         
+        // Lazy find our own component for the Reset helper
+        _rigidbody ??= GetComponent<RigidbodyComponent>();
+
         if (Transform != null)
         {
             Transform.Position = position;
             Transform.Orientation = velocity.ToAngle();
         }
         
-        _rigidbody.Velocity = velocity;
+        if (_rigidbody != null)
+        {
+            _rigidbody.Velocity = velocity;
+        }
     }
 }

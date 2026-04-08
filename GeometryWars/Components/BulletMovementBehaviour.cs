@@ -12,13 +12,13 @@ public sealed class BulletMovementBehaviour : IComponent
     public void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
-        _rigidbody = owner.Rigidbody;
+        _rigidbody = owner.GetComponent<RigidbodyComponent>();
     }
 
     public void Update(Entity owner)
     {
         _transform ??= owner.Transform;
-        _rigidbody ??= owner.Rigidbody;
+        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
 
         if (_transform == null || _rigidbody == null) return;
 

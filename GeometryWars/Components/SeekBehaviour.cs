@@ -20,13 +20,13 @@ public sealed class SeekBehaviour : IComponent
     public void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
-        _rigidbody = owner.Rigidbody;
+        _rigidbody = owner.GetComponent<RigidbodyComponent>();
     }
 
     public void Update(Entity owner)
     {
         _transform ??= owner.Transform;
-        _rigidbody ??= owner.Rigidbody;
+        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
 
         if (owner is not Enemy enemy || !enemy.IsActive || _rigidbody == null || _transform == null)
             return;

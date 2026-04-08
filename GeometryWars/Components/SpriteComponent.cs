@@ -4,14 +4,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that renders a sprite. Owns the visual-only 'Tint' data.
-/// </summary>
 public sealed class SpriteComponent : IComponent, IDrawableComponent
 {
     private readonly Texture2D _texture;
     private TransformComponent _transform;
-    
+
     public Color Tint { get; set; } = Color.White;
 
     public SpriteComponent(Texture2D texture)

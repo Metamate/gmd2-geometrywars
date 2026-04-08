@@ -14,7 +14,6 @@ public class Enemy : Entity
     public Enemy(EnemyDef def, Vector2 position)
     {
         _def     = def;
-        Tint     = Color.Transparent;
 
         var tex = def.GetTexture();
         Vector2 size = new(tex.Width, tex.Height);
@@ -25,7 +24,7 @@ public class Enemy : Entity
         AddComponent(new ScreenClampBehaviour(size));
         
         var sprite = AddComponent(new SpriteComponent(tex));
-        sprite.Tint = Color.Transparent; // Initial state for SpawnFade
+        sprite.Tint = Color.Transparent; // Set tint on the SpriteComponent, not the Entity
 
         AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());

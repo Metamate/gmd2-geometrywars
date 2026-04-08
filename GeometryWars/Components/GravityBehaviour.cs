@@ -33,7 +33,7 @@ public sealed class GravityBehaviour : IComponent
                 continue;
 
             var targetTransform = entity.Transform;
-            var targetRigidbody = entity.Rigidbody;
+            var targetRigidbody = entity.GetComponent<RigidbodyComponent>();
             
             if (targetTransform == null || targetRigidbody == null) continue;
 

@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
+/// <summary>
+/// Handles collision logic specifically for Black Holes.
+/// </summary>
 public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 {
     private int _hitpoints;
@@ -16,7 +19,7 @@ public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner) { }

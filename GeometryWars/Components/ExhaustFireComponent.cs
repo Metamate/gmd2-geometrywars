@@ -11,13 +11,13 @@ public sealed class ExhaustFireComponent : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _rigidbody = owner.Rigidbody;
+        _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
     public void Update(Entity owner)
     {
-        _rigidbody ??= owner.Rigidbody;
+        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
         _transform ??= owner.Transform;
 
         if (owner is not PlayerShip player || player.IsDead || _rigidbody == null || _transform == null)

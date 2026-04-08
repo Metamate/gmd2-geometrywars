@@ -11,7 +11,7 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
 
     public void OnAdded(Entity owner)
     {
-        _rigidbody = owner.Rigidbody;
+        _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
@@ -19,7 +19,7 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
 
     public void OnCollision(Entity owner, Entity other)
     {
-        _rigidbody ??= owner.Rigidbody;
+        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
         _transform ??= owner.Transform;
 
         if (owner is not Enemy enemy || _transform == null || _rigidbody == null) return;
@@ -31,7 +31,8 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         else if (other is Enemy e)
         {
             var otherTransform = e.Transform;
-            if (otherTransform == null) return;
+            var otherRigidbody = e.GetComponent<RigidbodyComponent>();
+            if (otherTransform == null || otherRigidbody == null) return;
 
             var d = _transform.Position - otherTransform.Position;
             _rigidbody.Velocity += 10 * d / (d.LengthSquared() + 1);
