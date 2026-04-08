@@ -23,7 +23,7 @@ public sealed class SpawnFadeBehaviour : Component
         _timeUntilStart = spawnDelay;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _sprite = owner.GetComponent<SpriteComponent>();
     }

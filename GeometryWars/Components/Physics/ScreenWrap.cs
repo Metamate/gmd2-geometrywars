@@ -10,7 +10,7 @@ public sealed class ScreenWrap : Component
 {
     private TransformComponent _transform;
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

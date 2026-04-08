@@ -12,7 +12,7 @@ public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
     private PlayerShip _player;
     private PlayerRespawnBehaviour _respawn;
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _player  = owner as PlayerShip;
         _respawn = owner.GetComponent<PlayerRespawnBehaviour>();

@@ -91,6 +91,8 @@ static class EntityManager
 
     private static void RegisterEntity(Entity entity)
     {
+        entity.Start();
+
         _entities.Add(entity);
         if (entity is Bullet b) _bullets.Add(b);
         else if (entity is BlackHole bh) _blackHoles.Add(bh);
@@ -98,9 +100,7 @@ static class EntityManager
 
         var collider = entity.GetComponent<ColliderComponent>();
         if (collider != null)
-        {
             _collidables.Add((entity, collider));
-        }
     }
 
     private static void HandleCollisions()

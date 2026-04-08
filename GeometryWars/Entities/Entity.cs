@@ -16,7 +16,6 @@ public abstract class Entity
     public bool IsActive { get; set; } = true;
     public bool IsExpired { get; set; }
 
-    // Direct access to spatial identity.
     public TransformComponent Transform { get; private set; }
     public Vector2 Position => Transform.Position;
 
@@ -59,6 +58,14 @@ public abstract class Entity
         if (component is TransformComponent tc) Transform = tc;
         component.OnAdded(this);
         return component;
+    }
+
+    // Call once after all components have been added to wire up sibling references.
+    // Invoked by EntityManager when the entity enters the world.
+    public void Start()
+    {
+        for (int i = 0; i < _components.Count; i++)
+            _components[i].OnStart(this);
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)

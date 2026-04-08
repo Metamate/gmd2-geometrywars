@@ -17,7 +17,7 @@ public sealed class RigidbodyComponent : Component
         _damping = damping;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

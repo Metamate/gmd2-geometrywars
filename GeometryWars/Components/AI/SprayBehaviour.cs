@@ -19,7 +19,7 @@ public sealed class SprayBehaviour : Component
         _gridRange = gridRange;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

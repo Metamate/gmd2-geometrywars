@@ -16,7 +16,7 @@ public sealed class ScreenClampBehaviour : Component
         _size = size;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

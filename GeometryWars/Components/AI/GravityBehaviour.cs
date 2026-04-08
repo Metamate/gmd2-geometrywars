@@ -19,7 +19,7 @@ public sealed class GravityBehaviour : Component
         _force = force;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

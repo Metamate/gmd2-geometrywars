@@ -7,5 +7,6 @@ public abstract class Component : IComponent
 {
     public bool IsActive { get; set; } = true;
     public virtual void OnAdded(Entity owner) { }
+    public virtual void OnStart(Entity owner) { }
     public abstract void Update(Entity owner);
 }

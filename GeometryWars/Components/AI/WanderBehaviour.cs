@@ -21,7 +21,7 @@ public sealed class WanderBehaviour : Component
         _direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();

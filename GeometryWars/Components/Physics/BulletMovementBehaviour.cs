@@ -13,7 +13,7 @@ public sealed class BulletMovementBehaviour : Component
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();

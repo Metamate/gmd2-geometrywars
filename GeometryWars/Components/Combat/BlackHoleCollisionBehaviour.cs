@@ -18,7 +18,7 @@ public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
         _hitpoints = hitpoints;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

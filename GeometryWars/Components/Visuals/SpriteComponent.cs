@@ -18,7 +18,7 @@ public sealed class SpriteComponent : Component, IDrawableComponent
         _texture = texture;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

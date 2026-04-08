@@ -16,7 +16,7 @@ public sealed class PlayerInputComponent : Component
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _player    = owner as PlayerShip;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();

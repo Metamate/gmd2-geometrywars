@@ -18,7 +18,7 @@ public sealed class GlowOverlay : Component, IDrawableComponent
         _color   = color;
     }
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
     }

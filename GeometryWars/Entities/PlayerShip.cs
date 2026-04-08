@@ -28,7 +28,7 @@ public class PlayerShip : Entity
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
 
-        _respawn = AddComponent(new PlayerRespawnBehaviour());
         AddComponent(new PlayerCollisionBehaviour());
+        _respawn = AddComponent(new PlayerRespawnBehaviour());
     }
 }

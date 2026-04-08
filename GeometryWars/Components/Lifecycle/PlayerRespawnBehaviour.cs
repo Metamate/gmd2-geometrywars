@@ -20,7 +20,7 @@ public sealed class PlayerRespawnBehaviour : Component
 
     public bool IsDead => _framesUntilRespawn > 0;
 
-    public override void OnAdded(Entity owner)
+    public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
         _sprite    = owner.GetComponent<SpriteComponent>();
