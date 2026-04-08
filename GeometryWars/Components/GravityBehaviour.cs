@@ -24,7 +24,7 @@ public sealed class GravityBehaviour : IComponent
     {
         foreach (var entity in EntityManager.GetNearbyEntities(_transform.Position, _range))
         {
-            if (entity == owner) continue;
+            if (entity == owner || entity is BlackHole) continue;
 
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
