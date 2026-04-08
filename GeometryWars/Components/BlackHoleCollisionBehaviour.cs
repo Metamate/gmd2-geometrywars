@@ -4,9 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Handles collision logic specifically for Black Holes.
-/// </summary>
 public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 {
     private int _hitpoints;
@@ -34,8 +31,6 @@ public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
 
     private void WasShot(Entity owner)
     {
-        if (_transform == null) return;
-
         if (--_hitpoints <= 0)
             owner.IsExpired = true;
 

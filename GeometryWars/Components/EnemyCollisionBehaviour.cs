@@ -19,10 +19,7 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
 
     public void OnCollision(Entity owner, Entity other)
     {
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-        _transform ??= owner.Transform;
-
-        if (owner is not Enemy enemy || _transform == null || _rigidbody == null) return;
+        if (owner is not Enemy enemy) return;
 
         if (other is Bullet || (other is BlackHole bh && bh.IsActive))
         {

@@ -26,9 +26,6 @@ public sealed class RigidbodyComponent : IComponent
 
     public void Update(Entity owner)
     {
-        _transform ??= owner.Transform;
-        if (_transform == null) return;
-
         // Integration
         _transform.Position += Velocity;
 

@@ -25,10 +25,7 @@ public sealed class WanderBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        _transform ??= owner.Transform;
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-
-        if (owner is not Enemy enemy || !enemy.IsActive || _rigidbody == null || _transform == null)
+        if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
         if (_stepCounter-- <= 0)
@@ -39,7 +36,6 @@ public sealed class WanderBehaviour : IComponent
             _direction = MathHelper.WrapAngle(_direction);
 
             var bounds = FrameContext.Viewport.Bounds;
-            // Use logical buffer to turn around before the physical clamp
             bounds.Inflate(-Art.Wanderer.Width, -Art.Wanderer.Height);
             
             if (!bounds.Contains(_transform.Position.ToPoint()))
@@ -49,10 +45,7 @@ public sealed class WanderBehaviour : IComponent
             }
         }
 
-        // Apply movement force
         _rigidbody.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
-        
-        // RESTORED: Continuous smooth spin independent of movement direction
         _transform.Orientation -= GameSettings.Enemy.WandererOrientationDecay;
     }
 }

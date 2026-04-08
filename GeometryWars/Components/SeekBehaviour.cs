@@ -25,12 +25,10 @@ public sealed class SeekBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        _transform ??= owner.Transform;
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-
-        if (owner is not Enemy enemy || !enemy.IsActive || _rigidbody == null || _transform == null)
+        if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
+        // TRUST: We assume components exist if the archetype was assembled correctly
         _rigidbody.Velocity += (_getTargetPosition() - _transform.Position).ScaleTo(_acceleration);
 
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)

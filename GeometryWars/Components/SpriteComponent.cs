@@ -25,9 +25,6 @@ public sealed class SpriteComponent : IComponent, IDrawableComponent
 
     public void Draw(Entity owner, SpriteBatch spriteBatch)
     {
-        _transform ??= owner.Transform;
-        if (_transform == null) return;
-
         Vector2 origin = new(_texture.Width / 2f, _texture.Height / 2f);
 
         spriteBatch.Draw(_texture, _transform.Position, null, Tint, 

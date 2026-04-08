@@ -17,10 +17,7 @@ public sealed class ExhaustFireComponent : IComponent
 
     public void Update(Entity owner)
     {
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-        _transform ??= owner.Transform;
-
-        if (owner is not PlayerShip player || player.IsDead || _rigidbody == null || _transform == null)
+        if (owner is not PlayerShip player || player.IsDead)
             return;
 
         if (_rigidbody.Velocity.LengthSquared() <= 0.1f)

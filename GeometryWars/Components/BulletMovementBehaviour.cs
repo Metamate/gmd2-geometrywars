@@ -17,11 +17,6 @@ public sealed class BulletMovementBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        _transform ??= owner.Transform;
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-
-        if (_transform == null || _rigidbody == null) return;
-
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)
             _transform.Orientation = _rigidbody.Velocity.ToAngle();
 

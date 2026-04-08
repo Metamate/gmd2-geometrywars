@@ -12,19 +12,16 @@ public sealed class PlayerInputComponent : IComponent
 
     public void OnAdded(Entity owner)
     {
-        // Rigidbody is now a regular component (found via GetComponent)
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
-        _transform = owner.Transform;
+        _transform = owner.GetComponent<TransformComponent>();
     }
 
     public void Update(Entity owner)
     {
-        _rigidbody ??= owner.GetComponent<RigidbodyComponent>();
-        _transform ??= owner.Transform;
-
-        if (owner is not PlayerShip player || player.IsDead || _rigidbody == null || _transform == null)
+        if (owner is not PlayerShip player || player.IsDead)
             return;
 
+        // TRUST: We assume these were found in OnAdded
         _rigidbody.Velocity += GameSettings.Player.Speed * GameController.Movement;
 
         var aim = GameController.AimDirection(_transform.Position);
