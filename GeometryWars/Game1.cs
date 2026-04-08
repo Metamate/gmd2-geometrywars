@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars;
 
-public class Game1 : GameCore
+public class Game1 : Core
 {
     private readonly BloomComponent _bloom;
 
@@ -42,7 +42,7 @@ public class Game1 : GameCore
     {
         // Performance and Mouse (UI) update every frame for smoothness.
         GameServices.Performance.Update(gameTime);
-        GameCore.Input.Mouse.UpdatePositionOnly();
+        Input.Mouse.UpdatePositionOnly();
 
         base.Update(gameTime);
     }
@@ -65,7 +65,7 @@ public class Game1 : GameCore
     protected override void RegisterServices(GameTime gameTime)
     {
         // Refresh temporal frame-specific data.
-        FrameContext.Time     = gameTime;
+        FrameContext.Time = gameTime;
         FrameContext.Viewport = GraphicsDevice.Viewport;
     }
 

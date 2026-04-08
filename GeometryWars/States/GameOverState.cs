@@ -8,9 +8,9 @@ namespace GeometryWars.States;
 
 public sealed class GameOverState : GameStateBase
 {
-    private readonly GameCore _game;
+    private readonly Core _game;
 
-    public GameOverState(GameCore game) => _game = game;
+    public GameOverState(Core game) => _game = game;
 
     public override void Update()
     {

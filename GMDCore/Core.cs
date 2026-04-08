@@ -12,7 +12,7 @@ namespace GMDCore;
 // We implement our own logic loop to allow uncapped rendering (VSync off)
 // while keeping gameplay simulation deterministic at 60Hz. This prevents
 // physics (like the spring grid) from breaking at high frame rates.
-public abstract class GameCore : Game
+public abstract class Core : Game
 {
     protected GraphicsDeviceManager Graphics;
     public SpriteBatch SpriteBatch { get; private set; }
@@ -25,7 +25,7 @@ public abstract class GameCore : Game
 
     public static InputManager Input { get; } = new();
 
-    protected GameCore(int width, int height)
+    protected Core(int width, int height)
     {
         Graphics = new GraphicsDeviceManager(this)
         {
