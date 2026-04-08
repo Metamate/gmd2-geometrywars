@@ -1,4 +1,3 @@
-using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Components.Visuals;
 using GeometryWars.Components.Combat;

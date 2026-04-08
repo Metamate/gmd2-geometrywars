@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
 
-// Handles collision response for enemies.
+// Handles collision response for enemies, including death effects and score.
 public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
 {
     private RigidbodyComponent _rigidbody;

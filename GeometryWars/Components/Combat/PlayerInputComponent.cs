@@ -3,11 +3,12 @@ using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
 
-// Translates user input into movement and combat actions.
+// Component that translates user input into movement and combat actions.
 public sealed class PlayerInputComponent : Component
 {
     private int _cooldownRemaining = 0;

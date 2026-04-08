@@ -5,9 +5,9 @@ using GeometryWars.Components.Visuals;
 using GeometryWars.Components.Combat;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using GeometryWars.Systems;
 
 namespace GeometryWars.Entities;
 
@@ -30,7 +30,7 @@ public class PlayerShip : Entity
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
-
+        
         _respawn = AddComponent(new PlayerRespawnBehaviour());
     }
 
@@ -62,7 +62,7 @@ public class PlayerShip : Entity
     public void Kill()
     {
         PlayerStatus.RemoveLife();
-
+        
         int frames = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
         _respawn.Kill(frames);
 

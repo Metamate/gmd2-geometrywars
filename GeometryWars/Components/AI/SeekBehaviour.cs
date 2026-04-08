@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
 
-// Steers an entity towards a target position.
+// AI component that steers an entity towards a target position.
 public sealed class SeekBehaviour : Component
 {
     private readonly Func<Vector2> _getTargetPosition;

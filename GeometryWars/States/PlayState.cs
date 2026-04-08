@@ -1,15 +1,14 @@
 using GMDCore;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 
 namespace GeometryWars.States;
 
-/// <summary>
-/// The main game loop state where combat and movement occur.
-/// </summary>
+// The main game loop state where combat and movement occur.
 public sealed class PlayState : GameStateBase
 {
     private readonly Game1 _game;

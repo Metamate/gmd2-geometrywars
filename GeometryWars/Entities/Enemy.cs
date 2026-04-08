@@ -1,13 +1,12 @@
 using System;
-using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Components.Visuals;
 using GeometryWars.Components.Combat;
 using GeometryWars.Components.AI;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Services;
-using Microsoft.Xna.Framework;
 using GeometryWars.Systems;
+using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Entities;
 
@@ -15,20 +14,20 @@ namespace GeometryWars.Entities;
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    public bool IsActiveLocal { get; set; }
+    public bool IsActiveLocal { get; set; } 
     public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)
     {
         _def = def;
         Transform.Position = position;
-
+        
         var tex = def.GetTexture();
         Vector2 size = new(tex.Width, tex.Height);
 
         AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         AddComponent(new ScreenClampBehaviour(size));
-
+        
         var sprite = AddComponent(new SpriteComponent(tex));
         sprite.Tint = Color.Transparent;
 
@@ -39,7 +38,7 @@ public class Enemy : Entity
 
     public static Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var def = GameSettings.Enemy.Seeker;
+        var def   = GameSettings.Enemy.Seeker;
         var enemy = new Enemy(def, position);
         enemy.AddComponent(new SeekBehaviour(getTargetPosition, def.Acceleration));
         return enemy;
@@ -47,7 +46,7 @@ public class Enemy : Entity
 
     public static Enemy CreateWanderer(Vector2 position)
     {
-        var def = GameSettings.Enemy.Wanderer;
+        var def   = GameSettings.Enemy.Wanderer;
         var enemy = new Enemy(def, position);
         enemy.AddComponent(new WanderBehaviour());
         return enemy;
