@@ -1,5 +1,4 @@
-using System;
-using System.Linq;
+using GMDCore;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -7,7 +6,8 @@ namespace GeometryWars;
 
 /// <summary>
 /// Abstracts raw hardware input into semantic game actions.
-/// Aligns with the architecture found in the Zelda and Pokemon projects.
+/// Uses GameCore.Input (same pattern as Zelda / Pokemon) rather than
+/// reading hardware state directly.
 /// </summary>
 public static class GameController
 {
@@ -24,55 +24,60 @@ public static class GameController
     public static bool IsShooting => GetIsShooting();
 
     // Semantic Actions (Abstracted from specific keys)
-    public static bool WasBombPressed => RawInput.WasButtonPressed(Buttons.LeftTrigger) || 
-                                         RawInput.WasButtonPressed(Buttons.RightTrigger) || 
-                                         RawInput.WasKeyPressed(Keys.Space);
+    public static bool WasBombPressed
+        => GameCore.Input.GamePad.WasButtonJustPressed(Buttons.LeftTrigger)  ||
+           GameCore.Input.GamePad.WasButtonJustPressed(Buttons.RightTrigger) ||
+           GameCore.Input.Keyboard.WasKeyJustPressed(Keys.Space);
 
-    public static bool WasPausePressed => RawInput.WasKeyPressed(Keys.P) || 
-                                          RawInput.WasButtonPressed(Buttons.Start);
+    public static bool WasPausePressed
+        => GameCore.Input.Keyboard.WasKeyJustPressed(Keys.P) ||
+           GameCore.Input.GamePad.WasButtonJustPressed(Buttons.Start);
 
-    public static bool WasDebugTogglePressed => RawInput.WasKeyPressed(Keys.F3);
+    public static bool WasDebugTogglePressed
+        => GameCore.Input.Keyboard.WasKeyJustPressed(Keys.F3);
 
-    public static bool WasConfirmPressed => RawInput.WasKeyPressed(Keys.Enter) || 
-                                            RawInput.WasButtonPressed(Buttons.A);
+    public static bool WasConfirmPressed
+        => GameCore.Input.Keyboard.WasKeyJustPressed(Keys.Enter) ||
+           GameCore.Input.GamePad.WasButtonJustPressed(Buttons.A);
 
-    public static bool WasExitPressed => RawInput.WasKeyPressed(Keys.Escape) || 
-                                         RawInput.WasButtonPressed(Buttons.Back);
+    public static bool WasExitPressed
+        => GameCore.Input.Keyboard.WasKeyJustPressed(Keys.Escape) ||
+           GameCore.Input.GamePad.WasButtonJustPressed(Buttons.Back);
 
-    public static Vector2 MousePosition => new(RawInput.Mouse.X, RawInput.Mouse.Y);
+    public static Vector2 MousePosition
+        => new(GameCore.Input.Mouse.X, GameCore.Input.Mouse.Y);
 
     /// <summary>
     /// Updates the semantic state. Called once per logic frame (60Hz).
     /// </summary>
     public static void Update()
     {
-        var mousePos = RawInput.Mouse.Position;
+        var mousePos = GameCore.Input.Mouse.Position;
 
         // Detect if the user is using the keyboard/gamepad to aim.
-        bool hasAimKeys = new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Any(k => RawInput.IsKeyDown(k));
-        bool hasAimStick = RawInput.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
+        bool hasAimKeys = GameCore.Input.Keyboard.IsKeyDown(Keys.Left)  ||
+                          GameCore.Input.Keyboard.IsKeyDown(Keys.Right) ||
+                          GameCore.Input.Keyboard.IsKeyDown(Keys.Up)    ||
+                          GameCore.Input.Keyboard.IsKeyDown(Keys.Down);
+        bool hasAimStick = GameCore.Input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
 
         if (hasAimKeys || hasAimStick)
-        {
             _isAimingWithMouse = false;
-        }
         else if (mousePos != _lastLogicMousePos)
-        {
             _isAimingWithMouse = true;
-        }
 
         _lastLogicMousePos = mousePos;
     }
 
     private static Vector2 GetMovementDirection()
     {
-        Vector2 direction = RawInput.GamePad.ThumbSticks.Left;
+        Vector2 direction = GameCore.Input.GamePad.ThumbSticks.Left;
         direction.Y *= -1;
 
-        if (RawInput.IsKeyDown(Keys.A)) direction.X -= 1;
-        if (RawInput.IsKeyDown(Keys.D)) direction.X += 1;
-        if (RawInput.IsKeyDown(Keys.W)) direction.Y -= 1;
-        if (RawInput.IsKeyDown(Keys.S)) direction.Y += 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.A)) direction.X -= 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.D)) direction.X += 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.W)) direction.Y -= 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.S)) direction.Y += 1;
 
         if (direction.LengthSquared() > 1)
             direction.Normalize();
@@ -88,13 +93,13 @@ public static class GameController
             return direction == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(direction);
         }
 
-        Vector2 aim = RawInput.GamePad.ThumbSticks.Right;
+        Vector2 aim = GameCore.Input.GamePad.ThumbSticks.Right;
         aim.Y *= -1;
 
-        if (RawInput.IsKeyDown(Keys.Left))  aim.X -= 1;
-        if (RawInput.IsKeyDown(Keys.Right)) aim.X += 1;
-        if (RawInput.IsKeyDown(Keys.Up))    aim.Y -= 1;
-        if (RawInput.IsKeyDown(Keys.Down))  aim.Y += 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.Left))  aim.X -= 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.Right)) aim.X += 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.Up))    aim.Y -= 1;
+        if (GameCore.Input.Keyboard.IsKeyDown(Keys.Down))  aim.Y += 1;
 
         return aim == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(aim);
     }
@@ -102,11 +107,12 @@ public static class GameController
     private static bool GetIsShooting()
     {
         if (_isAimingWithMouse)
-            return RawInput.Mouse.LeftButton == ButtonState.Pressed;
+            return GameCore.Input.Mouse.IsLeftButtonDown;
 
-        bool hasAimKeys = new[] { Keys.Left, Keys.Right, Keys.Up, Keys.Down }.Any(k => RawInput.IsKeyDown(k));
-        bool hasAimStick = RawInput.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
-
-        return hasAimKeys || hasAimStick;
+        return GameCore.Input.Keyboard.IsKeyDown(Keys.Left)  ||
+               GameCore.Input.Keyboard.IsKeyDown(Keys.Right) ||
+               GameCore.Input.Keyboard.IsKeyDown(Keys.Up)    ||
+               GameCore.Input.Keyboard.IsKeyDown(Keys.Down)  ||
+               GameCore.Input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using GMDCore.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -21,6 +22,8 @@ public abstract class GameCore : Game
     private readonly GameTime _fixedGameTime = new();
 
     protected GameStateBase ActiveState => _activeState;
+
+    public static InputManager Input { get; } = new();
 
     protected GameCore(int width, int height)
     {
@@ -46,7 +49,11 @@ public abstract class GameCore : Game
     }
 
     protected virtual void RegisterServices(GameTime gameTime) { }
-    protected virtual void OnUpdateInput() { }
+
+    protected virtual void OnUpdateInput()
+    {
+        Input.Update();
+    }
 
     protected virtual bool ShouldExit()
     {

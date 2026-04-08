@@ -42,7 +42,7 @@ public class Game1 : GameCore
     {
         // Performance and Mouse (UI) update every frame for smoothness.
         GameServices.Performance.Update(gameTime);
-        RawInput.UpdateMouseOnly();
+        GameCore.Input.Mouse.UpdatePositionOnly();
 
         base.Update(gameTime);
     }
@@ -56,7 +56,7 @@ public class Game1 : GameCore
     // The main logic tick (60Hz) handles the core input processing.
     protected override void OnUpdateInput()
     {
-        RawInput.Update();
+        base.OnUpdateInput(); // calls Input.Update() for all devices
         GameController.Update();
     }
 
