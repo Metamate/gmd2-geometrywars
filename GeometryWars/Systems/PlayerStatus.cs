@@ -42,7 +42,7 @@ public static class PlayerStatus
     {
         if (_multiplier > 1)
         {
-            _multiplierTimer += (float)FrameContext.Time.ElapsedGameTime.TotalSeconds;
+            _multiplierTimer += FrameContext.ElapsedSeconds;
             if (_multiplierTimer > GameSettings.Player.MultiplierExpiry)
             {
                 _multiplierTimer = 0;

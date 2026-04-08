@@ -14,7 +14,6 @@ namespace GeometryWars.Entities;
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    public bool IsActiveLocal { get; set; } 
     public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)

@@ -11,18 +11,20 @@ namespace GeometryWars.Components.Visuals;
 // Spawns fire particles behind a moving entity.
 public sealed class ExhaustFireComponent : Component
 {
+    private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
     public override void OnAdded(Entity owner)
     {
+        _player    = owner as PlayerShip;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
     public override void Update(Entity owner)
     {
-        if (owner is not PlayerShip player || player.IsDead)
+        if (_player == null || _player.IsDead)
             return;
 
         if (_rigidbody.Velocity.LengthSquared() <= 0.1f)
@@ -34,7 +36,7 @@ public sealed class ExhaustFireComponent : Component
         Vector2 baseVel = _rigidbody.Velocity.ScaleTo(-3);
         Vector2 perpVel = new Vector2(baseVel.Y, -baseVel.X) * (0.6f * (float)Math.Sin(t * 10));
         Color sideColor = new Color(200, 38, 9);
-        Color midColor = new Color(255, 187, 30);
+        Color midColor  = new Color(255, 187, 30);
         Vector2 pos = _transform.Position + Vector2.Transform(new Vector2(-25, 0), rot);
         const float alpha = 0.7f;
 

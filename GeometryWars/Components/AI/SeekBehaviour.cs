@@ -29,7 +29,7 @@ public sealed class SeekBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive)
+        if (owner is not Enemy enemy)
             return;
 
         _rigidbody.AddForce((_getTargetPosition() - _transform.Position).ScaleTo(_acceleration));

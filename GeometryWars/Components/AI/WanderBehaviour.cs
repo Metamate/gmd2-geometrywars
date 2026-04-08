@@ -29,7 +29,7 @@ public sealed class WanderBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive)
+        if (owner is not Enemy enemy)
             return;
 
         if (_stepCounter-- <= 0)

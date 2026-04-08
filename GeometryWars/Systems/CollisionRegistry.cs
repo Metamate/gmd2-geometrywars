@@ -19,7 +19,7 @@ public static class CollisionRegistry
         Register<BoxColliderComponent, BoxColliderComponent>(CheckBoxBox);
         Register<CircleColliderComponent, BoxColliderComponent>(CheckCircleBox);
         
-        Register<BoxColliderComponent, CircleColliderComponent>((eb, cb, ec, cc) => CheckCircleBox(ec, cc, eb, cb));
+        Register<BoxColliderComponent, CircleColliderComponent>((entityA, colA, entityB, colB) => CheckCircleBox(entityB, colB, entityA, colA));
     }
 
     public static void Register<TA, TB>(CollisionHandler handler) 

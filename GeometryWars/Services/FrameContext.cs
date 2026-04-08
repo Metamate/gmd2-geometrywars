@@ -9,5 +9,6 @@ public static class FrameContext
     public static Viewport Viewport { get; set; }
 
     public static Vector2 ScreenSize => new(Viewport.Width, Viewport.Height);
-    public static float TotalSeconds => (float)Time.TotalGameTime.TotalSeconds;
+    public static float TotalSeconds   => (float)Time.TotalGameTime.TotalSeconds;
+    public static float ElapsedSeconds => (float)Time.ElapsedGameTime.TotalSeconds;
 }

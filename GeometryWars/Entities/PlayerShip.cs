@@ -30,27 +30,9 @@ public class PlayerShip : Entity
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
         AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
-        
+        AddComponent(new PlayerCollisionBehaviour());
+
         _respawn = AddComponent(new PlayerRespawnBehaviour());
-    }
-
-    public override void OnCollision(Entity other)
-    {
-        if (IsDead) return;
-
-        if (other is Enemy e && e.IsActive)
-        {
-            Kill();
-            EntityManager.KillAllEnemies();
-            EnemySpawner.Reset();
-        }
-        else if (other is BlackHole)
-        {
-            Kill();
-            EntityManager.KillAllEnemies();
-            EntityManager.KillAllBlackHoles();
-            EnemySpawner.Reset();
-        }
     }
 
     public override void Draw(SpriteBatch spriteBatch)
