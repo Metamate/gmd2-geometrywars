@@ -7,39 +7,51 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars.Systems;
 
 // Manages the lifecycle, updates, and rendering of all game entities.
-static class EntityManager
+public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
 {
-    private static readonly List<Entity> _entities = [];
-    private static readonly List<Enemy> _enemies = [];
-    private static readonly List<Bullet> _bullets = [];
-    private static readonly List<BlackHole> _blackHoles = [];
-    private static readonly List<Entity> _pendingAdd = [];
+    private readonly List<Entity> _entities = [];
+    private readonly List<Enemy> _enemies = [];
+    private readonly List<Bullet> _bullets = [];
+    private readonly List<BlackHole> _blackHoles = [];
+    private readonly List<Entity> _pendingAdd = [];
     
-    private static readonly List<(Entity Entity, ColliderComponent Collider)> _collidables = [];
+    private readonly List<(Entity Entity, ColliderComponent Collider)> _collidables = [];
 
-    private static readonly ObjectPool<Bullet> _bulletPool = new(() => new Bullet(), 128);
-    private static bool _isUpdating;
+    private readonly ObjectPool<Bullet> _bulletPool;
+    private bool _isUpdating;
 
-    private static readonly List<Entity> _nearbyEntitiesBuffer = [];
+    private readonly List<Entity> _nearbyEntitiesBuffer = [];
 
-    public static List<BlackHole> BlackHoles => _blackHoles;
-    public static int Count => _entities.Count;
-    public static int BlackHoleCount => _blackHoles.Count;
+    public IReadOnlyList<BlackHole> BlackHoles => _blackHoles;
+    public int Count => _entities.Count;
+    public int BlackHoleCount => _blackHoles.Count;
 
-    public static Bullet GetBullet(Vector2 position, Vector2 velocity)
+    public EntityWorld(System.Func<Bullet> createBullet)
+    {
+        // The bullet factory is supplied by the composition root. Delay prewarming
+        // until after that root has fully assembled all collaborators.
+        _bulletPool = new ObjectPool<Bullet>(createBullet);
+    }
+
+    public Bullet GetBullet(Vector2 position, Vector2 velocity)
     {
         var bullet = _bulletPool.Get();
         bullet.Reset(position, velocity);
         return bullet;
     }
 
-    public static void Add(Entity entity)
+    public void SpawnBullet(Vector2 position, Vector2 velocity)
+    {
+        Add(GetBullet(position, velocity));
+    }
+
+    public void Add(Entity entity)
     {
         if (!_isUpdating) RegisterEntity(entity);
         else _pendingAdd.Add(entity);
     }
 
-    public static void Clear()
+    public void Clear()
     {
         _entities.Clear();
         _enemies.Clear();
@@ -49,19 +61,19 @@ static class EntityManager
         _collidables.Clear();
     }
 
-    public static void KillAllEnemies()
+    public void KillAllEnemies()
     {
         for (int i = 0; i < _enemies.Count; i++)
             _enemies[i].Kill();
     }
 
-    public static void KillAllBlackHoles()
+    public void KillAllBlackHoles()
     {
         for (int i = 0; i < _blackHoles.Count; i++)
             _blackHoles[i].Kill();
     }
 
-    public static void Update()
+    public void Update()
     {
         _isUpdating = true;
         HandleCollisions();
@@ -83,13 +95,13 @@ static class EntityManager
         _collidables.RemoveAll(c => c.Entity.IsExpired);
     }
 
-    public static void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch)
     {
         foreach (var entity in _entities)
             entity.Draw(spriteBatch);
     }
 
-    private static void RegisterEntity(Entity entity)
+    private void RegisterEntity(Entity entity)
     {
         entity.Start();
 
@@ -103,7 +115,7 @@ static class EntityManager
             _collidables.Add((entity, collider));
     }
 
-    private static void HandleCollisions()
+    private void HandleCollisions()
     {
         for (int i = 0; i < _collidables.Count; i++)
         {
@@ -125,8 +137,8 @@ static class EntityManager
     }
 
     // WARNING: Returns a shared internal buffer. Callers must not store or iterate the
-    // result after calling any other EntityManager method — use it immediately.
-    public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
+    // result after calling any other EntityWorld method — use it immediately.
+    public List<Entity> GetNearbyEntities(Vector2 position, float radius)
     {
         _nearbyEntitiesBuffer.Clear();
         float rSq = radius * radius;

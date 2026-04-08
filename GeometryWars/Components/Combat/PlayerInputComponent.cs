@@ -11,10 +11,16 @@ namespace GeometryWars.Components.Combat;
 // Component that translates user input into movement and combat actions.
 public sealed class PlayerInputComponent : Component
 {
+    private readonly IBulletSpawner _bulletSpawner;
     private int _cooldownRemaining;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
+
+    public PlayerInputComponent(IBulletSpawner bulletSpawner)
+    {
+        _bulletSpawner = bulletSpawner;
+    }
 
     public override void OnStart(Entity owner)
     {
@@ -60,8 +66,8 @@ public sealed class PlayerInputComponent : Component
         Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
         Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
 
-        EntityManager.Add(EntityManager.GetBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel));
-        EntityManager.Add(EntityManager.GetBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel));
+        _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel);
+        _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel);
 
         GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }

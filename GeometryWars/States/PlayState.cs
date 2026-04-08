@@ -1,5 +1,4 @@
 using GMDCore;
-using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
@@ -12,7 +11,7 @@ namespace GeometryWars.States;
 public sealed class PlayState : GameStateBase
 {
     private readonly Game1 _game;
-    private PlayerShip _player;
+    private PlaySession _session;
     private bool _paused;
 
     public PlayState(Game1 game) => _game = game;
@@ -20,11 +19,7 @@ public sealed class PlayState : GameStateBase
     public override void Enter()
     {
         _paused = false;
-        EntityManager.Clear();
-        _player = new PlayerShip();
-        EntityManager.Add(_player);
-        PlayerStatus.Reset();
-        EnemySpawner.Reset();
+        _session = new PlaySession(FrameContext.Viewport.Bounds);
         MediaPlayer.IsRepeating = true;
         MediaPlayer.Play(Sound.Music);
     }
@@ -39,26 +34,24 @@ public sealed class PlayState : GameStateBase
 
         if (_paused) return;
 
-        PlayerStatus.Update();
-        EntityManager.Update();
-        EnemySpawner.Update(!_player.IsDead, () => _player.Position);
+        _session.Update();
 
-        GameServices.Grid.Update();
-        GameServices.Particles.Update();
-
-        if (PlayerStatus.IsGameOver && !_player.IsDead)
-            _game.SetState(new GameOverState(_game));
+        if (_session.Score.IsGameOver && !_session.Player.IsDead)
+        {
+            _session.Score.SaveHighScore();
+            _game.SetState(new GameOverState(_game, _session));
+        }
     }
 
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        EntityManager.Draw(spriteBatch);
+        _session.Entities.Draw(spriteBatch);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        GameServices.Grid.Draw(spriteBatch);
-        GameServices.Particles.Draw(spriteBatch);
+        _session.Grid.Draw(spriteBatch);
+        _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }
 
@@ -67,11 +60,11 @@ public sealed class PlayState : GameStateBase
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 
         spriteBatch.Draw(Art.Pointer, GameController.MousePosition, Color.White);
-        spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
-        GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35), EntityManager.Count);
+        spriteBatch.DrawString(Art.Font, "Lives: " + _session.Score.Lives, new Vector2(5), Color.White);
+        GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35), _session.Entities.Count);
         
-        DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
-        DrawRightAligned(spriteBatch, "Multiplier: " + PlayerStatus.Multiplier, 35);
+        DrawRightAligned(spriteBatch, "Score: " + _session.Score.Score, 5);
+        DrawRightAligned(spriteBatch, "Multiplier: " + _session.Score.Multiplier, 35);
 
         if (_paused)
         {

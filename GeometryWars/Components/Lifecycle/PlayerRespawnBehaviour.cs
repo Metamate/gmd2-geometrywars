@@ -2,7 +2,6 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Visuals;
 using GeometryWars.Entities;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -14,9 +13,19 @@ namespace GeometryWars.Components.Lifecycle;
 //   3. After the timer expires, applies a grid shockwave at the respawn position.
 public sealed class PlayerRespawnBehaviour : Component
 {
+    private readonly IScoreTracker _score;
+    private readonly IParticleSystem<ParticleState> _particles;
+    private readonly IGridField _grid;
     private int _framesUntilRespawn;
     private TransformComponent _transform;
     private SpriteComponent _sprite;
+
+    public PlayerRespawnBehaviour(IScoreTracker score, IParticleSystem<ParticleState> particles, IGridField grid)
+    {
+        _score = score;
+        _particles = particles;
+        _grid = grid;
+    }
 
     public bool IsDead => _framesUntilRespawn > 0;
 
@@ -29,9 +38,9 @@ public sealed class PlayerRespawnBehaviour : Component
     // Called by PlayerCollisionBehaviour when the ship is hit.
     public void HandleDeath()
     {
-        PlayerStatus.RemoveLife();
+        _score.RemoveLife();
 
-        _framesUntilRespawn = PlayerStatus.IsGameOver
+        _framesUntilRespawn = _score.IsGameOver
             ? GameSettings.Player.GameOverFrames
             : GameSettings.Player.RespawnFrames;
 
@@ -44,7 +53,7 @@ public sealed class PlayerRespawnBehaviour : Component
         {
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(
+            _particles.CreateParticle(
                 Art.LineParticle, pos, color,
                 GameSettings.Visuals.DeathParticleLife,
                 GameSettings.Visuals.DeathParticleSize,
@@ -58,12 +67,12 @@ public sealed class PlayerRespawnBehaviour : Component
 
         _framesUntilRespawn--;
 
-        if (_framesUntilRespawn == 0 && !PlayerStatus.IsGameOver)
+        if (_framesUntilRespawn == 0 && !_score.IsGameOver)
         {
             if (_sprite != null)
                 _sprite.IsActive = true;
 
-            GameServices.Grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(_transform.Position, 0), 50);
+            _grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(_transform.Position, 0), 50);
         }
     }
 }

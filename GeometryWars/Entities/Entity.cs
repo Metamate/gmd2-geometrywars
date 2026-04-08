@@ -64,7 +64,7 @@ public abstract class Entity
     }
 
     // Call once after all components have been added to wire up sibling references.
-    // Invoked by EntityManager when the entity enters the world.
+    // Invoked by EntityWorld when the entity enters the current play session.
     public void Start()
     {
         for (int i = 0; i < _components.Count; i++)

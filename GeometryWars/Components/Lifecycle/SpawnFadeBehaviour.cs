@@ -18,7 +18,7 @@ public sealed class SpawnFadeBehaviour : Component
         _timeUntilStart = spawnDelay;
     }
 
-    // OnStart runs after EntityManager calls entity.Start(), which happens once all
+    // OnStart runs after EntityWorld calls entity.Start(), which happens once all
     // components have been added. Every sibling — including those from factory methods
     // — is present, so we can safely disable them all here.
     public override void OnStart(Entity owner)

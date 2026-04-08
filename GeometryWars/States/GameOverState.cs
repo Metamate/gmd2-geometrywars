@@ -1,5 +1,4 @@
 using GMDCore;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,13 +9,18 @@ namespace GeometryWars.States;
 public sealed class GameOverState : GameStateBase
 {
     private readonly Game1 _game;
+    private readonly PlaySession _session;
 
-    public GameOverState(Game1 game) => _game = game;
+    public GameOverState(Game1 game, PlaySession session)
+    {
+        _game = game;
+        _session = session;
+    }
 
     public override void Update()
     {
-        GameServices.Grid.Update();
-        GameServices.Particles.Update();
+        _session.Grid.Update();
+        _session.Particles.Update();
 
         if (GameController.WasConfirmPressed)
             _game.SetState(new PlayState(_game));
@@ -25,8 +29,8 @@ public sealed class GameOverState : GameStateBase
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        GameServices.Grid.Draw(spriteBatch);
-        GameServices.Particles.Draw(spriteBatch);
+        _session.Grid.Draw(spriteBatch);
+        _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }
 
@@ -38,8 +42,8 @@ public sealed class GameOverState : GameStateBase
         const float lineSpacing = 60f;
 
         DrawCentered(spriteBatch, "GAME OVER",               center + new Vector2(0, -lineSpacing * 2), Color.White);
-        DrawCentered(spriteBatch, "Score: " + PlayerStatus.Score,    center + new Vector2(0, -lineSpacing),     Color.LightGray);
-        DrawCentered(spriteBatch, "High Score: " + PlayerStatus.HighScore, center,                           Color.LightGray);
+        DrawCentered(spriteBatch, "Score: " + _session.Score.Score,    center + new Vector2(0, -lineSpacing),     Color.LightGray);
+        DrawCentered(spriteBatch, "High Score: " + _session.Score.HighScore, center,                           Color.LightGray);
         DrawCentered(spriteBatch, "Press Enter to Restart",  center + new Vector2(0,  lineSpacing * 1.5f),   Color.Gray);
 
         spriteBatch.End();

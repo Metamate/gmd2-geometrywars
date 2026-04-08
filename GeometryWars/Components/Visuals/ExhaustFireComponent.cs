@@ -2,7 +2,6 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -11,9 +10,15 @@ namespace GeometryWars.Components.Visuals;
 // Spawns fire particles behind a moving entity.
 public sealed class ExhaustFireComponent : Component
 {
+    private readonly IParticleSystem<ParticleState> _particles;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
+
+    public ExhaustFireComponent(IParticleSystem<ParticleState> particles)
+    {
+        _particles = particles;
+    }
 
     public override void OnStart(Entity owner)
     {
@@ -41,20 +46,20 @@ public sealed class ExhaustFireComponent : Component
         const float alpha = 0.7f;
 
         Vector2 velMid = baseVel + Random.Shared.NextVector2(0, 1);
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(velMid, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, midColor * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.Glow, pos, midColor * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(velMid, ParticleType.Enemy));
 
         Vector2 vel1 = baseVel + perpVel + Random.Shared.NextVector2(0, 0.3f);
         Vector2 vel2 = baseVel - perpVel + Random.Shared.NextVector2(0, 0.3f);
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(vel1, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.LineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(vel2, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(vel1, ParticleType.Enemy));
-        GameServices.Particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
+        _particles.CreateParticle(Art.Glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
             new ParticleState(vel2, ParticleType.Enemy));
     }
 }

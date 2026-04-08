@@ -6,11 +6,19 @@ using Microsoft.Xna.Framework;
 namespace GeometryWars.Systems;
 
 // Handles the timing and positioning of enemy spawns.
-public static class EnemySpawner
+public sealed class EnemyDirector : ISpawnController
 {
-    private static float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
+    private readonly EntityWorld _world;
+    private readonly EntityFactory _factory;
+    private float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 
-    public static void Update(bool playerActive, Func<Vector2> getPlayerPosition)
+    public EnemyDirector(EntityWorld world, EntityFactory factory)
+    {
+        _world = world;
+        _factory = factory;
+    }
+
+    public void Update(bool playerActive, Func<Vector2> getPlayerPosition)
     {
         // 1. Difficulty Scaling
         if (_inverseSpawnChance > GameSettings.Enemy.Spawning.ChanceMin)
@@ -18,36 +26,36 @@ public static class EnemySpawner
 
         // 2. Early Gates
         if (!playerActive) return;
-        if (EntityManager.Count >= GameSettings.Performance.MaxEntities) return;
+        if (_world.Count >= GameSettings.Performance.MaxEntities) return;
 
         // 3. Spawning Logic
         UpdateEnemySpawns(getPlayerPosition);
         UpdateBlackHoleSpawns(getPlayerPosition);
     }
 
-    private static void UpdateEnemySpawns(Func<Vector2> getPlayerPosition)
+    private void UpdateEnemySpawns(Func<Vector2> getPlayerPosition)
     {
         if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
-            EntityManager.Add(Enemy.CreateWanderer(spawnPos));
+            _world.Add(_factory.CreateWanderer(spawnPos));
             GameServices.Audio.Play(Sound.Spawn, 0.15f);
         }
 
         if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
-            EntityManager.Add(Enemy.CreateSeeker(spawnPos, getPlayerPosition));
+            _world.Add(_factory.CreateSeeker(spawnPos, getPlayerPosition));
             GameServices.Audio.Play(Sound.Spawn, 0.2f);
         }
     }
 
-    private static void UpdateBlackHoleSpawns(Func<Vector2> getPlayerPosition)
+    private void UpdateBlackHoleSpawns(Func<Vector2> getPlayerPosition)
     {
-        if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles && 
+        if (_world.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles &&
             Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
         {
-            EntityManager.Add(new BlackHole(GetRandomSpawnPosition(getPlayerPosition())));
+            _world.Add(_factory.CreateBlackHole(GetRandomSpawnPosition(getPlayerPosition())));
             GameServices.Audio.Play(Sound.Spawn, 0.3f, -0.2f);
         }
     }
@@ -68,5 +76,5 @@ public static class EnemySpawner
         return pos;
     }
 
-    public static void Reset() => _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
+    public void Reset() => _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 }

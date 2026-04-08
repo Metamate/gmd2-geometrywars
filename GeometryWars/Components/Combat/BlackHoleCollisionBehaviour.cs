@@ -1,7 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -11,11 +10,13 @@ namespace GeometryWars.Components.Combat;
 public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
 {
     private int _hitpoints;
+    private readonly IParticleSystem<ParticleState> _particles;
     private TransformComponent _transform;
 
-    public BlackHoleCollisionBehaviour(int hitpoints)
+    public BlackHoleCollisionBehaviour(int hitpoints, IParticleSystem<ParticleState> particles)
     {
         _hitpoints = hitpoints;
+        _particles = particles;
     }
 
     public override void OnStart(Entity owner)
@@ -52,7 +53,7 @@ public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            GameServices.Particles.CreateParticle(Art.LineParticle, _transform.Position + 2f * sprayVel, color,
+            _particles.CreateParticle(Art.LineParticle, _transform.Position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }

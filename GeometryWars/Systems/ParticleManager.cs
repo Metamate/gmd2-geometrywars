@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Systems;
 
-public class ParticleManager<T>
+public class ParticleManager<T> : IParticleSystem<T>
 {
     private readonly Action<Particle> _updateParticle;
     private readonly Particle[] _list;

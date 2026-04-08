@@ -8,8 +8,14 @@ namespace GeometryWars.Components.Combat;
 // Handles collision response for enemies, including death effects and score.
 public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
 {
+    private readonly IScoreTracker _score;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
+
+    public EnemyCollisionBehaviour(IScoreTracker score)
+    {
+        _score = score;
+    }
 
     public override void OnStart(Entity owner)
     {
@@ -38,11 +44,11 @@ public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
         }
     }
 
-    private static void WasShot(Enemy enemy)
+    private void WasShot(Enemy enemy)
     {
         // Award score before killing (Kill() marks entity as expired).
-        PlayerStatus.AddPoints(enemy.PointValue);
-        PlayerStatus.IncreaseMultiplier();
+        _score.AddPoints(enemy.PointValue);
+        _score.IncreaseMultiplier();
 
         // Visual / audio effects live in Enemy.Kill() — no duplication needed.
         enemy.Kill();

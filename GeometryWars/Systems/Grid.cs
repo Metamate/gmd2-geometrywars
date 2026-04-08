@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Systems;
 
-public class Grid
+public class Grid : IGridField
 {
     private readonly Spring[] _springs;
     private readonly PointMass[,] _points;

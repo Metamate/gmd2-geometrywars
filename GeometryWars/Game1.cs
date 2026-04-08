@@ -1,4 +1,3 @@
-using System;
 using BloomPostprocess;
 using GMDCore;
 using GeometryWars.Services;
@@ -25,12 +24,6 @@ public sealed class Game1 : Core
     protected override void Initialize()
     {
         base.Initialize();
-
-        var particles = new ParticleManager<ParticleState>(GameSettings.Performance.MaxParticles, ParticleState.UpdateParticle);
-        Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.Performance.MaxGridPoints));
-        var grid = new Grid(GraphicsDevice.Viewport.Bounds, gridSpacing);
-
-        GameServices.Initialize(particles, grid);
 
         // Register a placeholder GameTime so FrameContext is non-null before the first tick.
         RegisterServices(new GameTime());

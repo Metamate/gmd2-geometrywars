@@ -36,6 +36,10 @@ public static class Extensions
     // Returns this vector scaled to exactly the given length.
     public static Vector2 ScaleTo(this Vector2 vector, float length)
     {
-        return vector * (length / vector.Length());
+        float lengthSq = vector.LengthSquared();
+        if (lengthSq < 0.000001f)
+            return Vector2.Zero;
+
+        return vector * (length / MathF.Sqrt(lengthSq));
     }
 }

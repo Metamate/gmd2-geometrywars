@@ -9,8 +9,16 @@ namespace GeometryWars.Components.Combat;
 // Follows the same pattern as EnemyCollisionBehaviour and BulletCollisionBehaviour.
 public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
 {
+    private readonly IEntitySweeper _sweeper;
+    private readonly ISpawnController _spawner;
     private PlayerShip _player;
     private PlayerRespawnBehaviour _respawn;
+
+    public PlayerCollisionBehaviour(IEntitySweeper sweeper, ISpawnController spawner)
+    {
+        _sweeper = sweeper;
+        _spawner = spawner;
+    }
 
     public override void OnStart(Entity owner)
     {
@@ -30,9 +38,10 @@ public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
         if (hitByEnemy || hitByBlackHole)
         {
             _respawn.HandleDeath();
-            EntityManager.KillAllEnemies();
-            if (hitByBlackHole) EntityManager.KillAllBlackHoles();
-            EnemySpawner.Reset();
+            _sweeper.KillAllEnemies();
+            if (hitByBlackHole)
+                _sweeper.KillAllBlackHoles();
+            _spawner.Reset();
         }
     }
 }

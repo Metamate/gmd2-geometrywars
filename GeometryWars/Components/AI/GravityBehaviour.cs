@@ -11,12 +11,14 @@ public sealed class GravityBehaviour : Component
 {
     private readonly float _range;
     private readonly float _force;
+    private readonly INeighborQuery _neighborQuery;
     private TransformComponent _transform;
 
-    public GravityBehaviour(float range, float force)
+    public GravityBehaviour(float range, float force, INeighborQuery neighborQuery)
     {
         _range = range;
         _force = force;
+        _neighborQuery = neighborQuery;
     }
 
     public override void OnStart(Entity owner)
@@ -26,7 +28,7 @@ public sealed class GravityBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        foreach (var entity in EntityManager.GetNearbyEntities(_transform.Position, _range))
+        foreach (var entity in _neighborQuery.GetNearbyEntities(_transform.Position, _range))
         {
             if (entity == owner || entity is BlackHole) continue;
 

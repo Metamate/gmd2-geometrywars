@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
@@ -7,7 +9,7 @@ public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
 
 public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
 {
-    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle)
+    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle, IReadOnlyList<BlackHole> blackHoles)
     {
         var vel = particle.State.Velocity;
         particle.Position += vel;
@@ -39,10 +41,14 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
 
         if (particle.State.Type != ParticleType.IgnoreGravity)
         {
-            foreach (var blackHole in EntityManager.BlackHoles)
+            for (int i = 0; i < blackHoles.Count; i++)
             {
+                var blackHole = blackHoles[i];
                 var dPos = blackHole.Transform.Position - pos;
                 float distance = dPos.Length();
+                if (distance < 0.001f)
+                    continue;
+
                 var n = dPos / distance;
                 vel += GameSettings.Physics.ParticleGravityForce * n / (distance * distance + GameSettings.Physics.ParticleGravityForce);
                 if (distance < GameSettings.Physics.ParticleOrbitalRange)

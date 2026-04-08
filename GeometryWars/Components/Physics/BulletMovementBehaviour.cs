@@ -1,7 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -10,8 +9,16 @@ namespace GeometryWars.Components.Physics;
 // Handles bullet-specific movement, screen bounds, and grid effects.
 public sealed class BulletMovementBehaviour : Component
 {
+    private readonly IParticleSystem<ParticleState> _particles;
+    private readonly IGridField _grid;
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
+
+    public BulletMovementBehaviour(IParticleSystem<ParticleState> particles, IGridField grid)
+    {
+        _particles = particles;
+        _grid = grid;
+    }
 
     public override void OnStart(Entity owner)
     {
@@ -29,11 +36,11 @@ public sealed class BulletMovementBehaviour : Component
             owner.IsExpired = true;
             for (int i = 0; i < GameSettings.Visuals.BulletDeathParticles; i++)
             {
-                GameServices.Particles.CreateParticle(Art.LineParticle, _transform.Position, Color.LightBlue, 50, 1,
+                _particles.CreateParticle(Art.LineParticle, _transform.Position, Color.LightBlue, 50, 1,
                     new ParticleState { Velocity = Random.Shared.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
             }
         }
 
-        GameServices.Grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * _rigidbody.Velocity.Length(), _transform.Position, GameSettings.Physics.BulletGridRadius);
+        _grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * _rigidbody.Velocity.Length(), _transform.Position, GameSettings.Physics.BulletGridRadius);
     }
 }
