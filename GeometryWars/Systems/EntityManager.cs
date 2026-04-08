@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,9 +14,8 @@ static class EntityManager
     private static readonly List<BlackHole> blackHoles = [];
     private static readonly List<Entity> pendingAdd = [];
     
-    // Fast path for collision detection: 
-    // We only keep track of entities that have a collider component.
-    private static readonly List<(Entity Entity, CircleColliderComponent Collider)> collidables = [];
+    // POLYMORPHIC list of collidables
+    private static readonly List<(Entity Entity, ColliderComponent Collider)> collidables = [];
 
     private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);
     private static bool isUpdating;
@@ -96,9 +96,8 @@ static class EntityManager
         else if (entity is BlackHole bh) blackHoles.Add(bh);
         else if (entity is Enemy e) enemies.Add(e);
 
-        // SYSTEM QUERY: Check if the new entity has a Collider component.
-        // If it does, we register it for the collision system.
-        var collider = entity.GetComponent<CircleColliderComponent>();
+        // SYSTEM QUERY: Look for any Collider base component
+        var collider = entity.GetComponent<ColliderComponent>();
         if (collider != null)
         {
             collidables.Add((entity, collider));
@@ -107,7 +106,6 @@ static class EntityManager
 
     private static void HandleCollisions()
     {
-        // Use our specialized 'collidables' list for O(n²) checks
         for (int i = 0; i < collidables.Count; i++)
         {
             var a = collidables[i];
@@ -118,8 +116,8 @@ static class EntityManager
                 var b = collidables[j];
                 if (b.Entity.IsExpired || !b.Collider.IsActive) continue;
 
-                float r = a.Collider.Radius + b.Collider.Radius;
-                if (Vector2.DistanceSquared(a.Entity.Position, b.Entity.Position) < r * r)
+                // Delegating math to the Registry which handles shape dispatching
+                if (CollisionRegistry.Intersects(a.Entity, a.Collider, b.Entity, b.Collider))
                 {
                     a.Entity.OnCollision(b.Entity);
                     b.Entity.OnCollision(a.Entity);
