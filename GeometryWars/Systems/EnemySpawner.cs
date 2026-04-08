@@ -8,39 +8,49 @@ public static class EnemySpawner
 {
     private static float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 
-    // isPlayerAlive guards spawning so enemies stop appearing during the death sequence.
-    // getPlayerPosition is a delegate passed to seekers so they track the live player
-    // position each frame without needing a direct reference to PlayerShip.
-    public static void Update(bool isPlayerAlive, Func<Vector2> getPlayerPosition)
+    public static void Update(bool playerActive, Func<Vector2> getPlayerPosition)
     {
-        if (isPlayerAlive && EntityManager.Count < GameSettings.Performance.MaxEntities)
+        if (!playerActive) return;
+
+        // Random spawn logic based on current difficulty chance
+        if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
         {
-            Vector2 playerPos = getPlayerPosition();
+            var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
+            
+            // 20% chance for a Seeker, 80% for a Wanderer
+            if (Random.Shared.Next(5) == 0)
+                EntityManager.Add(Enemy.CreateSeeker(spawnPos, getPlayerPosition));
+            else
+                EntityManager.Add(Enemy.CreateWanderer(spawnPos));
 
-            if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(GetSpawnPosition(playerPos), getPlayerPosition));
-
-            if (Random.Shared.Next((int)_inverseSpawnChance) == 0)
-                EntityManager.Add(Enemy.CreateWanderer(GetSpawnPosition(playerPos)));
-
-            if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles &&
-                Random.Shared.Next((int)GameSettings.Hazards.BlackHoleSpawnChance) == 0)
-                EntityManager.Add(new BlackHole(GetSpawnPosition(playerPos)));
+            GameServices.Audio.Play(Sound.Spawn, 0.2f);
         }
 
+        // Difficulty scaling
         if (_inverseSpawnChance > GameSettings.Enemy.Spawning.ChanceMin)
             _inverseSpawnChance -= GameSettings.Enemy.Spawning.ChanceDecay;
+
+        // Occasional black hole spawn
+        if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles && Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
+        {
+            EntityManager.Add(new BlackHole(GetRandomSpawnPosition(getPlayerPosition())));
+            GameServices.Audio.Play(Sound.Spawn, 0.3f, -0.2f);
+        }
     }
 
-    private static Vector2 GetSpawnPosition(Vector2 playerPosition)
+    private static Vector2 GetRandomSpawnPosition(Vector2 playerPosition)
     {
-        float minDistSq = GameSettings.Enemy.Spawning.MinDistance * GameSettings.Enemy.Spawning.MinDistance;
         Vector2 pos;
+        float minDistSq = GameSettings.Enemy.Spawning.MinDistance * GameSettings.Enemy.Spawning.MinDistance;
+        
         do
         {
-            pos = new Vector2(Random.Shared.Next((int)FrameContext.ScreenSize.X), Random.Shared.Next((int)FrameContext.ScreenSize.Y));
+            pos = new Vector2(
+                Random.Shared.Next((int)FrameContext.ScreenSize.X),
+                Random.Shared.Next((int)FrameContext.ScreenSize.Y));
         }
         while (Vector2.DistanceSquared(pos, playerPosition) < minDistSq);
+        
         return pos;
     }
 

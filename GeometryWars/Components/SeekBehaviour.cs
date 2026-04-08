@@ -28,7 +28,6 @@ public sealed class SeekBehaviour : IComponent
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
-        // TRUST: We assume components exist if the archetype was assembled correctly
         _rigidbody.Velocity += (_getTargetPosition() - _transform.Position).ScaleTo(_acceleration);
 
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)

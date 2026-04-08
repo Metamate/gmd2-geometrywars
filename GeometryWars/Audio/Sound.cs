@@ -9,21 +9,20 @@ namespace GeometryWars;
 static class Sound
 {
     public static Song Music { get; private set; }
-    private static SoundEffect[] explosions;
-    public static SoundEffect Explosion => explosions[Random.Shared.Next(explosions.Length)];
-    private static SoundEffect[] shots;
-    public static SoundEffect Shot => shots[Random.Shared.Next(shots.Length)];
-    private static SoundEffect[] spawns;
-    public static SoundEffect Spawn => spawns[Random.Shared.Next(spawns.Length)];
+    
+    private static SoundEffect[] _explosions;
+    private static SoundEffect[] _shots;
+    private static SoundEffect[] _spawns;
+
+    public static SoundEffect Explosion => _explosions[Random.Shared.Next(_explosions.Length)];
+    public static SoundEffect Shot      => _shots[Random.Shared.Next(_shots.Length)];
+    public static SoundEffect Spawn     => _spawns[Random.Shared.Next(_spawns.Length)];
+
     public static void Load(ContentManager content)
     {
-        MediaPlayer.Volume = 0.1f;
-        SoundEffect.MasterVolume = 0.1f;
         Music = content.Load<Song>("Audio/Music");
-        // Enumerable.Range + Select loads all numbered sound files into an array concisely.
-        // e.g. "Audio/explosion-01" through "Audio/explosion-08".
-        explosions = [.. Enumerable.Range(1, 8).Select(x => content.Load<SoundEffect>("Audio/explosion-0" + x))];
-        shots = [.. Enumerable.Range(1, 4).Select(x => content.Load<SoundEffect>("Audio/shoot-0" + x))];
-        spawns = [.. Enumerable.Range(1, 8).Select(x => content.Load<SoundEffect>("Audio/spawn-0" + x))];
+        _explosions = [.. Enumerable.Range(1, 8).Select(i => content.Load<SoundEffect>($"Audio/explosion-{i:D2}"))];
+        _shots      = [.. Enumerable.Range(1, 4).Select(i => content.Load<SoundEffect>($"Audio/shoot-{i:D2}"))];
+        _spawns     = [.. Enumerable.Range(1, 8).Select(i => content.Load<SoundEffect>($"Audio/spawn-{i:D2}"))];
     }
 }

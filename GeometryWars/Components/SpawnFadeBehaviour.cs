@@ -2,10 +2,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that handles the initial fade-in and state activation.
-/// Now interacts with SpriteComponent to apply visual fading.
-/// </summary>
 public sealed class SpawnFadeBehaviour : IComponent
 {
     private int _timeUntilStart;
@@ -25,8 +21,6 @@ public sealed class SpawnFadeBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        _sprite ??= owner.GetComponent<SpriteComponent>();
-
         if (_timeUntilStart > 0)
         {
             _timeUntilStart--;

@@ -4,10 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Systems;
 
-/// <summary>
-/// Tracks FPS, heap memory, and entity count.
-/// Toggle display on/off with F3 during play.
-/// </summary>
 public sealed class PerformanceMonitor
 {
     private int _frameCounter;

@@ -1,69 +1,88 @@
 using System.IO;
-using GeometryWars.Services;
 
 namespace GeometryWars;
 
 public static class PlayerStatus
 {
-    private const string HighScoreFilename = "highscore.txt";
+    private static int _score;
+    private static int _lives;
+    private static int _multiplier;
+    private static int _highScore;
+    private static float _multiplierTimer;
 
-    private static float _multiplierTimeLeft;
-    private static int _scoreForExtraLife;
+    private const string HighScoreFile = "highscore.txt";
+
+    public static int Score => _score;
+    public static int Lives => _lives;
+    public static int Multiplier => _multiplier;
+    public static int HighScore => _highScore;
+    public static bool IsGameOver => _lives <= 0;
 
     static PlayerStatus()
     {
-        HighScore = LoadHighScore();
-        Reset();
+        _highScore = LoadHighScore();
     }
-
-    public static int Lives { get; private set; }
-    public static int Score { get; private set; }
-    public static int Multiplier { get; private set; }
-    public static bool IsGameOver => Lives == 0;
-    public static int HighScore { get; private set; }
 
     public static void Reset()
     {
-        if (Score > HighScore)
-            SaveHighScore(HighScore = Score);
+        if (_score > _highScore)
+        {
+            _highScore = _score;
+            SaveHighScore(_highScore);
+        }
 
-        Score = 0;
-        Multiplier = 1;
-        Lives = GameSettings.Player.StartingLives;
-        _scoreForExtraLife = GameSettings.Player.ExtraLifeScore;
-        _multiplierTimeLeft = 0;
+        _score = 0;
+        _multiplier = 1;
+        _lives = GameSettings.Player.StartingLives;
+        _multiplierTimer = 0;
     }
 
     public static void Update()
     {
-        if (Multiplier > 1 && (_multiplierTimeLeft -= FrameContext.ElapsedSeconds) <= 0)
+        if (_multiplier > 1)
         {
-            _multiplierTimeLeft = GameSettings.Player.MultiplierExpiry;
-            Multiplier = 1;
+            _multiplierTimer += (float)FrameContext.Time.ElapsedGameTime.TotalSeconds;
+            if (_multiplierTimer > GameSettings.Player.MultiplierExpiry)
+            {
+                _multiplierTimer = 0;
+                ResetMultiplier();
+            }
         }
     }
 
     public static void AddPoints(int basePoints)
     {
-        Score += basePoints * Multiplier;
-        while (Score >= _scoreForExtraLife)
-        {
-            _scoreForExtraLife += GameSettings.Player.ExtraLifeScore;
-            Lives++;
-        }
+        if (IsGameOver) return;
+
+        _score += basePoints * _multiplier;
     }
 
     public static void IncreaseMultiplier()
     {
-        _multiplierTimeLeft = GameSettings.Player.MultiplierExpiry;
-        if (Multiplier < GameSettings.Player.MaxMultiplier) Multiplier++;
+        if (IsGameOver) return;
+
+        _multiplierTimer = 0;
+        if (_multiplier < GameSettings.Player.MaxMultiplier)
+            _multiplier++;
     }
 
-    public static void RemoveLife() => Lives--;
+    public static void ResetMultiplier()
+    {
+        _multiplier = 1;
+    }
+
+    public static void RemoveLife()
+    {
+        _lives--;
+    }
 
     private static int LoadHighScore()
-        => File.Exists(HighScoreFilename) && int.TryParse(File.ReadAllText(HighScoreFilename), out int s) ? s : 0;
+    {
+        return File.Exists(HighScoreFile) && int.TryParse(File.ReadAllText(HighScoreFile), out int score) ? score : 0;
+    }
 
     private static void SaveHighScore(int score)
-        => File.WriteAllText(HighScoreFilename, score.ToString());
+    {
+        File.WriteAllText(HighScoreFile, score.ToString());
+    }
 }

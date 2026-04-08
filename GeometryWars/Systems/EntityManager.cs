@@ -6,118 +6,114 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
-// Manages entity lifecycle: add, update, draw, remove.
 static class EntityManager
 {
-    private static readonly List<Entity> entities = [];
-    private static readonly List<Enemy> enemies = [];
-    private static readonly List<Bullet> bullets = [];
-    private static readonly List<BlackHole> blackHoles = [];
-    private static readonly List<Entity> pendingAdd = [];
+    private static readonly List<Entity> _entities = [];
+    private static readonly List<Enemy> _enemies = [];
+    private static readonly List<Bullet> _bullets = [];
+    private static readonly List<BlackHole> _blackHoles = [];
+    private static readonly List<Entity> _pendingAdd = [];
     
-    // POLYMORPHIC list of collidables
-    private static readonly List<(Entity Entity, ColliderComponent Collider)> collidables = [];
+    private static readonly List<(Entity Entity, ColliderComponent Collider)> _collidables = [];
 
-    private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);
-    private static bool isUpdating;
+    private static readonly ObjectPool<Bullet> _bulletPool = new(() => new Bullet(), 128);
+    private static bool _isUpdating;
 
-    private static readonly List<Entity> nearbyEntitiesBuffer = [];
+    private static readonly List<Entity> _nearbyEntitiesBuffer = [];
 
-    public static List<BlackHole> BlackHoles => blackHoles;
-    public static int Count => entities.Count;
-    public static int BlackHoleCount => blackHoles.Count;
+    public static List<BlackHole> BlackHoles => _blackHoles;
+    public static int Count => _entities.Count;
+    public static int BlackHoleCount => _blackHoles.Count;
 
     public static Bullet GetBullet(Vector2 position, Vector2 velocity)
     {
-        var bullet = bulletPool.Get();
+        var bullet = _bulletPool.Get();
         bullet.Reset(position, velocity);
         return bullet;
     }
 
     public static void Add(Entity entity)
     {
-        if (!isUpdating) RegisterEntity(entity);
-        else pendingAdd.Add(entity);
+        if (!_isUpdating) RegisterEntity(entity);
+        else _pendingAdd.Add(entity);
     }
 
     public static void Clear()
     {
-        entities.Clear();
-        enemies.Clear();
-        bullets.Clear();
-        blackHoles.Clear();
-        pendingAdd.Clear();
-        collidables.Clear();
+        _entities.Clear();
+        _enemies.Clear();
+        _bullets.Clear();
+        _blackHoles.Clear();
+        _pendingAdd.Clear();
+        _collidables.Clear();
     }
 
     public static void KillAllEnemies()
     {
-        for (int i = 0; i < enemies.Count; i++)
-            enemies[i].Kill();
+        for (int i = 0; i < _enemies.Count; i++)
+            _enemies[i].Kill();
     }
 
     public static void KillAllBlackHoles()
     {
-        for (int i = 0; i < blackHoles.Count; i++)
-            blackHoles[i].Kill();
+        for (int i = 0; i < _blackHoles.Count; i++)
+            _blackHoles[i].Kill();
     }
 
     public static void Update()
     {
-        isUpdating = true;
+        _isUpdating = true;
         HandleCollisions();
-        foreach (var entity in entities)
+        foreach (var entity in _entities)
             entity.Update();
-        isUpdating = false;
+        _isUpdating = false;
 
-        foreach (var entity in pendingAdd)
+        foreach (var entity in _pendingAdd)
             RegisterEntity(entity);
-        pendingAdd.Clear();
+        _pendingAdd.Clear();
 
-        foreach (var b in bullets)
-            if (b.IsExpired) bulletPool.Return(b);
+        foreach (var b in _bullets)
+            if (b.IsExpired) _bulletPool.Return(b);
 
-        entities.RemoveAll(e => e.IsExpired);
-        bullets.RemoveAll(b => b.IsExpired);
-        enemies.RemoveAll(e => e.IsExpired);
-        blackHoles.RemoveAll(bh => bh.IsExpired);
-        collidables.RemoveAll(c => c.Entity.IsExpired);
+        _entities.RemoveAll(e => e.IsExpired);
+        _bullets.RemoveAll(b => b.IsExpired);
+        _enemies.RemoveAll(e => e.IsExpired);
+        _blackHoles.RemoveAll(bh => bh.IsExpired);
+        _collidables.RemoveAll(c => c.Entity.IsExpired);
     }
 
     public static void Draw(SpriteBatch spriteBatch)
     {
-        foreach (var entity in entities)
+        foreach (var entity in _entities)
             entity.Draw(spriteBatch);
     }
 
     private static void RegisterEntity(Entity entity)
     {
-        entities.Add(entity);
-        if (entity is Bullet b) bullets.Add(b);
-        else if (entity is BlackHole bh) blackHoles.Add(bh);
-        else if (entity is Enemy e) enemies.Add(e);
+        _entities.Add(entity);
+        if (entity is Bullet b) _bullets.Add(b);
+        else if (entity is BlackHole bh) _blackHoles.Add(bh);
+        else if (entity is Enemy e) _enemies.Add(e);
 
-        // SYSTEM QUERY: Look for any Collider base component
         var collider = entity.GetComponent<ColliderComponent>();
         if (collider != null)
         {
-            collidables.Add((entity, collider));
+            _collidables.Add((entity, collider));
         }
     }
 
     private static void HandleCollisions()
     {
-        for (int i = 0; i < collidables.Count; i++)
+        for (int i = 0; i < _collidables.Count; i++)
         {
-            var a = collidables[i];
+            var a = _collidables[i];
             if (a.Entity.IsExpired || !a.Collider.IsActive) continue;
 
-            for (int j = i + 1; j < collidables.Count; j++)
+            for (int j = i + 1; j < _collidables.Count; j++)
             {
-                var b = collidables[j];
+                var b = _collidables[j];
                 if (b.Entity.IsExpired || !b.Collider.IsActive) continue;
 
-                // Delegating math to the Registry which handles shape dispatching
                 if (CollisionRegistry.Intersects(a.Entity, a.Collider, b.Entity, b.Collider))
                 {
                     a.Entity.OnCollision(b.Entity);
@@ -129,13 +125,13 @@ static class EntityManager
 
     public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
     {
-        nearbyEntitiesBuffer.Clear();
+        _nearbyEntitiesBuffer.Clear();
         float rSq = radius * radius;
-        for (int i = 0; i < entities.Count; i++)
+        for (int i = 0; i < _entities.Count; i++)
         {
-            if (Vector2.DistanceSquared(position, entities[i].Position) < rSq)
-                nearbyEntitiesBuffer.Add(entities[i]);
+            if (Vector2.DistanceSquared(position, _entities[i].Position) < rSq)
+                _nearbyEntitiesBuffer.Add(_entities[i]);
         }
-        return nearbyEntitiesBuffer;
+        return _nearbyEntitiesBuffer;
     }
 }

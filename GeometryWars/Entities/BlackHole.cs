@@ -9,8 +9,9 @@ public class BlackHole : Entity
 
     public BlackHole(Vector2 position)
     {
+        Transform.Position = position;
+        
         // Assembler: Plug in components
-        AddComponent(new TransformComponent(position));
         AddComponent(new RigidbodyComponent()); 
         AddComponent(new SpriteComponent(Art.BlackHole));
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));

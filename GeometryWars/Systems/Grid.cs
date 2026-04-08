@@ -5,15 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
-// Spring-mass cloth simulation used as a visual background distortion effect.
-//
-// Concepts:
-// 1. PointMass: A single point in space with velocity and mass.
-// 2. Spring: Connects two PointMasses and pulls them toward a target distance.
-// 3. Grid: A 2D mesh of points and springs.
-//
-// Note: See GridOptimized.cs for a high-performance version of this system
-// using Data Oriented Design (DOD) and Memory Locality.
 public class Grid
 {
     private readonly Spring[] _springs;
@@ -170,9 +161,9 @@ public class Grid
 
     private class PointMass(Vector3 position, float invMass)
     {
-        public Vector3 Position = position;
-        public Vector3 Velocity;
-        public float InverseMass = invMass;
+        public Vector3 Position { get; set; } = position;
+        public Vector3 Velocity { get; set; }
+        public float InverseMass { get; set; } = invMass;
         private Vector3 _acceleration;
         private float _damping = 0.98f;
 

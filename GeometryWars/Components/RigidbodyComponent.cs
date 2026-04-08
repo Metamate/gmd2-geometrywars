@@ -3,10 +3,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that handles physics integration (Velocity).
-/// Similar to Unity's Rigidbody, it manages movement forces.
-/// </summary>
 public sealed class RigidbodyComponent : IComponent
 {
     public Vector2 Velocity { get; set; }
@@ -26,10 +22,7 @@ public sealed class RigidbodyComponent : IComponent
 
     public void Update(Entity owner)
     {
-        // Integration
         _transform.Position += Velocity;
-
-        // Damping (Friction)
         Velocity *= _damping;
     }
 }

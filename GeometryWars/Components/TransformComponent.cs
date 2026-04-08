@@ -2,10 +2,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that defines an entity's existence in space.
-/// Unifies Position, Orientation (Rotation), and Scale.
-/// </summary>
 public sealed class TransformComponent : IComponent
 {
     public Vector2 Position { get; set; }

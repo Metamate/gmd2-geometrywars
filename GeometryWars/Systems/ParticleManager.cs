@@ -4,15 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars;
 
-// Manages a list of game particles.
-//
-// Removal Logic (Sifting):
-// When a particle dies, we swap it with the LAST living particle in the array.
-// This is a simple, high-performance way to keep the list contiguous without
-// needing complex circular buffers or moving every item in memory.
-//
-// Note: See ParticleManagerOptimized.cs for a high-performance version of 
-// this system using Data Oriented Design (DOD) and Memory Locality.
 public class ParticleManager<T>
 {
     private readonly Action<Particle> _updateParticle;
@@ -26,7 +17,6 @@ public class ParticleManager<T>
         _updateParticle = updateParticle;
         _list = new Particle[capacity];
 
-        // Pre-populate the array with objects we can reuse.
         for (int i = 0; i < capacity; i++)
             _list[i] = new Particle();
     }
@@ -39,17 +29,14 @@ public class ParticleManager<T>
             _updateParticle(p);
             p.PercentLife -= 1f / p.Duration;
 
-            // If dead, swap with the last living particle and decrease count.
             if (p.PercentLife < 0)
             {
-                // Note: We don't actually delete the object, we just swap
-                // its position in the array so it's outside the "living" range.
                 Particle last = _list[_count - 1];
                 _list[i] = last;
                 _list[_count - 1] = p;
 
                 _count--;
-                i--; // Process the particle we just swapped into this slot.
+                i--; 
             }
         }
     }
@@ -69,7 +56,6 @@ public class ParticleManager<T>
         }
         else
         {
-            // If the buffer is full, overwrite a random living particle.
             p = _list[Random.Shared.Next(0, _capacity)];
         }
 
@@ -95,13 +81,13 @@ public class ParticleManager<T>
 
     public class Particle
     {
-        public Texture2D Texture;
-        public Vector2 Position;
-        public float Orientation;
-        public Vector2 Scale;
-        public Color Tint;
-        public float Duration;
-        public float PercentLife;
-        public T State;
+        public Texture2D Texture { get; set; }
+        public Vector2 Position { get; set; }
+        public float Orientation { get; set; }
+        public Vector2 Scale { get; set; }
+        public Color Tint { get; set; }
+        public float Duration { get; set; }
+        public float PercentLife { get; set; }
+        public T State { get; set; }
     }
 }

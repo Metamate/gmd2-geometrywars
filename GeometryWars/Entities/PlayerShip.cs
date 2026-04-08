@@ -14,11 +14,9 @@ public class PlayerShip : Entity
 
     public PlayerShip()
     {
-        Vector2 position = FrameContext.ScreenSize / 2;
+        Transform.Position = FrameContext.ScreenSize / 2;
         Vector2 size = new(Art.Player.Width, Art.Player.Height);
 
-        // Assembler: Composition of specific capabilities
-        AddComponent(new TransformComponent(position));
         AddComponent(new RigidbodyComponent(damping: 0f));
         AddComponent(new ScreenClampBehaviour(size));
         AddComponent(new SpriteComponent(Art.Player));
@@ -62,14 +60,12 @@ public class PlayerShip : Entity
         int frames = PlayerStatus.IsGameOver ? GameSettings.Player.GameOverFrames : GameSettings.Player.RespawnFrames;
         _respawn.Kill(frames);
 
-        var pos = Transform?.Position ?? Vector2.Zero;
-
         Color yellow = new(0.8f, 0.8f, 0.4f);
         for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)
         {
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
-            GameServices.Particles.CreateParticle(Art.LineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize,
+            GameServices.Particles.CreateParticle(Art.LineParticle, Position, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize,
                 new ParticleState { Velocity = Random.Shared.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });
         }
     }

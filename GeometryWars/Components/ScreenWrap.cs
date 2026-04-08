@@ -14,8 +14,6 @@ public sealed class ScreenWrap : IComponent
 
     public void Update(Entity owner)
     {
-        if (_transform == null) return;
-
         var pos = _transform.Position;
         var size = FrameContext.ScreenSize;
 

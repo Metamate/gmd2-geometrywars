@@ -9,9 +9,7 @@ public class Bullet : Entity
 
     public Bullet()
     {
-        // Assembler: Plug in components
-        AddComponent(new TransformComponent(Vector2.Zero));
-        AddComponent(new RigidbodyComponent(damping: 1f));
+        _rigidbody = AddComponent(new RigidbodyComponent(damping: 1f));
         AddComponent(new SpriteComponent(Art.Bullet));
         AddComponent(new BulletMovementBehaviour());
         AddComponent(new BulletCollisionBehaviour());
@@ -25,11 +23,8 @@ public class Bullet : Entity
         // Lazy find our own component for the Reset helper
         _rigidbody ??= GetComponent<RigidbodyComponent>();
 
-        if (Transform != null)
-        {
-            Transform.Position = position;
-            Transform.Orientation = velocity.ToAngle();
-        }
+        Transform.Position = position;
+        Transform.Orientation = velocity.ToAngle();
         
         if (_rigidbody != null)
         {

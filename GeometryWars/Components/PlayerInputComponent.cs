@@ -13,7 +13,7 @@ public sealed class PlayerInputComponent : IComponent
     public void OnAdded(Entity owner)
     {
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
-        _transform = owner.GetComponent<TransformComponent>();
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner)
@@ -21,7 +21,6 @@ public sealed class PlayerInputComponent : IComponent
         if (owner is not PlayerShip player || player.IsDead)
             return;
 
-        // TRUST: We assume these were found in OnAdded
         _rigidbody.Velocity += GameSettings.Player.Speed * GameController.Movement;
 
         var aim = GameController.AimDirection(_transform.Position);

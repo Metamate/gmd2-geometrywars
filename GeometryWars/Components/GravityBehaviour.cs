@@ -22,9 +22,6 @@ public sealed class GravityBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        _transform ??= owner.Transform;
-        if (_transform == null) return;
-
         foreach (var entity in EntityManager.GetNearbyEntities(_transform.Position, _range))
         {
             if (entity == owner) continue;

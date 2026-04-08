@@ -28,8 +28,7 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         else if (other is Enemy e)
         {
             var otherTransform = e.Transform;
-            var otherRigidbody = e.GetComponent<RigidbodyComponent>();
-            if (otherTransform == null || otherRigidbody == null) return;
+            if (otherTransform == null) return;
 
             var d = _transform.Position - otherTransform.Position;
             _rigidbody.Velocity += 10 * d / (d.LengthSquared() + 1);

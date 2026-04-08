@@ -14,7 +14,7 @@ public sealed class PlayerRespawnBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner)

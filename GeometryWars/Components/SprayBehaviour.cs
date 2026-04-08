@@ -17,13 +17,11 @@ public sealed class SprayBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner)
     {
-        if (_transform == null) return;
-
         if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
         {
             Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));

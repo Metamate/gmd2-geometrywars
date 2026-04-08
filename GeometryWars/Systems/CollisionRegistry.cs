@@ -5,27 +5,18 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
 
-/// <summary>
-/// A registry that maps pairs of Collider types to their specific collision math.
-/// This allows the system to be "Open/Closed": you can add new shapes without
-/// modifying the Registry or the EntityManager.
-/// </summary>
 public static class CollisionRegistry
 {
-    // A delegate for the collision math function
     public delegate bool CollisionHandler(Entity a, ColliderComponent colA, Entity b, ColliderComponent colB);
 
-    // The lookup table: (TypeA, TypeB) -> Math Function
     private static readonly Dictionary<(Type, Type), CollisionHandler> _handlers = new();
 
     static CollisionRegistry()
     {
-        // Initialize with the standard primitive handlers
         Register<CircleColliderComponent, CircleColliderComponent>(CheckCircleCircle);
         Register<BoxColliderComponent, BoxColliderComponent>(CheckBoxBox);
         Register<CircleColliderComponent, BoxColliderComponent>(CheckCircleBox);
         
-        // Register the inverse for symmetry (Box vs Circle)
         Register<BoxColliderComponent, CircleColliderComponent>((eb, cb, ec, cc) => CheckCircleBox(ec, cc, eb, cb));
     }
 
@@ -43,11 +34,8 @@ public static class CollisionRegistry
             return handler(a, colA, b, colB);
         }
 
-        // Default to no collision if we don't have math for this pair
         return false;
     }
-
-    // --- Specific Math Implementations ---
 
     private static bool CheckCircleCircle(Entity a, ColliderComponent colA, Entity b, ColliderComponent colB)
     {

@@ -13,7 +13,6 @@ public class Game1 : Core
 
     public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
     {
-        // Disable VSync and FixedTimeStep for performance benchmarking.
         Graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
 
@@ -26,13 +25,11 @@ public class Game1 : Core
     {
         base.Initialize();
 
-        // Register stable services once.
         GameServices.Particles = new ParticleManager<ParticleState>(GameSettings.Performance.MaxParticles, ParticleState.UpdateParticle);
 
         Vector2 gridSpacing = new(MathF.Sqrt(GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height / GameSettings.Performance.MaxGridPoints));
         GameServices.Grid = new Grid(GraphicsDevice.Viewport.Bounds, gridSpacing);
 
-        // Seed frame context before the first tick.
         RegisterServices(new GameTime());
 
         SetState(new PlayState(this));
@@ -40,7 +37,6 @@ public class Game1 : Core
 
     protected override void Update(GameTime gameTime)
     {
-        // Performance and Mouse (UI) update every frame for smoothness.
         GameServices.Performance.Update(gameTime);
         Input.Mouse.UpdatePositionOnly();
 
@@ -53,10 +49,9 @@ public class Game1 : Core
         Sound.Load(Content);
     }
 
-    // The main logic tick (60Hz) handles the core input processing.
     protected override void OnUpdateInput()
     {
-        base.OnUpdateInput(); // calls Input.Update() for all devices
+        base.OnUpdateInput();
         GameController.Update();
     }
 
@@ -64,7 +59,6 @@ public class Game1 : Core
 
     protected override void RegisterServices(GameTime gameTime)
     {
-        // Refresh temporal frame-specific data.
         FrameContext.Time = gameTime;
         FrameContext.Viewport = GraphicsDevice.Viewport;
     }
