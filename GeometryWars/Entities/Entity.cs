@@ -7,19 +7,16 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars;
 
 // Base class for all game entities.
-//
-// PURE COMPONENT ARCHITECTURE:
-// The entity has zero built-in logic or spatial data. 
-// It is simply a container for a list of Components.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
 
+    public Color Tint { get; set; } = Color.White;
     public bool IsExpired { get; set; }
 
     // PERFORMANCE CACHE: Direct references to common components.
     public TransformComponent Transform { get; private set; }
-    public MovementComponent Movement { get; private set; }
+    public RigidbodyComponent Rigidbody { get; private set; }
 
     // Convenience helpers
     public Vector2 Position => Transform?.Position ?? Vector2.Zero;
@@ -47,7 +44,7 @@ public abstract class Entity
         _components.Add(component);
         
         if (component is TransformComponent tc) Transform = tc;
-        else if (component is MovementComponent mc) Movement = mc;
+        else if (component is RigidbodyComponent rc) Rigidbody = rc;
 
         component.OnAdded(this);
         return component;

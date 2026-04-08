@@ -10,7 +10,7 @@ public sealed class WanderBehaviour : IComponent
     private int _stepCounter;
     
     private TransformComponent _transform;
-    private MovementComponent _movement;
+    private RigidbodyComponent _rigidbody;
 
     public WanderBehaviour()
     {
@@ -19,13 +19,16 @@ public sealed class WanderBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
-        _movement = owner.GetComponent<MovementComponent>();
+        _transform = owner.Transform;
+        _rigidbody = owner.Rigidbody;
     }
 
     public void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null || _transform == null)
+        _transform ??= owner.Transform;
+        _rigidbody ??= owner.Rigidbody;
+
+        if (owner is not Enemy enemy || !enemy.IsActive || _rigidbody == null || _transform == null)
             return;
 
         if (_stepCounter-- <= 0)
@@ -42,7 +45,7 @@ public sealed class WanderBehaviour : IComponent
                              Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
         }
 
-        _movement.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
+        _rigidbody.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
         _transform.Orientation = _direction;
     }
 }

@@ -9,7 +9,7 @@ public sealed class SeekBehaviour : IComponent
     private readonly float _acceleration;
     
     private TransformComponent _transform;
-    private MovementComponent _movement;
+    private RigidbodyComponent _rigidbody;
 
     public SeekBehaviour(Func<Vector2> getTargetPosition, float acceleration)
     {
@@ -19,18 +19,21 @@ public sealed class SeekBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
-        _movement = owner.GetComponent<MovementComponent>();
+        _transform = owner.Transform;
+        _rigidbody = owner.Rigidbody;
     }
 
     public void Update(Entity owner)
     {
-        if (owner is not Enemy enemy || !enemy.IsActive || _movement == null || _transform == null)
+        _transform ??= owner.Transform;
+        _rigidbody ??= owner.Rigidbody;
+
+        if (owner is not Enemy enemy || !enemy.IsActive || _rigidbody == null || _transform == null)
             return;
 
-        _movement.Velocity += (_getTargetPosition() - _transform.Position).ScaleTo(_acceleration);
+        _rigidbody.Velocity += (_getTargetPosition() - _transform.Position).ScaleTo(_acceleration);
 
-        if (_movement.Velocity.LengthSquared() > 0.01f)
-            _transform.Orientation = _movement.Velocity.ToAngle();
+        if (_rigidbody.Velocity.LengthSquared() > 0.01f)
+            _transform.Orientation = _rigidbody.Velocity.ToAngle();
     }
 }

@@ -19,7 +19,7 @@ public class PlayerShip : Entity
 
         // Assembler: Composition of specific capabilities
         AddComponent(new TransformComponent(position));
-        AddComponent(new MovementComponent(damping: 0f));
+        AddComponent(new RigidbodyComponent(damping: 0f));
         AddComponent(new ScreenClampBehaviour(size));
         AddComponent(new SpriteComponent(Art.Player));
         AddComponent(new PlayerInputComponent());

@@ -11,7 +11,7 @@ public class BlackHole : Entity
     {
         // Assembler: Plug in components
         AddComponent(new TransformComponent(position));
-        AddComponent(new MovementComponent()); 
+        AddComponent(new RigidbodyComponent()); 
         AddComponent(new SpriteComponent(Art.BlackHole));
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));
         AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce));

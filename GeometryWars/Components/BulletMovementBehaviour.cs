@@ -7,20 +7,23 @@ namespace GeometryWars.Components;
 public sealed class BulletMovementBehaviour : IComponent
 {
     private TransformComponent _transform;
-    private MovementComponent _movement;
+    private RigidbodyComponent _rigidbody;
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
-        _movement = owner.GetComponent<MovementComponent>();
+        _transform = owner.Transform;
+        _rigidbody = owner.Rigidbody;
     }
 
     public void Update(Entity owner)
     {
-        if (_transform == null || _movement == null) return;
+        _transform ??= owner.Transform;
+        _rigidbody ??= owner.Rigidbody;
 
-        if (_movement.Velocity.LengthSquared() > 0.01f)
-            _transform.Orientation = _movement.Velocity.ToAngle();
+        if (_transform == null || _rigidbody == null) return;
+
+        if (_rigidbody.Velocity.LengthSquared() > 0.01f)
+            _transform.Orientation = _rigidbody.Velocity.ToAngle();
 
         if (!FrameContext.Viewport.Bounds.Contains(_transform.Position.ToPoint()))
         {
@@ -32,6 +35,6 @@ public sealed class BulletMovementBehaviour : IComponent
             }
         }
 
-        GameServices.Grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * _movement.Velocity.Length(), _transform.Position, GameSettings.Physics.BulletGridRadius);
+        GameServices.Grid.ApplyExplosiveForce(GameSettings.Physics.BulletGridForce * _rigidbody.Velocity.Length(), _transform.Position, GameSettings.Physics.BulletGridRadius);
     }
 }

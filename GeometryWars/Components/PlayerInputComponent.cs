@@ -7,21 +7,24 @@ namespace GeometryWars.Components;
 public sealed class PlayerInputComponent : IComponent
 {
     private int _cooldownRemaining = 0;
-    private MovementComponent _movement;
+    private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
     public void OnAdded(Entity owner)
     {
-        _movement = owner.GetComponent<MovementComponent>();
-        _transform = owner.GetComponent<TransformComponent>();
+        _rigidbody = owner.Rigidbody;
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner)
     {
-        if (owner is not PlayerShip player || player.IsDead || _movement == null || _transform == null)
+        _rigidbody ??= owner.Rigidbody;
+        _transform ??= owner.Transform;
+
+        if (owner is not PlayerShip player || player.IsDead || _rigidbody == null || _transform == null)
             return;
 
-        _movement.Velocity += GameSettings.Player.Speed * GameController.Movement;
+        _rigidbody.Velocity += GameSettings.Player.Speed * GameController.Movement;
 
         var aim = GameController.AimDirection(_transform.Position);
         if (GameController.IsShooting)
@@ -34,9 +37,9 @@ public sealed class PlayerInputComponent : IComponent
                 Shoot(owner, aim, _transform.Orientation);
             }
         }
-        else if (_movement.Velocity.LengthSquared() > 0.01f)
+        else if (_rigidbody.Velocity.LengthSquared() > 0.01f)
         {
-            _transform.Orientation = _movement.Velocity.ToAngle();
+            _transform.Orientation = _rigidbody.Velocity.ToAngle();
         }
 
         if (_cooldownRemaining > 0)

@@ -17,11 +17,12 @@ public sealed class GravityBehaviour : IComponent
 
     public void OnAdded(Entity owner)
     {
-        _transform = owner.GetComponent<TransformComponent>();
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner)
     {
+        _transform ??= owner.Transform;
         if (_transform == null) return;
 
         foreach (var entity in EntityManager.GetNearbyEntities(_transform.Position, _range))
@@ -31,19 +32,19 @@ public sealed class GravityBehaviour : IComponent
             if (entity is Enemy enemy && !enemy.IsActive)
                 continue;
 
-            var targetTransform = entity.GetComponent<TransformComponent>();
-            var targetMovement = entity.GetComponent<MovementComponent>();
+            var targetTransform = entity.Transform;
+            var targetRigidbody = entity.Rigidbody;
             
-            if (targetTransform == null || targetMovement == null) continue;
+            if (targetTransform == null || targetRigidbody == null) continue;
 
             if (entity is Bullet)
             {
-                targetMovement.Velocity += (targetTransform.Position - _transform.Position).ScaleTo(0.3f);
+                targetRigidbody.Velocity += (targetTransform.Position - _transform.Position).ScaleTo(0.3f);
             }
             else
             {
                 var dPos = _transform.Position - targetTransform.Position;
-                targetMovement.Velocity += dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range));
+                targetRigidbody.Velocity += dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range));
             }
         }
     }

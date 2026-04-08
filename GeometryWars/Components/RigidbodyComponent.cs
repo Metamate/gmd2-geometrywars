@@ -5,16 +5,16 @@ namespace GeometryWars.Components;
 
 /// <summary>
 /// Component that handles physics integration (Velocity).
-/// Interacts with the TransformComponent to update Position.
+/// Similar to Unity's Rigidbody, it manages movement forces.
 /// </summary>
-public sealed class MovementComponent : IComponent
+public sealed class RigidbodyComponent : IComponent
 {
-    public Vector2 Velocity;
+    public Vector2 Velocity { get; set; }
     
-    private TransformComponent _transform; // Cached
+    private TransformComponent _transform;
     private readonly float _damping;
 
-    public MovementComponent(float damping = 1f)
+    public RigidbodyComponent(float damping = 1f)
     {
         _damping = damping;
     }
@@ -29,10 +29,10 @@ public sealed class MovementComponent : IComponent
         _transform ??= owner.Transform;
         if (_transform == null) return;
 
-        // 1. Integration
+        // Integration
         _transform.Position += Velocity;
 
-        // 2. Friction
+        // Damping (Friction)
         Velocity *= _damping;
     }
 }

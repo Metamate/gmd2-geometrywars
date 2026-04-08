@@ -14,13 +14,14 @@ public class Enemy : Entity
     public Enemy(EnemyDef def, Vector2 position)
     {
         _def     = def;
+        Tint     = Color.Transparent;
 
         var tex = def.GetTexture();
         Vector2 size = new(tex.Width, tex.Height);
 
         // Assembler: Composition of specific capabilities
         AddComponent(new TransformComponent(position));
-        AddComponent(new MovementComponent(damping: GameSettings.Enemy.Damping));
+        AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         AddComponent(new ScreenClampBehaviour(size));
         
         var sprite = AddComponent(new SpriteComponent(tex));

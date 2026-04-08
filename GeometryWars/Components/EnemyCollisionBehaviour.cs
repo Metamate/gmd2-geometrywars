@@ -6,20 +6,23 @@ namespace GeometryWars.Components;
 
 public sealed class EnemyCollisionBehaviour : ICollisionComponent
 {
-    private MovementComponent _movement;
+    private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
     public void OnAdded(Entity owner)
     {
-        _movement = owner.GetComponent<MovementComponent>();
-        _transform = owner.GetComponent<TransformComponent>();
+        _rigidbody = owner.Rigidbody;
+        _transform = owner.Transform;
     }
 
     public void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {
-        if (owner is not Enemy enemy || _transform == null || _movement == null) return;
+        _rigidbody ??= owner.Rigidbody;
+        _transform ??= owner.Transform;
+
+        if (owner is not Enemy enemy || _transform == null || _rigidbody == null) return;
 
         if (other is Bullet || (other is BlackHole bh && bh.IsActive))
         {
@@ -27,11 +30,11 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         }
         else if (other is Enemy e)
         {
-            var otherTransform = e.GetComponent<TransformComponent>();
+            var otherTransform = e.Transform;
             if (otherTransform == null) return;
 
             var d = _transform.Position - otherTransform.Position;
-            _movement.Velocity += 10 * d / (d.LengthSquared() + 1);
+            _rigidbody.Velocity += 10 * d / (d.LengthSquared() + 1);
         }
     }
 
