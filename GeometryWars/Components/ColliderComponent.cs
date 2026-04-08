@@ -1,6 +1,4 @@
-using GeometryWars.Components;
-
-namespace GeometryWars;
+namespace GeometryWars.Components;
 
 /// <summary>
 /// Base class for all collision volumes.

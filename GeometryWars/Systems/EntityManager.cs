@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GeometryWars.Components;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,7 +15,6 @@ static class EntityManager
     private static readonly List<BlackHole> blackHoles = [];
     private static readonly List<Entity> pendingAdd = [];
     
-    // POLYMORPHIC list of collidables
     private static readonly List<(Entity Entity, ColliderComponent Collider)> collidables = [];
 
     private static readonly ObjectPool<Bullet> bulletPool = new(() => new Bullet(), 128);

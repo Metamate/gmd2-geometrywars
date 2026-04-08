@@ -1,4 +1,4 @@
-namespace GeometryWars;
+namespace GeometryWars.Components;
 
 public sealed class CircleColliderComponent : ColliderComponent
 {
