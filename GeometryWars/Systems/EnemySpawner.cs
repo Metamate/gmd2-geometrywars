@@ -10,28 +10,38 @@ public static class EnemySpawner
 
     public static void Update(bool playerActive, Func<Vector2> getPlayerPosition)
     {
-        if (!playerActive) return;
-
-        // Random spawn logic based on current difficulty chance
-        if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
-        {
-            var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
-            
-            // 20% chance for a Seeker, 80% for a Wanderer
-            if (Random.Shared.Next(5) == 0)
-                EntityManager.Add(Enemy.CreateSeeker(spawnPos, getPlayerPosition));
-            else
-                EntityManager.Add(Enemy.CreateWanderer(spawnPos));
-
-            GameServices.Audio.Play(Sound.Spawn, 0.2f);
-        }
-
-        // Difficulty scaling
         if (_inverseSpawnChance > GameSettings.Enemy.Spawning.ChanceMin)
             _inverseSpawnChance -= GameSettings.Enemy.Spawning.ChanceDecay;
 
-        // Occasional black hole spawn
-        if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles && Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
+
+        if (!playerActive) return;
+        if (EntityManager.Count >= GameSettings.Performance.MaxEntities) return;
+
+        SpawnEnemies(getPlayerPosition);
+        SpawnBlackHoles(getPlayerPosition);
+    }
+
+    private static void SpawnEnemies(Func<Vector2> getPlayerPosition)
+    {
+        if (Random.Shared.NextSingle() < 1f / _inverseSpawnChance)
+        {
+            var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
+            EntityManager.Add(Enemy.CreateWanderer(spawnPos));
+            GameServices.Audio.Play(Sound.Spawn, 0.15f);
+        }
+
+        if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
+        {
+            var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
+            EntityManager.Add(Enemy.CreateSeeker(spawnPos, getPlayerPosition));
+            GameServices.Audio.Play(Sound.Spawn, 0.2f);
+        }
+    }
+
+    private static void SpawnBlackHoles(Func<Vector2> getPlayerPosition)
+    {
+        if (EntityManager.BlackHoleCount < GameSettings.Hazards.MaxBlackHoles && 
+            Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
         {
             EntityManager.Add(new BlackHole(GetRandomSpawnPosition(getPlayerPosition())));
             GameServices.Audio.Play(Sound.Spawn, 0.3f, -0.2f);

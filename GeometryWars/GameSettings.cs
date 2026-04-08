@@ -65,8 +65,8 @@ public static class GameSettings
         public const float BlackHoleGravityRange = 250f;
         public const float BlackHoleGravityForce = 2f;
         public const float BlackHoleGridRange    = 200f;
-        public const float BlackHoleSpawnChance  = 600f;
-        public const int   MaxBlackHoles         = 2;
+        public const float BlackHoleSpawnChance  = 200f;
+        public const int   MaxBlackHoles         = 5;
     }
 
     public static class Physics
