@@ -1,4 +1,5 @@
 using GMDCore;
+using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,26 +15,39 @@ public sealed class GameOverState : GameStateBase
 
     public override void Update()
     {
+        GameServices.Grid.Update();
+        GameServices.Particles.Update();
+
         if (GameController.WasConfirmPressed)
             _game.SetState(new PlayState(_game));
+    }
+
+    public override void DrawWorld(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+        GameServices.Grid.Draw(spriteBatch);
+        GameServices.Particles.Draw(spriteBatch);
+        spriteBatch.End();
     }
 
     public override void DrawHUD(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin();
 
-        string text = "GAME OVER";
-        Vector2 textSize = Art.Font.MeasureString(text);
-        spriteBatch.DrawString(Art.Font, text, FrameContext.ScreenSize / 2 - textSize, Color.White);
+        Vector2 center = FrameContext.ScreenSize / 2;
+        const float lineSpacing = 60f;
 
-        text = "Score: " + PlayerStatus.Score;
-        textSize = Art.Font.MeasureString(text);
-        spriteBatch.DrawString(Art.Font, text, FrameContext.ScreenSize / 2 - new Vector2(textSize.X, 0), Color.White);
-
-        text = "Press Enter to Restart";
-        textSize = Art.Font.MeasureString(text);
-        spriteBatch.DrawString(Art.Font, text, FrameContext.ScreenSize / 2 - textSize / 2, Color.White);
+        DrawCentered(spriteBatch, "GAME OVER",               center + new Vector2(0, -lineSpacing * 2), Color.White);
+        DrawCentered(spriteBatch, "Score: " + PlayerStatus.Score,    center + new Vector2(0, -lineSpacing),     Color.LightGray);
+        DrawCentered(spriteBatch, "High Score: " + PlayerStatus.HighScore, center,                           Color.LightGray);
+        DrawCentered(spriteBatch, "Press Enter to Restart",  center + new Vector2(0,  lineSpacing * 1.5f),   Color.Gray);
 
         spriteBatch.End();
+    }
+
+    private static void DrawCentered(SpriteBatch spriteBatch, string text, Vector2 center, Color color)
+    {
+        Vector2 size = Art.Font.MeasureString(text);
+        spriteBatch.DrawString(Art.Font, text, center - size / 2, color);
     }
 }
