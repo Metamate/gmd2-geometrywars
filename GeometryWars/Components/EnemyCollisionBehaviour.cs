@@ -4,9 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Handles collision logic specifically for Enemies.
-/// </summary>
 public sealed class EnemyCollisionBehaviour : ICollisionComponent
 {
     public void Update(Entity owner) { }
@@ -15,16 +12,17 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
     {
         if (owner is not Enemy enemy) return;
 
-        // Enemy dies if hit by a bullet or an active black hole
         if (other is Bullet || (other is BlackHole bh && bh.IsActive))
         {
             WasShot(enemy);
         }
         else if (other is Enemy e)
         {
-            // Push apart from other enemies
+            var movement = owner.GetComponent<MovementComponent>();
+            if (movement == null) return;
+
             var d = owner.Position - e.Position;
-            owner.Velocity += 10 * d / (d.LengthSquared() + 1);
+            movement.Velocity += 10 * d / (d.LengthSquared() + 1);
         }
     }
 

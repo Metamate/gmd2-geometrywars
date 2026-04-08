@@ -8,7 +8,7 @@ namespace GeometryWars;
 
 /// <summary>
 /// Archetype for Black Holes.
-/// Composed of visual, spatial, and collision components.
+/// Composed of visual, spatial, movement, and collision components.
 /// </summary>
 public class BlackHole : Entity
 {
@@ -21,6 +21,7 @@ public class BlackHole : Entity
         Position = position;
         
         // Assembler: Plug in the specific behaviours of a Black Hole
+        AddComponent(new MovementComponent()); // Stationary by default (damping 1, velocity 0)
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));
         AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce));
         AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange));
@@ -34,7 +35,11 @@ public class BlackHole : Entity
     {
         // Visual pulsing effect
         float scale = 1 + 0.1f * (float)Math.Sin(10 * FrameContext.TotalSeconds);
-        spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, scale, 0, 0);
+        
+        // Find orientation from MovementComponent
+        float orientation = GetComponent<MovementComponent>()?.Orientation ?? 0f;
+        
+        spriteBatch.Draw(Image, Position, null, Tint, orientation, Size / 2f, scale, 0, 0);
         
         // Call base to draw components (like the GlowOverlay)
         base.Draw(spriteBatch);

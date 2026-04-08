@@ -7,26 +7,22 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars;
 
 // Base class for all game entities.
-//
-// Component system: AddComponent() registers an IComponent to run each frame.
-// Every piece of logic (AI, Input, Physics) and Data (Colliders) is a component.
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
 
     public Texture2D Image { get; set; }
     public Color Tint { get; set; } = Color.White;
-
     public Vector2 Position { get; set; }
-    public Vector2 Velocity { get; set; }
-    public float Orientation { get; set; }
-
     public bool IsExpired { get; set; }
+
+    // PERFORMANCE CACHE: 
+    // Since movement is the most accessed component in the game, 
+    // we store a direct reference to avoid searching the list every frame.
+    public MovementComponent Movement { get; private set; }
 
     public Vector2 Size => Image == null ? Vector2.Zero : new Vector2(Image.Width, Image.Height);
 
-    // Helper to find the first component of a specific type.
-    // For performance-critical systems, consider pre-caching these references.
     public T GetComponent<T>() where T : class, IComponent 
         => _components.OfType<T>().FirstOrDefault();
 
@@ -48,12 +44,20 @@ public abstract class Entity
     public T AddComponent<T>(T component) where T : IComponent
     {
         _components.Add(component);
+        
+        // Caching: if this is a movement component, store the ref for fast access
+        if (component is MovementComponent mc)
+            Movement = mc;
+
         return component;
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(Image, Position, null, Tint, Orientation, Size / 2f, 1f, 0, 0);
+        // Use the cached reference for O(1) access to orientation
+        float orientation = Movement?.Orientation ?? 0f;
+
+        spriteBatch.Draw(Image, Position, null, Tint, orientation, Size / 2f, 1f, 0, 0);
 
         foreach (var comp in _components)
             if (comp is IDrawableComponent dc)

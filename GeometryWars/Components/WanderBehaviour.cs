@@ -4,10 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that steers an entity in random directions.
-/// Translates the original coroutine logic into a simple state-based component.
-/// </summary>
 public sealed class WanderBehaviour : IComponent
 {
     private float _direction;
@@ -23,7 +19,9 @@ public sealed class WanderBehaviour : IComponent
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
-        // Update direction after N steps.
+        var movement = owner.Movement;
+        if (movement == null) return;
+
         if (_stepCounter-- <= 0)
         {
             _stepCounter = GameSettings.Enemy.WandererStepsPerTick;
@@ -34,13 +32,14 @@ public sealed class WanderBehaviour : IComponent
             var bounds = FrameContext.Viewport.Bounds;
             bounds.Inflate(-owner.Size.X, -owner.Size.Y);
             
-            // Turn back towards center if hitting screen boundaries
             if (!bounds.Contains(owner.Position.ToPoint()))
                 _direction = (FrameContext.ScreenSize / 2 - owner.Position).ToAngle() + 
                              Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
         }
 
-        owner.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
-        owner.Orientation -= GameSettings.Enemy.WandererOrientationDecay;
+        movement.Velocity += MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity);
+        
+        // Face the wander direction
+        movement.Orientation = _direction;
     }
 }

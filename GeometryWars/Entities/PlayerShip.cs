@@ -22,7 +22,7 @@ public class PlayerShip : Entity
         Position = FrameContext.ScreenSize / 2;
 
         // Assembler: Plug in the specific behaviours of the Player
-        AddComponent(new VelocityMover(damping: 0f, clampToScreen: true));
+        AddComponent(new MovementComponent(damping: 0f, clampToScreen: true));
         AddComponent(new PlayerInputComponent());
         AddComponent(new ExhaustFireComponent());
         AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));

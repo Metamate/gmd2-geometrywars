@@ -25,8 +25,8 @@ public class Enemy : Entity
         Position = position;
         Tint     = Color.Transparent;
 
-        // Assembler: Common components for all enemies
-        AddComponent(new VelocityMover(damping: GameSettings.Enemy.Damping, clampToScreen: true));
+        // Assembler: Plug in components. Note that MovementComponent now owns Velocity.
+        AddComponent(new MovementComponent(damping: GameSettings.Enemy.Damping, clampToScreen: true));
         AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());
         AddComponent(new CircleColliderComponent(Image.Width / 2f));
@@ -48,7 +48,6 @@ public class Enemy : Entity
         return enemy;
     }
 
-    // Helper for EntityManager mass-kill logic
     public void Kill()
     {
         IsExpired = true;

@@ -3,10 +3,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that steers an entity towards a target position.
-/// Demonstrates how AI logic can be encapsulated into a reusable component.
-/// </summary>
 public sealed class SeekBehaviour : IComponent
 {
     private readonly Func<Vector2> _getTargetPosition;
@@ -20,13 +16,16 @@ public sealed class SeekBehaviour : IComponent
 
     public void Update(Entity owner)
     {
-        // Gate logic: only update if the enemy has finished spawning
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;
 
-        owner.Velocity += (_getTargetPosition() - owner.Position).ScaleTo(_acceleration);
+        // PERFORMANCE: Direct cached access
+        var movement = owner.Movement;
+        if (movement == null) return;
+
+        movement.Velocity += (_getTargetPosition() - owner.Position).ScaleTo(_acceleration);
         
-        if (owner.Velocity != Vector2.Zero)
-            owner.Orientation = owner.Velocity.ToAngle();
+        if (movement.Velocity.LengthSquared() > 0.01f)
+            movement.Orientation = movement.Velocity.ToAngle();
     }
 }

@@ -4,10 +4,6 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that spawns exhaust particles behind the player ship when moving.
-/// Demonstrates using components for visual effects linked to entity state.
-/// </summary>
 public sealed class ExhaustFireComponent : IComponent
 {
     public void Update(Entity owner)
@@ -15,15 +11,14 @@ public sealed class ExhaustFireComponent : IComponent
         if (owner is not PlayerShip player || player.IsDead)
             return;
 
-        if (owner.Velocity.LengthSquared() <= 0.1f)
+        var movement = owner.GetComponent<MovementComponent>();
+        if (movement == null || movement.Velocity.LengthSquared() <= 0.1f)
             return;
 
-        // Ensure orientation is up-to-date for the fire effect
-        owner.Orientation = owner.Velocity.ToAngle();
-        Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, owner.Orientation);
+        Quaternion rot = Quaternion.CreateFromYawPitchRoll(0f, 0f, movement.Orientation);
         double t = FrameContext.TotalSeconds;
 
-        Vector2 baseVel = owner.Velocity.ScaleTo(-3);
+        Vector2 baseVel = movement.Velocity.ScaleTo(-3);
         Vector2 perpVel = new Vector2(baseVel.Y, -baseVel.X) * (0.6f * (float)Math.Sin(t * 10));
         Color sideColor = new Color(200, 38, 9);
         Color midColor = new Color(255, 187, 30);
