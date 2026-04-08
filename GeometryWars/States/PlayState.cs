@@ -9,11 +9,11 @@ namespace GeometryWars.States;
 
 public sealed class PlayState : GameStateBase
 {
-    private readonly Core _game;
+    private readonly Game1 _game;
     private PlayerShip _player;
     private bool _paused;
 
-    public PlayState(Core game) => _game = game;
+    public PlayState(Game1 game) => _game = game;
 
     public override void Enter()
     {
@@ -67,7 +67,7 @@ public sealed class PlayState : GameStateBase
         spriteBatch.Draw(Art.Pointer, GameController.MousePosition, Color.White);
         spriteBatch.DrawString(Art.Font, "Lives: " + PlayerStatus.Lives, new Vector2(5), Color.White);
         GameServices.Performance.Draw(spriteBatch, Art.Font, new Vector2(5, 35), EntityManager.Count);
-
+        
         DrawRightAligned(spriteBatch, "Score: " + PlayerStatus.Score, 5);
         DrawRightAligned(spriteBatch, "Multiplier: " + PlayerStatus.Multiplier, 35);
 
