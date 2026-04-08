@@ -1,4 +1,5 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
 
@@ -8,18 +9,27 @@ namespace GeometryWars.Components.Combat;
 // Follows the same pattern as EnemyCollisionBehaviour and BulletCollisionBehaviour.
 public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
 {
+    private PlayerShip _player;
+    private PlayerRespawnBehaviour _respawn;
+
+    public override void OnAdded(Entity owner)
+    {
+        _player  = owner as PlayerShip;
+        _respawn = owner.GetComponent<PlayerRespawnBehaviour>();
+    }
+
     public override void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {
-        if (owner is not PlayerShip player || player.IsDead) return;
+        if (_player == null || _player.IsDead) return;
 
-        bool hitByEnemy   = other is Enemy e && e.IsActive;
+        bool hitByEnemy     = other is Enemy e && e.IsActive;
         bool hitByBlackHole = other is BlackHole;
 
         if (hitByEnemy || hitByBlackHole)
         {
-            player.Kill();
+            _respawn.HandleDeath();
             EntityManager.KillAllEnemies();
             if (hitByBlackHole) EntityManager.KillAllBlackHoles();
             EnemySpawner.Reset();
