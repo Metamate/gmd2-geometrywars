@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class TransformComponent : IComponent
+public sealed class TransformComponent : Component
 {
     public Vector2 Position { get; set; }
     public float Orientation { get; set; }
@@ -15,6 +15,5 @@ public sealed class TransformComponent : IComponent
         Scale = scale;
     }
 
-    public void OnAdded(Entity owner) { }
-    public void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 }

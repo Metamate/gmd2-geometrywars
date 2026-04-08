@@ -3,7 +3,7 @@ using GeometryWars.Services;
 
 namespace GeometryWars.Components;
 
-public sealed class PlayerRespawnBehaviour : IComponent
+public sealed class PlayerRespawnBehaviour : Component
 {
     private int _framesUntilRespawn = 0;
     private TransformComponent _transform;
@@ -12,12 +12,12 @@ public sealed class PlayerRespawnBehaviour : IComponent
 
     public void Kill(int frames) => _framesUntilRespawn = frames;
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (IsDead)
         {

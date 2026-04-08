@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class SpawnFadeBehaviour : IComponent
+public sealed class SpawnFadeBehaviour : Component
 {
     private int _timeUntilStart;
     private readonly int _spawnDelay;
@@ -14,12 +14,17 @@ public sealed class SpawnFadeBehaviour : IComponent
         _timeUntilStart = spawnDelay;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _sprite = owner.GetComponent<SpriteComponent>();
+        
+        owner.SetAllComponentsActive(false);
+        IsActive = true; 
+        
+        if (_sprite != null) _sprite.IsActive = true;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (_timeUntilStart > 0)
         {
@@ -29,11 +34,13 @@ public sealed class SpawnFadeBehaviour : IComponent
             {
                 _sprite.Tint = Color.White * (1 - _timeUntilStart / (float)_spawnDelay);
             }
-        }
-        
-        if (owner is Enemy enemy)
-        {
-            enemy.IsActive = _timeUntilStart <= 0;
+
+            if (_timeUntilStart <= 0)
+            {
+                owner.SetAllComponentsActive(true);
+                
+                IsActive = false; 
+            }
         }
     }
 }

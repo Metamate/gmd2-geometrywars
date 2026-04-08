@@ -1,9 +1,6 @@
 namespace GeometryWars.Components;
 
-public abstract class ColliderComponent : IComponent
+public abstract class ColliderComponent : Component
 {
-    public bool IsActive { get; set; } = true;
-
-    public virtual void OnAdded(Entity owner) { }
-    public virtual void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 }

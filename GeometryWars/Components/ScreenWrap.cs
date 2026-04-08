@@ -3,16 +3,16 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class ScreenWrap : IComponent
+public sealed class ScreenWrap : Component
 {
     private TransformComponent _transform;
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         var pos = _transform.Position;
         var size = FrameContext.ScreenSize;

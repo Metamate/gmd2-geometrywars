@@ -1,9 +1,8 @@
-using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class RigidbodyComponent : IComponent
+public sealed class RigidbodyComponent : Component
 {
     public Vector2 Velocity { get; set; }
     
@@ -15,12 +14,12 @@ public sealed class RigidbodyComponent : IComponent
         _damping = damping;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         _transform.Position += Velocity;
         Velocity *= _damping;

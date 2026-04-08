@@ -4,18 +4,18 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class BulletMovementBehaviour : IComponent
+public sealed class BulletMovementBehaviour : Component
 {
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)
             _transform.Orientation = _rigidbody.Velocity.ToAngle();

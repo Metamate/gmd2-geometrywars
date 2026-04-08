@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components;
 
-public sealed class GlowOverlay : IComponent, IDrawableComponent
+public sealed class GlowOverlay : Component, IDrawableComponent
 {
     private readonly Texture2D _texture;
     private readonly Color _color;
@@ -15,12 +15,12 @@ public sealed class GlowOverlay : IComponent, IDrawableComponent
         _color   = color;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 
     public void Draw(Entity owner, SpriteBatch spriteBatch)
     {

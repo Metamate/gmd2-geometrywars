@@ -4,18 +4,18 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class EnemyCollisionBehaviour : ICollisionComponent
+public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
 {
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {
@@ -28,7 +28,8 @@ public sealed class EnemyCollisionBehaviour : ICollisionComponent
         else if (other is Enemy e)
         {
             var otherTransform = e.Transform;
-            if (otherTransform == null) return;
+            var otherRigidbody = e.GetComponent<RigidbodyComponent>();
+            if (otherTransform == null || otherRigidbody == null) return;
 
             var d = _transform.Position - otherTransform.Position;
             _rigidbody.Velocity += 10 * d / (d.LengthSquared() + 1);

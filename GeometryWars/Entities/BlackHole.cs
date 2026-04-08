@@ -5,13 +5,10 @@ namespace GeometryWars;
 
 public class BlackHole : Entity
 {
-    public bool IsActive => true;
-
     public BlackHole(Vector2 position)
     {
         Transform.Position = position;
         
-        // Assembler: Plug in components
         AddComponent(new RigidbodyComponent()); 
         AddComponent(new SpriteComponent(Art.BlackHole));
         AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));

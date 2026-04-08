@@ -4,18 +4,18 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class ExhaustFireComponent : IComponent
+public sealed class ExhaustFireComponent : Component
 {
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (owner is not PlayerShip player || player.IsDead)
             return;

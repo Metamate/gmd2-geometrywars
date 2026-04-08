@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class SeekBehaviour : IComponent
+public sealed class SeekBehaviour : Component
 {
     private readonly Func<Vector2> _getTargetPosition;
     private readonly float _acceleration;
@@ -17,13 +17,13 @@ public sealed class SeekBehaviour : IComponent
         _acceleration = acceleration;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;

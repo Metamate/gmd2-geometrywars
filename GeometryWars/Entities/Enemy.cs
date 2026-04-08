@@ -8,7 +8,6 @@ namespace GeometryWars;
 public class Enemy : Entity
 {
     private readonly EnemyDef _def;
-    public bool IsActive { get; set; }
     public int PointValue => _def.PointValue;
 
     public Enemy(EnemyDef def, Vector2 position)
@@ -19,12 +18,11 @@ public class Enemy : Entity
         var tex = def.GetTexture();
         Vector2 size = new(tex.Width, tex.Height);
 
-        // Assembler: Composition of specific capabilities
         AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         AddComponent(new ScreenClampBehaviour(size));
         
         var sprite = AddComponent(new SpriteComponent(tex));
-        sprite.Tint = Color.Transparent; // Correctly setting visual data on the SpriteComponent
+        sprite.Tint = Color.Transparent;
 
         AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         AddComponent(new EnemyCollisionBehaviour());

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class SprayBehaviour : IComponent
+public sealed class SprayBehaviour : Component
 {
     private float _sprayAngle = 0;
     private readonly float _gridRange;
@@ -15,12 +15,12 @@ public sealed class SprayBehaviour : IComponent
         _gridRange = gridRange;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
         {

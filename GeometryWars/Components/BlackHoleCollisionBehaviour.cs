@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
+public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
 {
     private int _hitpoints;
     private TransformComponent _transform;
@@ -14,12 +14,12 @@ public sealed class BlackHoleCollisionBehaviour : ICollisionComponent
         _hitpoints = hitpoints;
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
     }
 
-    public void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {

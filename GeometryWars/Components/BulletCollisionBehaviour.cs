@@ -1,10 +1,8 @@
 namespace GeometryWars.Components;
 
-public sealed class BulletCollisionBehaviour : ICollisionComponent
+public sealed class BulletCollisionBehaviour : Component, ICollisionComponent
 {
-    public void OnAdded(Entity owner) { }
-
-    public void Update(Entity owner) { }
+    public override void Update(Entity owner) { }
 
     public void OnCollision(Entity owner, Entity other)
     {

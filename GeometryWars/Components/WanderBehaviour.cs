@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components;
 
-public sealed class WanderBehaviour : IComponent
+public sealed class WanderBehaviour : Component
 {
     private float _direction;
     private int _stepCounter;
@@ -17,13 +17,13 @@ public sealed class WanderBehaviour : IComponent
         _direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
     }
 
-    public void OnAdded(Entity owner)
+    public override void OnAdded(Entity owner)
     {
         _transform = owner.Transform;
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
     }
 
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (owner is not Enemy enemy || !enemy.IsActive)
             return;

@@ -1,9 +1,6 @@
 namespace GeometryWars.Components;
 
-/// <summary>
-/// Component that automatically marks an entity as expired after a set duration.
-/// </summary>
-public sealed class LifetimeExpiry : IComponent
+public sealed class LifetimeExpiry : Component
 {
     private int _framesRemaining;
 
@@ -12,9 +9,7 @@ public sealed class LifetimeExpiry : IComponent
         _framesRemaining = frames;
     }
 
-    public void OnAdded(Entity owner) { }
-
-    public void Update(Entity owner)
+    public override void Update(Entity owner)
     {
         if (--_framesRemaining <= 0)
         {
