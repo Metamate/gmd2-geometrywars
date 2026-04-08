@@ -6,8 +6,7 @@ namespace GeometryWars;
 
 /// <summary>
 /// Abstracts raw hardware input into semantic game actions.
-/// Uses GameCore.Input (same pattern as Zelda / Pokemon) rather than
-/// reading hardware state directly.
+/// Uses Core.Input rather than reading hardware state directly.
 /// </summary>
 public static class GameController
 {
@@ -22,12 +21,6 @@ public static class GameController
 
     // Shooting: True if holding mouse button or using a controller/keyboard aim input
     public static bool IsShooting => GetIsShooting();
-
-    // Semantic Actions (Abstracted from specific keys)
-    public static bool WasBombPressed
-        => Core.Input.GamePad.WasButtonJustPressed(Buttons.LeftTrigger) ||
-           Core.Input.GamePad.WasButtonJustPressed(Buttons.RightTrigger) ||
-           Core.Input.Keyboard.WasKeyJustPressed(Keys.Space);
 
     public static bool WasPausePressed
         => Core.Input.Keyboard.WasKeyJustPressed(Keys.P) ||

@@ -124,6 +124,8 @@ static class EntityManager
         }
     }
 
+    // WARNING: Returns a shared internal buffer. Callers must not store or iterate the
+    // result after calling any other EntityManager method — use it immediately.
     public static List<Entity> GetNearbyEntities(Vector2 position, float radius)
     {
         _nearbyEntitiesBuffer.Clear();

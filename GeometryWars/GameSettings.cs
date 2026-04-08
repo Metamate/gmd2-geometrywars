@@ -18,10 +18,9 @@ public static class GameSettings
     public static class Player
     {
         public const float Speed = 8f;
-        public const int StartingLives = 1;
+        public const int StartingLives = 1; // debug: increase to 3 for release
         public const int RespawnFrames = 120;
         public const int GameOverFrames = 120;
-        public const int ExtraLifeScore = 2000;
         public const float MultiplierExpiry = 0.8f;
         public const int MaxMultiplier = 20;
     }

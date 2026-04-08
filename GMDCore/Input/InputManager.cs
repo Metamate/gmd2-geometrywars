@@ -2,7 +2,7 @@ namespace GMDCore.Input;
 
 /// <summary>
 /// Owns one instance of each input device and advances them together each logic tick.
-/// Access via GameCore.Input (analogous to Core.Input in Zelda / Pokemon).
+/// Access via Core.Input from anywhere in the game.
 /// </summary>
 public class InputManager
 {

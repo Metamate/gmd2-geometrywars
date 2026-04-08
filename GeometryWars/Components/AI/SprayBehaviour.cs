@@ -10,7 +10,7 @@ namespace GeometryWars.Components.AI;
 // Spawns orbital particles and applies grid distortion.
 public sealed class SprayBehaviour : Component
 {
-    private float _sprayAngle = 0;
+    private float _sprayAngle;
     private readonly float _gridRange;
     private TransformComponent _transform;
 
@@ -26,7 +26,7 @@ public sealed class SprayBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if ((FrameContext.Time.TotalGameTime.Milliseconds / 250) % 2 == 0)
+        if (((int)FrameContext.Time.TotalGameTime.TotalMilliseconds / 250) % 2 == 0)
         {
             Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));
             Color color = ColorUtil.HSVToColor(5, 0.5f, 0.8f);

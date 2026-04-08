@@ -12,7 +12,7 @@ public sealed class PerformanceMonitor
     private int _fps;
     private long _totalMemory;
 
-    public bool IsVisible { get; private set; } = false;
+    public bool IsVisible { get; private set; }
 
     public void Toggle() => IsVisible = !IsVisible;
 

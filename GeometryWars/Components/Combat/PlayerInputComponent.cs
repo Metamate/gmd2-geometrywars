@@ -11,7 +11,7 @@ namespace GeometryWars.Components.Combat;
 // Component that translates user input into movement and combat actions.
 public sealed class PlayerInputComponent : Component
 {
-    private int _cooldownRemaining = 0;
+    private int _cooldownRemaining;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;

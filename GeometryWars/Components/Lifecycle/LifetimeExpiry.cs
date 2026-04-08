@@ -3,7 +3,8 @@ using GeometryWars.Entities;
 
 namespace GeometryWars.Components.Lifecycle;
 
-// Automatically marks an entity as expired after a duration.
+// Automatically marks an entity as expired after a fixed number of frames.
+// At 60Hz, 60 frames = 1 second.
 public sealed class LifetimeExpiry : Component
 {
     private int _framesRemaining;
@@ -16,8 +17,6 @@ public sealed class LifetimeExpiry : Component
     public override void Update(Entity owner)
     {
         if (--_framesRemaining <= 0)
-        {
             owner.IsExpired = true;
-        }
     }
 }

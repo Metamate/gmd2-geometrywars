@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Combat;
 using GeometryWars.Components.Visuals;
@@ -26,8 +25,12 @@ public abstract class Entity
         Transform = AddComponent(new TransformComponent(Vector2.Zero));
     }
 
-    public T GetComponent<T>() where T : class, IComponent 
-        => _components.OfType<T>().FirstOrDefault();
+    public T GetComponent<T>() where T : class, IComponent
+    {
+        for (int i = 0; i < _components.Count; i++)
+            if (_components[i] is T t) return t;
+        return null;
+    }
 
     public void Update()
     {
@@ -41,7 +44,7 @@ public abstract class Entity
     }
 
     // Broadcasts collision events to all active components.
-    public virtual void OnCollision(Entity other) 
+    public virtual void OnCollision(Entity other)
     {
         if (!IsActive) return;
 
@@ -77,11 +80,5 @@ public abstract class Entity
             if (_components[i].IsActive && _components[i] is IDrawableComponent dc)
                 dc.Draw(this, spriteBatch);
         }
-    }
-
-    public void SetAllComponentsActive(bool active)
-    {
-        foreach (var comp in _components)
-            comp.IsActive = active;
     }
 }

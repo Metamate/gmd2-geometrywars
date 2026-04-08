@@ -55,17 +55,14 @@ public abstract class Core : Game
         Input.Update();
     }
 
+    // Override to provide a game-specific exit condition.
+    // ShouldExit() is called after OnUpdateInput(), so Core.Input is current.
     protected virtual bool ShouldExit()
-    {
-        return GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-               Keyboard.GetState().IsKeyDown(Keys.Escape);
-    }
+        => Input.Keyboard.IsKeyDown(Keys.Escape) ||
+           Input.GamePad.IsButtonDown(Buttons.Back);
 
     protected override void Update(GameTime gameTime)
     {
-        if (ShouldExit())
-            Exit();
-
         if (!IsActive)
         {
             base.Update(gameTime);
@@ -85,6 +82,7 @@ public abstract class Core : Game
             _fixedGameTime.TotalGameTime += TimeSpan.FromSeconds(timeStep);
 
             OnUpdateInput();
+            if (ShouldExit()) { Exit(); return; }
             RegisterServices(_fixedGameTime);
             _activeState?.Update();
 
@@ -94,6 +92,8 @@ public abstract class Core : Game
         base.Update(gameTime);
     }
 
+    // Triggers MonoGame's DrawableGameComponent pipeline (e.g. BloomComponent).
+    // Must be called from Draw() after scene rendering is done.
     protected void RunComponents(GameTime gameTime) => base.Draw(gameTime);
 
     protected override void Draw(GameTime gameTime)
