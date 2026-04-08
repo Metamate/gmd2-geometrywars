@@ -26,5 +26,8 @@ public sealed class SeekBehaviour : IComponent
             return;
 
         _movement.Velocity += (_getTargetPosition() - owner.Position).ScaleTo(_acceleration);
+
+        if (_movement.Velocity.LengthSquared() > 0.01f)
+            _movement.Orientation = _movement.Velocity.ToAngle();
     }
 }
