@@ -8,5 +8,5 @@ namespace GeometryWars.Entities;
 // Archetype for the player-controlled ship.
 public class PlayerShip : Entity
 {
-    public bool IsDead => GetComponent<PlayerRespawnBehaviour>()?.IsDead ?? false;
+    public bool IsDead => GetComponent<PlayerLifeComponent>()?.IsDead ?? false;
 }

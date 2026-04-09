@@ -1,16 +1,15 @@
 using System;
 using GeometryWars.Components.Core;
-using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 
-namespace GeometryWars.Components.Combat;
+namespace GeometryWars.Components.Input;
 
-// Component that translates user input into movement and combat actions.
-public sealed class PlayerInputComponent : Component
+// Translates firing input into aim, cooldown handling, bullet spawning, and shot audio.
+public sealed class PlayerWeaponInputComponent : Component
 {
     private readonly IBulletSpawner _bulletSpawner;
     private readonly GameController _controller;
@@ -18,10 +17,9 @@ public sealed class PlayerInputComponent : Component
     private readonly Func<SoundEffect> _getShotSound;
     private int _cooldownRemaining;
     private PlayerShip _player;
-    private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public PlayerInputComponent(IBulletSpawner bulletSpawner, GameController controller, AudioManager audio, Func<SoundEffect> getShotSound)
+    public PlayerWeaponInputComponent(IBulletSpawner bulletSpawner, GameController controller, AudioManager audio, Func<SoundEffect> getShotSound)
     {
         _bulletSpawner = bulletSpawner;
         _controller = controller;
@@ -31,8 +29,7 @@ public sealed class PlayerInputComponent : Component
 
     public override void OnStart(Entity owner)
     {
-        _player    = owner as PlayerShip;
-        _rigidbody = owner.GetComponent<RigidbodyComponent>();
+        _player = owner as PlayerShip;
         _transform = owner.Transform;
     }
 
@@ -40,8 +37,6 @@ public sealed class PlayerInputComponent : Component
     {
         if (_player == null || _player.IsDead)
             return;
-
-        _rigidbody.AddForce(GameSettings.Player.Speed * _controller.Movement);
 
         var aim = _controller.AimDirection(_transform.Position);
         if (_controller.IsShooting)
@@ -53,10 +48,6 @@ public sealed class PlayerInputComponent : Component
                 _cooldownRemaining = GameSettings.Bullets.ShotCooldown;
                 Shoot(aim, _transform.Orientation);
             }
-        }
-        else if (_rigidbody.Velocity.LengthSquared() > 0.01f)
-        {
-            _transform.Orientation = _rigidbody.Velocity.ToAngle();
         }
 
         if (_cooldownRemaining > 0)
@@ -71,7 +62,7 @@ public sealed class PlayerInputComponent : Component
 
         Vector2 vel = MathUtil.FromPolar(aimAngle + randomSpread, GameSettings.Bullets.Speed);
         Vector2 offsetA = new(GameSettings.Bullets.OffsetX, -GameSettings.Bullets.OffsetY);
-        Vector2 offsetB = new(GameSettings.Bullets.OffsetX,  GameSettings.Bullets.OffsetY);
+        Vector2 offsetB = new(GameSettings.Bullets.OffsetX, GameSettings.Bullets.OffsetY);
 
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel);
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel);

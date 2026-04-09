@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GeometryWars.Components.AI;
 using GeometryWars.Components.Combat;
+using GeometryWars.Components.Input;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Components.Visuals;
@@ -46,17 +47,20 @@ public sealed class EntityFactory
         };
 
         Vector2 size = new(_context.Assets.Player.Width, _context.Assets.Player.Height);
-        var respawn = new PlayerRespawnBehaviour(_score, _particles, _grid, _context.Assets.LineParticle);
+        var respawnEffects = new PlayerRespawnEffectsComponent(_particles, _grid, _context.Assets.LineParticle);
+        var life = new PlayerLifeComponent(_score);
 
         player.AddComponent(new RigidbodyComponent(damping: 0f));
         player.AddComponent(new ScreenClampBehaviour(size, _context.Frame));
         player.AddComponent(new SpriteComponent(_context.Assets.Player));
-        player.AddComponent(new PlayerInputComponent(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
+        player.AddComponent(new PlayerMovementInputComponent(_context.Controller));
+        player.AddComponent(new PlayerWeaponInputComponent(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
         player.AddComponent(new ExhaustFireComponent(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
         player.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         player.AddComponent(new PlayerCollisionBehaviour(_world, _spawner));
-        player.AddComponent(respawn);
+        player.AddComponent(respawnEffects);
+        player.AddComponent(life);
 
         return player;
     }
@@ -66,7 +70,9 @@ public sealed class EntityFactory
         var bullet = new Bullet();
         bullet.AddComponent(new RigidbodyComponent(damping: 1f));
         bullet.AddComponent(new SpriteComponent(_context.Assets.Bullet));
-        bullet.AddComponent(new BulletMovementBehaviour(_particles, _grid, _context.Frame, _context.Assets.LineParticle));
+        bullet.AddComponent(new FaceVelocityBehaviour());
+        bullet.AddComponent(new BulletOffscreenExpiryComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        bullet.AddComponent(new VelocityGridForceBehaviour(_grid, GameSettings.Physics.BulletGridForce, GameSettings.Physics.BulletGridRadius));
         bullet.AddComponent(new BulletCollisionBehaviour());
         bullet.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         return bullet;
@@ -97,8 +103,10 @@ public sealed class EntityFactory
         blackHole.AddComponent(new SpriteComponent(_context.Assets.BlackHole));
         blackHole.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.DarkViolet * 0.4f));
         blackHole.AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
-        blackHole.AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange, _particles, _grid, _context.Frame, _context.Assets.LineParticle));
-        blackHole.AddComponent(new BlackHoleCollisionBehaviour(GameSettings.Hazards.BlackHoleHitpoints, _particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new BlackHoleSprayParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new BlackHoleGridPulseComponent(GameSettings.Hazards.BlackHoleGridRange, _grid));
+        blackHole.AddComponent(new BlackHoleHitEffectsComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new BlackHoleHealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
         blackHole.AddComponent(new CircleColliderComponent(_context.Assets.BlackHole.Width / 2f));
 
         return blackHole;

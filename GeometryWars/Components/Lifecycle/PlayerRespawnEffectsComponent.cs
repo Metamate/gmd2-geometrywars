@@ -1,0 +1,42 @@
+using System;
+using GeometryWars.Components.Core;
+using GeometryWars.Systems;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace GeometryWars.Components.Lifecycle;
+
+// Owns the player's death particles and respawn shockwave effects.
+public sealed class PlayerRespawnEffectsComponent : Component
+{
+    private readonly IParticleSystem<ParticleState> _particles;
+    private readonly IGridField _grid;
+    private readonly Texture2D _lineParticle;
+
+    public PlayerRespawnEffectsComponent(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
+    {
+        _particles = particles;
+        _grid = grid;
+        _lineParticle = lineParticle;
+    }
+
+    public void PlayDeath(Vector2 position)
+    {
+        Color yellow = new(0.8f, 0.8f, 0.4f);
+        for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)
+        {
+            float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
+            Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
+            _particles.CreateParticle(
+                _lineParticle, position, color,
+                GameSettings.Visuals.DeathParticleLife,
+                GameSettings.Visuals.DeathParticleSize,
+                new ParticleState { Velocity = Random.Shared.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });
+        }
+    }
+
+    public void PlayRespawn(Vector2 position)
+    {
+        _grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(position, 0), 50);
+    }
+}

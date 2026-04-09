@@ -12,7 +12,7 @@ public sealed class PlayerCollisionBehaviour : Component
     private readonly IEntitySweeper _sweeper;
     private readonly ISpawnController _spawner;
     private PlayerShip _player;
-    private PlayerRespawnBehaviour _respawn;
+    private PlayerLifeComponent _life;
 
     public PlayerCollisionBehaviour(IEntitySweeper sweeper, ISpawnController spawner)
     {
@@ -23,7 +23,7 @@ public sealed class PlayerCollisionBehaviour : Component
     public override void OnStart(Entity owner)
     {
         _player  = owner as PlayerShip;
-        _respawn = owner.GetComponent<PlayerRespawnBehaviour>();
+        _life = owner.GetComponent<PlayerLifeComponent>();
     }
 
     public override void OnCollision(Entity owner, Entity other)
@@ -35,7 +35,7 @@ public sealed class PlayerCollisionBehaviour : Component
 
         if (hitByEnemy || hitByBlackHole)
         {
-            _respawn.HandleDeath();
+            _life.HandleDeath();
             _sweeper.KillAllEnemies();
             if (hitByBlackHole)
                 _sweeper.KillAllBlackHoles();

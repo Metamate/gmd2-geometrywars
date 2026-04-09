@@ -1,48 +1,28 @@
 using System;
 using GeometryWars.Components.Core;
-using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components.Combat;
+namespace GeometryWars.Components.Visuals;
 
-// Handles damage and effects when a black hole is hit.
-public sealed class BlackHoleCollisionBehaviour : Component
+// Plays the particle burst used when a black hole is hit.
+public sealed class BlackHoleHitEffectsComponent : Component
 {
-    private int _hitpoints;
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
-    private TransformComponent _transform;
 
-    public BlackHoleCollisionBehaviour(int hitpoints, IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
+    public BlackHoleHitEffectsComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
-        _hitpoints = hitpoints;
         _particles = particles;
         _frame = frame;
         _lineParticle = lineParticle;
     }
 
-    public override void OnStart(Entity owner)
+    public void PlayHit(Vector2 position)
     {
-        _transform = owner.Transform;
-    }
-
-    public override void OnCollision(Entity owner, Entity other)
-    {
-        if (other is Bullet)
-        {
-            WasShot(owner);
-        }
-    }
-
-    private void WasShot(Entity owner)
-    {
-        if (--_hitpoints <= 0)
-            owner.IsExpired = true;
-
         float hue = (float)(3 * _frame.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
@@ -57,7 +37,7 @@ public sealed class BlackHoleCollisionBehaviour : Component
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            _particles.CreateParticle(_lineParticle, _transform.Position + 2f * sprayVel, color,
+            _particles.CreateParticle(_lineParticle, position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }

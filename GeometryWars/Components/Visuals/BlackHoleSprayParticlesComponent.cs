@@ -6,24 +6,20 @@ using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components.AI;
+namespace GeometryWars.Components.Visuals;
 
-// Spawns orbital particles and applies grid distortion.
-public sealed class SprayBehaviour : Component
+// Spawns the black hole's orbiting particle spray.
+public sealed class BlackHoleSprayParticlesComponent : Component
 {
     private float _sprayAngle;
-    private readonly float _gridRange;
     private readonly IParticleSystem<ParticleState> _particles;
-    private readonly IGridField _grid;
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
     private TransformComponent _transform;
 
-    public SprayBehaviour(float gridRange, IParticleSystem<ParticleState> particles, IGridField grid, FrameInfo frame, Texture2D lineParticle)
+    public BlackHoleSprayParticlesComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
-        _gridRange = gridRange;
         _particles = particles;
-        _grid = grid;
         _frame = frame;
         _lineParticle = lineParticle;
     }
@@ -45,6 +41,5 @@ public sealed class SprayBehaviour : Component
         }
 
         _sprayAngle -= MathHelper.TwoPi / 50f;
-        _grid.ApplyImplosiveForce((float)Math.Sin(_sprayAngle / 2) * 10 + 20, _transform.Position, _gridRange);
     }
 }
