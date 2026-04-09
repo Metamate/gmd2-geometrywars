@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using GeometryWars.Components.Lifecycle;
+using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -33,7 +36,10 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
             throw new System.InvalidOperationException("Bullet factory has not been configured.");
 
         var bullet = _bulletPool.Get();
-        bullet.Reset(position, velocity);
+        bullet.IsExpired = false;
+        bullet.Transform.Position = position;
+        bullet.Transform.Orientation = velocity.ToAngle();
+        bullet.GetComponent<RigidbodyComponent>().Velocity = velocity;
         return bullet;
     }
 
@@ -58,13 +64,25 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
     public void KillAllEnemies()
     {
         for (int i = 0; i < _catalog.Enemies.Count; i++)
-            _catalog.Enemies[i].Kill();
+        {
+            var destroyable = _catalog.Enemies[i].GetComponent<DestroyableComponent>();
+            if (destroyable != null)
+                destroyable.Destroy();
+            else
+                _catalog.Enemies[i].IsExpired = true;
+        }
     }
 
     public void KillAllBlackHoles()
     {
         for (int i = 0; i < _catalog.BlackHoles.Count; i++)
-            _catalog.BlackHoles[i].Kill();
+        {
+            var destroyable = _catalog.BlackHoles[i].GetComponent<DestroyableComponent>();
+            if (destroyable != null)
+                destroyable.Destroy();
+            else
+                _catalog.BlackHoles[i].IsExpired = true;
+        }
     }
 
     public void Update()

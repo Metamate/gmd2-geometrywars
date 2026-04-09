@@ -41,7 +41,7 @@ public sealed class PlayState : GameStateBase
 
         _session.Update();
 
-        if (_session.Score.IsGameOver && !_session.Player.IsDead)
+        if (_session.Score.IsGameOver && !_session.IsPlayerRespawning)
         {
             _session.Score.SaveHighScore();
             _game.SetState(new GameOverState(_game, _context, _session));

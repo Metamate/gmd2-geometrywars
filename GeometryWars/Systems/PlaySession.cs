@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Entities;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
@@ -16,6 +17,7 @@ public sealed class PlaySession
     public EntityFactory Factory { get; }
     public EnemyDirector Spawner { get; }
     public PlayerShip Player { get; }
+    public bool IsPlayerRespawning => Player.GetComponent<RespawnStateComponent>()?.IsRespawning ?? false;
 
     public PlaySession(PlayContext context, Rectangle viewportBounds)
     {
@@ -44,7 +46,7 @@ public sealed class PlaySession
     {
         Score.Update();
         Entities.Update();
-        Spawner.Update(!Player.IsDead, () => Player.Position);
+        Spawner.Update(!IsPlayerRespawning, () => Player.Position);
         Grid.Update();
         Particles.Update();
     }

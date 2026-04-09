@@ -1,35 +1,29 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
-using GeometryWars.Systems;
 
 namespace GeometryWars.Components.Combat;
 
-// Handles collision response for enemies, including death effects and score.
+// Handles collision response for enemies.
 public sealed class EnemyCollisionBehaviour : Component
 {
-    private readonly IScoreTracker _score;
+    private DestroyableComponent _destroyable;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public EnemyCollisionBehaviour(IScoreTracker score)
-    {
-        _score = score;
-    }
-
     public override void OnStart(Entity owner)
     {
+        _destroyable = owner.GetComponent<DestroyableComponent>();
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
     public override void OnCollision(Entity owner, Entity other)
     {
-        if (owner is not Enemy enemy) return;
-
         if (other is Bullet || (other is BlackHole bh && bh.IsActive))
         {
-            WasShot(enemy);
+            _destroyable?.Destroy();
         }
         else if (other is Enemy e)
         {
@@ -40,15 +34,5 @@ public sealed class EnemyCollisionBehaviour : Component
             var d = _transform.Position - otherTransform.Position;
             _rigidbody.AddForce(10 * d / (d.LengthSquared() + 1));
         }
-    }
-
-    private void WasShot(Enemy enemy)
-    {
-        // Award score before killing (Kill() marks entity as expired).
-        _score.AddPoints(enemy.PointValue);
-        _score.IncreaseMultiplier();
-
-        // Visual / audio effects live in Enemy.Kill() — no duplication needed.
-        enemy.Kill();
     }
 }

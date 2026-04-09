@@ -1,61 +1,60 @@
 using System;
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components.Lifecycle;
+namespace GeometryWars.Components.Visuals;
 
-// Plays enemy death VFX/SFX when the owning enemy is destroyed.
-// Subscribes to the Enemy.Killed event rather than being called directly,
-// keeping the entity decoupled from any specific component.
-public sealed class EnemyDeathEffectsComponent : Component
+// Plays a colorful burst of particles when the owner is destroyed.
+public sealed class PlayBurstParticlesOnDestroyedComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
-    private readonly Action _playExplosionSound;
     private readonly Texture2D _lineParticle;
-    private Enemy _enemy;
+    private readonly int _particleCount;
+    private readonly ParticleType _particleType;
+    private DestroyableComponent _destroyable;
 
-    public EnemyDeathEffectsComponent(IParticleSystem<ParticleState> particles, Action playExplosionSound, Texture2D lineParticle)
+    public PlayBurstParticlesOnDestroyedComponent(IParticleSystem<ParticleState> particles, Texture2D lineParticle, int particleCount, ParticleType particleType)
     {
         _particles = particles;
-        _playExplosionSound = playExplosionSound;
         _lineParticle = lineParticle;
+        _particleCount = particleCount;
+        _particleType = particleType;
     }
 
     public override void OnStart(Entity owner)
     {
-        if (_enemy != null)
-            _enemy.Killed -= OnKilled;
+        if (_destroyable != null)
+            _destroyable.Destroyed -= OnDestroyed;
 
-        _enemy = owner as Enemy;
-        if (_enemy != null)
-            _enemy.Killed += OnKilled;
+        _destroyable = owner.GetComponent<DestroyableComponent>();
+        if (_destroyable != null)
+            _destroyable.Destroyed += OnDestroyed;
     }
 
-    private void OnKilled(Enemy enemy)
+    private void OnDestroyed(Entity owner)
     {
-        var pos = enemy.Transform.Position;
+        var pos = owner.Transform.Position;
 
         float hue1 = Random.Shared.NextFloat(0, 6);
         float hue2 = (hue1 + Random.Shared.NextFloat(0, 2)) % 6f;
         Color color1 = ColorUtil.HSVToColor(hue1, 0.5f, 1);
         Color color2 = ColorUtil.HSVToColor(hue2, 0.5f, 1);
-        for (int i = 0; i < GameSettings.Visuals.EnemyDeathParticles; i++)
+        for (int i = 0; i < _particleCount; i++)
         {
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             var state = new ParticleState
             {
                 Velocity = Random.Shared.NextVector2(speed, speed),
-                Type = ParticleType.Enemy,
+                Type = _particleType,
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
             _particles.CreateParticle(_lineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
-
-        _playExplosionSound();
     }
 }

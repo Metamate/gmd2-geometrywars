@@ -1,4 +1,5 @@
 using System;
+using GeometryWars.Components.Audio;
 using GeometryWars.Components.AI;
 using GeometryWars.Components.Combat;
 using GeometryWars.Components.Input;
@@ -105,9 +106,10 @@ public sealed class EntityFactory
         blackHole.AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
         blackHole.AddComponent(new EmitOrbitingParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
         blackHole.AddComponent(new ApplyOscillatingImplosiveGridForceComponent(GameSettings.Hazards.BlackHoleGridRange, _grid));
+        blackHole.AddComponent(new DestroyableComponent());
         blackHole.AddComponent(new HealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
         blackHole.AddComponent(new TakeDamageOnBulletCollisionComponent());
-        blackHole.AddComponent(new ExpireWhenHealthDepletedComponent());
+        blackHole.AddComponent(new DestroyWhenHealthDepletedComponent());
         blackHole.AddComponent(new PlayHitParticlesOnDamageComponent(_particles, _context.Frame, _context.Assets.LineParticle));
         blackHole.AddComponent(new CircleColliderComponent(_context.Assets.BlackHole.Width / 2f));
 
@@ -116,7 +118,7 @@ public sealed class EntityFactory
 
     private Enemy CreateEnemyBase(Microsoft.Xna.Framework.Graphics.Texture2D texture, int pointValue, Vector2 position)
     {
-        var enemy = new Enemy(pointValue)
+        var enemy = new Enemy
         {
             Transform = { Position = position }
         };
@@ -127,8 +129,11 @@ public sealed class EntityFactory
         var sprite = enemy.AddComponent(new SpriteComponent(texture));
         sprite.Tint = Color.Transparent;
 
-        enemy.AddComponent(new EnemyCollisionBehaviour(_score));
-        enemy.AddComponent(new EnemyDeathEffectsComponent(_particles, PlayExplosionSound, _context.Assets.LineParticle));
+        enemy.AddComponent(new DestroyableComponent());
+        enemy.AddComponent(new EnemyCollisionBehaviour());
+        enemy.AddComponent(new AwardScoreOnDestroyedComponent(_score, pointValue));
+        enemy.AddComponent(new PlayBurstParticlesOnDestroyedComponent(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, ParticleType.Enemy));
+        enemy.AddComponent(new PlaySoundOnDestroyedComponent(PlayExplosionSound));
         enemy.AddComponent(new CircleColliderComponent(size.X / 2f));
         enemy.AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         return enemy;
