@@ -18,8 +18,6 @@ public sealed class EnemyDeathEffectsComponent : Component
         _playExplosionSound = playExplosionSound;
     }
 
-    public override void Update(Entity owner) { }
-
     public void Play(Enemy enemy)
     {
         var pos = enemy.Transform.Position;

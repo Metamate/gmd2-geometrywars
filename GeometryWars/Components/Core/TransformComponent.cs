@@ -16,6 +16,4 @@ public sealed class TransformComponent : Component
         Orientation = orientation;
         Scale = scale;
     }
-
-    public override void Update(Entity owner) { }
 }
