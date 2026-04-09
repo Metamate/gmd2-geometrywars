@@ -1,10 +1,11 @@
 using GeometryWars.Components.Physics;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Entities;
 
 // Archetype for player bullets.
-public class Bullet : Entity
+public sealed class Bullet : Entity
 {
     public void Reset(Vector2 position, Vector2 velocity)
     {

@@ -1,9 +1,8 @@
-using BloomPostprocess;
+using GeometryWars.Graphics;
 using GMDCore;
 using GeometryWars.Services;
 using GeometryWars.States;
 using Microsoft.Xna.Framework;
-using GeometryWars.Systems;
 
 namespace GeometryWars;
 
@@ -60,12 +59,5 @@ public sealed class Game1 : Core
         Runtime.Frame.Update(gameTime, GraphicsDevice.Viewport);
     }
 
-    protected override void Draw(GameTime gameTime)
-    {
-        GraphicsDevice.Clear(Color.Black);
-        _bloom.BeginDraw();
-        ActiveState?.DrawWorld(SpriteBatch);
-        RunComponents(gameTime);
-        ActiveState?.DrawHUD(SpriteBatch);
-    }
+    protected override void OnBeginDraw() => _bloom.BeginDraw();
 }

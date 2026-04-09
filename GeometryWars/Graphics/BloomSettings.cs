@@ -1,4 +1,4 @@
-namespace BloomPostprocess
+namespace GeometryWars.Graphics
 {
     /// <summary>
     /// Class holds all the settings used to tweak the bloom effect.

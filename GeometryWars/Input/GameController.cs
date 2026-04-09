@@ -2,7 +2,7 @@ using GMDCore.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace GeometryWars;
+namespace GeometryWars.Input;
 
 /// <summary>
 /// Abstracts raw hardware input into semantic game actions.

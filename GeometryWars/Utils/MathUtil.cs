@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars;
+namespace GeometryWars.Utils;
 
 public static class MathUtil
 {

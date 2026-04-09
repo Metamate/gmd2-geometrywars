@@ -1,5 +1,6 @@
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
+using GeometryWars.Utils;
 
 namespace GeometryWars.Components.Physics;
 

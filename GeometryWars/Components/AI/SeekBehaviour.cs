@@ -2,6 +2,7 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
@@ -29,9 +30,6 @@ public sealed class SeekBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (owner is not Enemy enemy)
-            return;
-
         _rigidbody.AddForce((_getTargetPosition() - _transform.Position).ScaleTo(_acceleration));
 
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)

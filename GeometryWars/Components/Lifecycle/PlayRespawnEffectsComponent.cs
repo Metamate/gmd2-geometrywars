@@ -2,6 +2,7 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -57,7 +58,7 @@ public sealed class PlayRespawnEffectsComponent : Component
 
     private void PlayRespawn(Vector2 position)
     {
-        _grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(position, 0), 50);
+        _grid.ApplyDepthPulse(position, 5000, 50);
     }
 
     private void PlayDeathAtOwner() => PlayDeath(_transform.Position);

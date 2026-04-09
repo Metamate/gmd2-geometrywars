@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars;
+namespace GeometryWars.Utils;
 
 // Converts HSV colour values to XNA Color.
 // Hue (h) is in [0, 6), saturation (s) and value (v) are in [0, 1].

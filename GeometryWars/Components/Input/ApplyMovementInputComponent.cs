@@ -2,7 +2,8 @@ using GeometryWars.Components.Core;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
-using GeometryWars.Services;
+using GeometryWars.Input;
+using GeometryWars.Utils;
 
 namespace GeometryWars.Components.Input;
 

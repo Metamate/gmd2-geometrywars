@@ -2,17 +2,21 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Lifecycle;
 
 // Plays enemy death VFX/SFX when the owning enemy is destroyed.
+// Subscribes to the Enemy.Killed event rather than being called directly,
+// keeping the entity decoupled from any specific component.
 public sealed class EnemyDeathEffectsComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly Action _playExplosionSound;
     private readonly Texture2D _lineParticle;
+    private Enemy _enemy;
 
     public EnemyDeathEffectsComponent(IParticleSystem<ParticleState> particles, Action playExplosionSound, Texture2D lineParticle)
     {
@@ -21,7 +25,17 @@ public sealed class EnemyDeathEffectsComponent : Component
         _lineParticle = lineParticle;
     }
 
-    public void Play(Enemy enemy)
+    public override void OnStart(Entity owner)
+    {
+        if (_enemy != null)
+            _enemy.Killed -= OnKilled;
+
+        _enemy = owner as Enemy;
+        if (_enemy != null)
+            _enemy.Killed += OnKilled;
+    }
+
+    private void OnKilled(Enemy enemy)
     {
         var pos = enemy.Transform.Position;
 

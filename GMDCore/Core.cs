@@ -95,9 +95,13 @@ public abstract class Core : Game
     // Must be called from Draw() after scene rendering is done.
     protected void RunComponents(GameTime gameTime) => base.Draw(gameTime);
 
+    // Override to inject work between Clear and DrawWorld (e.g. post-process capture).
+    protected virtual void OnBeginDraw() { }
+
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
+        OnBeginDraw();
         _activeState?.DrawWorld(SpriteBatch);
         RunComponents(gameTime);
         _activeState?.DrawHUD(SpriteBatch);

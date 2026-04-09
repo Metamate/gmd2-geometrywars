@@ -3,6 +3,7 @@ using GeometryWars.Components.Core;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.AI;
@@ -33,9 +34,6 @@ public sealed class WanderBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (owner is not Enemy enemy)
-            return;
-
         if (_stepCounter-- <= 0)
         {
             _stepCounter = GameSettings.Enemy.WandererStepsPerTick;

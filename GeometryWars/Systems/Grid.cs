@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -59,50 +60,58 @@ public class Grid : IGridField
     }
 
     public void ApplyDirectedForce(Vector2 force, Vector2 position, float radius)
-        => ApplyDirectedForce(new Vector3(force, 0), new Vector3(position, 0), radius);
-
-    public void ApplyDirectedForce(Vector3 force, Vector3 position, float radius)
     {
+        var force3 = new Vector3(force, 0);
+        var pos3 = new Vector3(position, 0);
         float rSq = radius * radius;
         foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, mass.Position);
+            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
             if (distSq < rSq)
-                mass.ApplyForce(10 * force / (10 + MathF.Sqrt(distSq)));
+                mass.ApplyForce(10 * force3 / (10 + MathF.Sqrt(distSq)));
         }
     }
 
     public void ApplyImplosiveForce(float force, Vector2 position, float radius)
-        => ApplyImplosiveForce(force, new Vector3(position, 0), radius);
-
-    public void ApplyImplosiveForce(float force, Vector3 position, float radius)
     {
+        var pos3 = new Vector3(position, 0);
         float rSq = radius * radius;
         foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, mass.Position);
+            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
             if (distSq < rSq)
             {
-                mass.ApplyForce(10 * force * (position - mass.Position) / (100 + distSq));
+                mass.ApplyForce(10 * force * (pos3 - mass.Position) / (100 + distSq));
                 mass.IncreaseDamping(0.6f);
             }
         }
     }
 
     public void ApplyExplosiveForce(float force, Vector2 position, float radius)
-        => ApplyExplosiveForce(force, new Vector3(position, 0), radius);
-
-    public void ApplyExplosiveForce(float force, Vector3 position, float radius)
     {
+        var pos3 = new Vector3(position, 0);
         float rSq = radius * radius;
         foreach (var mass in _points)
         {
-            float distSq = Vector3.DistanceSquared(position, mass.Position);
+            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
             if (distSq < rSq)
             {
-                mass.ApplyForce(100 * force * (mass.Position - position) / (10000 + distSq));
+                mass.ApplyForce(100 * force * (mass.Position - pos3) / (10000 + distSq));
                 mass.IncreaseDamping(0.6f);
             }
+        }
+    }
+
+    public void ApplyDepthPulse(Vector2 position, float force, float radius)
+    {
+        var force3 = new Vector3(0, 0, force);
+        var pos3 = new Vector3(position, 0);
+        float rSq = radius * radius;
+        foreach (var mass in _points)
+        {
+            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
+            if (distSq < rSq)
+                mass.ApplyForce(10 * force3 / (10 + MathF.Sqrt(distSq)));
         }
     }
 

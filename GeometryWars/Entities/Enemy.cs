@@ -1,12 +1,13 @@
 using System;
-using GeometryWars.Components.Lifecycle;
 
 namespace GeometryWars.Entities;
 
 // Archetype for enemy units.
-public class Enemy : Entity
+public sealed class Enemy : Entity
 {
     public int PointValue { get; }
+
+    public event Action<Enemy> Killed;
 
     public Enemy(int pointValue) => PointValue = pointValue;
 
@@ -14,7 +15,7 @@ public class Enemy : Entity
     {
         if (IsExpired) return;
 
-        GetComponent<EnemyDeathEffectsComponent>()?.Play(this);
+        Killed?.Invoke(this);
         IsExpired = true;
     }
 }
