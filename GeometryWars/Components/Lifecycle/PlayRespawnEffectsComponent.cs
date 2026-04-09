@@ -40,7 +40,7 @@ public sealed class PlayRespawnEffectsComponent : Component
         _lineParticle = lineParticle;
     }
 
-    public void PlayDeath(Vector2 position)
+    private void PlayDeath(Vector2 position)
     {
         Color yellow = new(0.8f, 0.8f, 0.4f);
         for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)
@@ -55,7 +55,7 @@ public sealed class PlayRespawnEffectsComponent : Component
         }
     }
 
-    public void PlayRespawn(Vector2 position)
+    private void PlayRespawn(Vector2 position)
     {
         _grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(position, 0), 50);
     }

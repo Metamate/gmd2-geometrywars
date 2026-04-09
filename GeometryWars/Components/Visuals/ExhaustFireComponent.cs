@@ -1,5 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
@@ -16,7 +17,7 @@ public sealed class ExhaustFireComponent : Component
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
     private readonly Texture2D _glow;
-    private PlayerShip _player;
+    private RespawnStateComponent _respawnState;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
@@ -30,14 +31,14 @@ public sealed class ExhaustFireComponent : Component
 
     public override void OnStart(Entity owner)
     {
-        _player    = owner as PlayerShip;
+        _respawnState = owner.GetComponent<RespawnStateComponent>();
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
     public override void PostUpdate(Entity owner)
     {
-        if (_player == null || _player.IsDead)
+        if (_respawnState?.IsRespawning == true)
             return;
 
         if (_rigidbody.Velocity.LengthSquared() <= 0.1f)

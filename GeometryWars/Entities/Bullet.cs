@@ -1,6 +1,4 @@
 using GeometryWars.Components.Physics;
-using GeometryWars.Components.Visuals;
-using GeometryWars.Components.Combat;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Entities;

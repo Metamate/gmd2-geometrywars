@@ -1,3 +1,4 @@
+using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Visuals;
 using GeometryWars.Entities;
@@ -13,8 +14,8 @@ public sealed class RespawnStateComponent : Component
     private TransformComponent _transform;
     private SpriteComponent _sprite;
 
-    public event System.Action Died;
-    public event System.Action Respawned;
+    public event Action Died;
+    public event Action Respawned;
 
     public RespawnStateComponent(IScoreTracker score)
     {
@@ -29,8 +30,8 @@ public sealed class RespawnStateComponent : Component
         _sprite = owner.GetComponent<SpriteComponent>();
     }
 
-    // Called by PlayerCollisionBehaviour when the ship is hit.
-    public void HandleDeath()
+    // Called when gameplay should remove a life and start the respawn timer.
+    public void BeginRespawn()
     {
         _score.RemoveLife();
 

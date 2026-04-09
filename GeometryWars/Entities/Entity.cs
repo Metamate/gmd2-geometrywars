@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using GeometryWars.Components.Core;
-using GeometryWars.Components.Combat;
-using GeometryWars.Components.Visuals;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

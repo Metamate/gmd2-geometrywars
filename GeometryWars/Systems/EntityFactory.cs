@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using GeometryWars.Components.AI;
 using GeometryWars.Components.Combat;
 using GeometryWars.Components.Input;
