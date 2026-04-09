@@ -1,4 +1,5 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
@@ -29,8 +30,8 @@ public sealed class PlayerCollisionBehaviour : Component
         if (_respawnState?.IsRespawning == true)
             return;
 
-        bool hitByEnemy     = other is Enemy e && e.IsActive;
-        bool hitByBlackHole = other is BlackHole;
+        bool hitByEnemy = other.IsActive && other.HasComponent<EnemyTagComponent>();
+        bool hitByBlackHole = other.HasComponent<BlackHoleTagComponent>();
 
         if (hitByEnemy || hitByBlackHole)
         {

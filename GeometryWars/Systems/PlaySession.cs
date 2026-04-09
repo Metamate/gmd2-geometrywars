@@ -16,7 +16,7 @@ public sealed class PlaySession
     public EntityWorld Entities { get; }
     public EntityFactory Factory { get; }
     public EnemyDirector Spawner { get; }
-    public PlayerShip Player { get; }
+    public Entity Player { get; }
     public bool IsPlayerRespawning => Player.GetComponent<RespawnStateComponent>()?.IsRespawning ?? false;
 
     public PlaySession(PlayContext context, Rectangle viewportBounds)

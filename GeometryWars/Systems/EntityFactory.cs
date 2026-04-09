@@ -2,6 +2,7 @@ using System;
 using GeometryWars.Components.Audio;
 using GeometryWars.Components.AI;
 using GeometryWars.Components.Combat;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Input;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
@@ -40,9 +41,9 @@ public sealed class EntityFactory
         _context = context;
     }
 
-    public PlayerShip CreatePlayer()
+    public Entity CreatePlayer()
     {
-        var player = new PlayerShip
+        var player = new Entity
         {
             Transform = { Position = _context.Frame.ScreenSize / 2 }
         };
@@ -66,9 +67,10 @@ public sealed class EntityFactory
         return player;
     }
 
-    public Bullet CreateBullet()
+    public Entity CreateBullet()
     {
-        var bullet = new Bullet();
+        var bullet = new Entity();
+        bullet.AddComponent(new BulletTagComponent());
         bullet.AddComponent(new RigidbodyComponent(damping: 1f));
         bullet.AddComponent(new SpriteComponent(_context.Assets.Bullet));
         bullet.AddComponent(new FaceVelocityComponent());
@@ -79,27 +81,28 @@ public sealed class EntityFactory
         return bullet;
     }
 
-    public Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
+    public Entity CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var enemy = CreateEnemyBase(_context.Assets.Seeker, GameSettings.Enemy.SeekerPointValue, position);
         enemy.AddComponent(new SeekBehaviour(getTargetPosition, GameSettings.Enemy.SeekerAcceleration));
         return enemy;
     }
 
-    public Enemy CreateWanderer(Vector2 position)
+    public Entity CreateWanderer(Vector2 position)
     {
         var enemy = CreateEnemyBase(_context.Assets.Wanderer, GameSettings.Enemy.WandererPointValue, position);
         enemy.AddComponent(new WanderBehaviour(_context.Frame, new Vector2(_context.Assets.Wanderer.Width, _context.Assets.Wanderer.Height)));
         return enemy;
     }
 
-    public BlackHole CreateBlackHole(Vector2 position)
+    public Entity CreateBlackHole(Vector2 position)
     {
-        var blackHole = new BlackHole
+        var blackHole = new Entity
         {
             Transform = { Position = position }
         };
 
+        blackHole.AddComponent(new BlackHoleTagComponent());
         blackHole.AddComponent(new RigidbodyComponent());
         blackHole.AddComponent(new SpriteComponent(_context.Assets.BlackHole));
         blackHole.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.DarkViolet * 0.4f));
@@ -116,14 +119,15 @@ public sealed class EntityFactory
         return blackHole;
     }
 
-    private Enemy CreateEnemyBase(Microsoft.Xna.Framework.Graphics.Texture2D texture, int pointValue, Vector2 position)
+    private Entity CreateEnemyBase(Microsoft.Xna.Framework.Graphics.Texture2D texture, int pointValue, Vector2 position)
     {
-        var enemy = new Enemy
+        var enemy = new Entity
         {
             Transform = { Position = position }
         };
 
         Vector2 size = new(texture.Width, texture.Height);
+        enemy.AddComponent(new EnemyTagComponent());
         enemy.AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
         enemy.AddComponent(new ScreenClampBehaviour(size, _context.Frame));
         var sprite = enemy.AddComponent(new SpriteComponent(texture));

@@ -1,4 +1,5 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Systems;
@@ -31,7 +32,7 @@ public sealed class GravityBehaviour : Component
     {
         _neighborQuery.ForEachNearbyEntity(_transform.Position, _range, entity =>
         {
-            if (entity == owner || entity is BlackHole) return;
+            if (entity == owner || entity.HasComponent<BlackHoleTagComponent>()) return;
 
             var targetTransform = entity.Transform;
             var targetRigidbody = entity.GetComponent<RigidbodyComponent>();
@@ -40,7 +41,7 @@ public sealed class GravityBehaviour : Component
 
             if (!targetRigidbody.IsActive) return;
 
-            if (entity is Bullet)
+            if (entity.HasComponent<BulletTagComponent>())
             {
                 targetRigidbody.AddForce((targetTransform.Position - _transform.Position).ScaleTo(0.3f));
             }

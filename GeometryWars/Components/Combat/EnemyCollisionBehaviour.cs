@@ -1,4 +1,5 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
@@ -21,14 +22,14 @@ public sealed class EnemyCollisionBehaviour : Component
 
     public override void OnCollision(Entity owner, Entity other)
     {
-        if (other is Bullet || (other is BlackHole bh && bh.IsActive))
+        if (other.HasComponent<BulletTagComponent>() || (other.HasComponent<BlackHoleTagComponent>() && other.IsActive))
         {
             _destroyable?.Destroy();
         }
-        else if (other is Enemy e)
+        else if (other.HasComponent<EnemyTagComponent>())
         {
-            var otherTransform = e.Transform;
-            var otherRigidbody = e.GetComponent<RigidbodyComponent>();
+            var otherTransform = other.Transform;
+            var otherRigidbody = other.GetComponent<RigidbodyComponent>();
             if (otherTransform == null || otherRigidbody == null) return;
 
             var d = _transform.Position - otherTransform.Position;

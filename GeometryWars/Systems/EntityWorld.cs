@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
@@ -15,31 +16,36 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
     private readonly EntityCatalog _catalog = new();
     private readonly CollisionSystem _collisions = new();
 
-    private ObjectPool<Bullet> _bulletPool;
+    private ObjectPool<Entity> _bulletPool;
     private bool _isUpdating;
 
-    public IReadOnlyList<BlackHole> BlackHoles => _catalog.BlackHoles;
+    public IReadOnlyList<Entity> BlackHoles => _catalog.BlackHoles;
     public int Count => _catalog.Count;
     public int BlackHoleCount => _catalog.BlackHoleCount;
 
-    public void ConfigureBulletFactory(System.Func<Bullet> createBullet)
+    public void ConfigureBulletFactory(System.Func<Entity> createBullet)
     {
         if (_bulletPool != null)
             throw new System.InvalidOperationException("Bullet factory has already been configured.");
 
-        _bulletPool = new ObjectPool<Bullet>(createBullet);
+        _bulletPool = new ObjectPool<Entity>(createBullet);
     }
 
-    public Bullet GetBullet(Vector2 position, Vector2 velocity)
+    public Entity GetBullet(Vector2 position, Vector2 velocity)
     {
         if (_bulletPool == null)
             throw new System.InvalidOperationException("Bullet factory has not been configured.");
 
         var bullet = _bulletPool.Get();
+        if (!bullet.HasComponent<BulletTagComponent>())
+            throw new System.InvalidOperationException("Bullet factory must create entities tagged as bullets.");
+
+        var rigidbody = bullet.GetComponent<RigidbodyComponent>() ?? throw new System.InvalidOperationException("Bullet entities must include a RigidbodyComponent.");
+
         bullet.IsExpired = false;
         bullet.Transform.Position = position;
         bullet.Transform.Orientation = velocity.ToAngle();
-        bullet.GetComponent<RigidbodyComponent>().Velocity = velocity;
+        rigidbody.Velocity = velocity;
         return bullet;
     }
 

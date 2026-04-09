@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GeometryWars.Components.Identity;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
@@ -11,14 +12,14 @@ namespace GeometryWars.Systems;
 internal sealed class EntityCatalog
 {
     private readonly List<Entity> _entities = [];
-    private readonly List<Enemy> _enemies = [];
-    private readonly List<Bullet> _bullets = [];
-    private readonly List<BlackHole> _blackHoles = [];
+    private readonly List<Entity> _enemies = [];
+    private readonly List<Entity> _bullets = [];
+    private readonly List<Entity> _blackHoles = [];
 
     public IReadOnlyList<Entity> Entities => _entities;
-    public IReadOnlyList<Enemy> Enemies => _enemies;
-    public IReadOnlyList<Bullet> Bullets => _bullets;
-    public IReadOnlyList<BlackHole> BlackHoles => _blackHoles;
+    public IReadOnlyList<Entity> Enemies => _enemies;
+    public IReadOnlyList<Entity> Bullets => _bullets;
+    public IReadOnlyList<Entity> BlackHoles => _blackHoles;
 
     public int Count => _entities.Count;
     public int BlackHoleCount => _blackHoles.Count;
@@ -27,9 +28,9 @@ internal sealed class EntityCatalog
     {
         _entities.Add(entity);
 
-        if (entity is Bullet bullet) _bullets.Add(bullet);
-        else if (entity is BlackHole blackHole) _blackHoles.Add(blackHole);
-        else if (entity is Enemy enemy) _enemies.Add(enemy);
+        if (entity.HasComponent<BulletTagComponent>()) _bullets.Add(entity);
+        else if (entity.HasComponent<BlackHoleTagComponent>()) _blackHoles.Add(entity);
+        else if (entity.HasComponent<EnemyTagComponent>()) _enemies.Add(entity);
     }
 
     public void Clear()
@@ -56,7 +57,7 @@ internal sealed class EntityCatalog
         }
     }
 
-    public void RemoveExpired(Action<Bullet> onBulletExpired)
+    public void RemoveExpired(Action<Entity> onBulletExpired)
     {
         for (int i = 0; i < _bullets.Count; i++)
         {

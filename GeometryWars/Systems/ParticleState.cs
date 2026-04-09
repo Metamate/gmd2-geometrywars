@@ -11,7 +11,7 @@ public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
 
 public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
 {
-    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle, IReadOnlyList<BlackHole> blackHoles, FrameInfo frame)
+    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle, IReadOnlyList<Entity> blackHoles, FrameInfo frame)
     {
         var vel = particle.State.Velocity;
         particle.Position += vel;

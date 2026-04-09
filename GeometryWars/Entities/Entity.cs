@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars.Entities;
 
 // Base class for all game objects.
-public abstract class Entity
+public class Entity
 {
     private readonly List<IComponent> _components = [];
 
@@ -18,7 +18,7 @@ public abstract class Entity
 
     public IReadOnlyList<IComponent> Components => _components;
 
-    protected Entity()
+    public Entity()
     {
         Transform = AddComponent(new TransformComponent(Vector2.Zero));
     }
@@ -29,6 +29,9 @@ public abstract class Entity
             if (_components[i] is T t) return t;
         return null;
     }
+
+    public bool HasComponent<T>() where T : class, IComponent
+        => GetComponent<T>() != null;
 
     public void Update()
     {

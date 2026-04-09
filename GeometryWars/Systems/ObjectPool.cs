@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace GeometryWars.Systems;
 
 // Generic stack-based object pool. Avoids per-frame heap allocations for
-// frequently created/destroyed objects (e.g. Bullet).
+// frequently created/destroyed objects (e.g. pooled entities).
 public sealed class ObjectPool<T> where T : class
 {
     private readonly Stack<T> _pool = new();
