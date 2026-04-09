@@ -1,4 +1,5 @@
 using GMDCore;
+using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,11 +10,13 @@ namespace GeometryWars.States;
 public sealed class GameOverState : GameStateBase
 {
     private readonly Game1 _game;
+    private readonly GameRuntime _runtime;
     private readonly PlaySession _session;
 
-    public GameOverState(Game1 game, PlaySession session)
+    public GameOverState(Game1 game, GameRuntime runtime, PlaySession session)
     {
         _game = game;
+        _runtime = runtime;
         _session = session;
     }
 
@@ -22,14 +25,14 @@ public sealed class GameOverState : GameStateBase
         _session.Grid.Update();
         _session.Particles.Update();
 
-        if (GameController.WasConfirmPressed)
-            _game.SetState(new PlayState(_game));
+        if (_runtime.Controller.WasConfirmPressed)
+            _game.SetState(new PlayState(_game, _runtime));
     }
 
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        _session.Grid.Draw(spriteBatch);
+        _session.Grid.Draw(spriteBatch, _runtime.Assets.Pixel);
         _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }
@@ -38,7 +41,7 @@ public sealed class GameOverState : GameStateBase
     {
         spriteBatch.Begin();
 
-        Vector2 center = FrameContext.ScreenSize / 2;
+        Vector2 center = _runtime.Frame.ScreenSize / 2;
         const float lineSpacing = 60f;
 
         DrawCentered(spriteBatch, "GAME OVER",               center + new Vector2(0, -lineSpacing * 2), Color.White);
@@ -49,9 +52,9 @@ public sealed class GameOverState : GameStateBase
         spriteBatch.End();
     }
 
-    private static void DrawCentered(SpriteBatch spriteBatch, string text, Vector2 center, Color color)
+    private void DrawCentered(SpriteBatch spriteBatch, string text, Vector2 center, Color color)
     {
-        Vector2 size = Art.Font.MeasureString(text);
-        spriteBatch.DrawString(Art.Font, text, center - size / 2, color);
+        Vector2 size = _runtime.Assets.Font.MeasureString(text);
+        spriteBatch.DrawString(_runtime.Assets.Font, text, center - size / 2, color);
     }
 }

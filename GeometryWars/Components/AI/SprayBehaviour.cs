@@ -1,8 +1,10 @@
 using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.AI;
 
@@ -13,13 +15,15 @@ public sealed class SprayBehaviour : Component
     private readonly float _gridRange;
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
+    private readonly GameRuntime _runtime;
     private TransformComponent _transform;
 
-    public SprayBehaviour(float gridRange, IParticleSystem<ParticleState> particles, IGridField grid)
+    public SprayBehaviour(float gridRange, IParticleSystem<ParticleState> particles, IGridField grid, GameRuntime runtime)
     {
         _gridRange = gridRange;
         _particles = particles;
         _grid = grid;
+        _runtime = runtime;
     }
 
     public override void OnStart(Entity owner)
@@ -29,12 +33,12 @@ public sealed class SprayBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        if (((int)FrameContext.Time.TotalGameTime.TotalMilliseconds / 250) % 2 == 0)
+        if (((int)_runtime.Frame.Time.TotalGameTime.TotalMilliseconds / 250) % 2 == 0)
         {
             Vector2 sprayVel = MathUtil.FromPolar(_sprayAngle, Random.Shared.NextFloat(12, 15));
             Color color = ColorUtil.HSVToColor(5, 0.5f, 0.8f);
             Vector2 pos = _transform.Position + 2f * new Vector2(sprayVel.Y, -sprayVel.X) + Random.Shared.NextVector2(4, 8);
-            _particles.CreateParticle(Art.LineParticle, pos, color, 190, 1.5f,
+            _particles.CreateParticle(_runtime.Assets.LineParticle, pos, color, 190, 1.5f,
                 new ParticleState { Velocity = sprayVel, LengthMultiplier = 1, Type = ParticleType.Enemy });
         }
 

@@ -112,7 +112,7 @@ public class Grid : IGridField
         return (new Vector2(v.X, v.Y) - _screenSize / 2f) * factor + _screenSize / 2;
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
         Color color = new(30, 30, 139, 85);
         for (int y = 1; y < _rows; y++)
@@ -133,18 +133,18 @@ public class Grid : IGridField
 
                     if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
                     {
-                        spriteBatch.DrawLine(left, mid, color, thickness);
-                        spriteBatch.DrawLine(mid, p, color, thickness);
+                        spriteBatch.DrawLine(pixel, left, mid, color, thickness);
+                        spriteBatch.DrawLine(pixel, mid, p, color, thickness);
                     }
                     else
-                        spriteBatch.DrawLine(left, p, color, thickness);
+                        spriteBatch.DrawLine(pixel, left, p, color, thickness);
                 }
 
                 if (y > 1)
                 {
                     Vector2 up = ToVec2(_points[x, y - 1].Position);
                     float thickness = x % 3 == 1 ? 3f : 1f;
-                    spriteBatch.DrawLine(up, p, color, thickness);
+                    spriteBatch.DrawLine(pixel, up, p, color, thickness);
                 }
 
                 if (x > 1 && y > 1)
@@ -152,8 +152,8 @@ public class Grid : IGridField
                     Vector2 up = ToVec2(_points[x, y - 1].Position);
                     Vector2 left = ToVec2(_points[x - 1, y].Position);
                     Vector2 upLeft = ToVec2(_points[x - 1, y - 1].Position);
-                    spriteBatch.DrawLine(0.5f * (upLeft + up), 0.5f * (left + p), color, 1f);
-                    spriteBatch.DrawLine(0.5f * (upLeft + left), 0.5f * (up + p), color, 1f);
+                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + up), 0.5f * (left + p), color, 1f);
+                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + left), 0.5f * (up + p), color, 1f);
                 }
             }
         }

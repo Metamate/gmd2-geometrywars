@@ -1,4 +1,4 @@
-using GMDCore;
+using GMDCore.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -6,53 +6,56 @@ namespace GeometryWars;
 
 /// <summary>
 /// Abstracts raw hardware input into semantic game actions.
-/// Uses Core.Input rather than reading hardware state directly.
+/// Uses an injected InputManager rather than reading hardware state directly.
 /// </summary>
-public static class GameController
+public sealed class GameController
 {
-    private static bool _isAimingWithMouse = true;
-    private static Point _lastLogicMousePos;
+    private readonly InputManager _input;
+    private bool _isAimingWithMouse = true;
+    private Point _lastLogicMousePos;
+
+    public GameController(InputManager input) => _input = input;
 
     // Movement: Vector2 derived from WASD or Left Stick
-    public static Vector2 Movement => GetMovementDirection();
+    public Vector2 Movement => GetMovementDirection();
 
     // Aiming: Vector2 derived from Mouse Position or Right Stick/Arrows
-    public static Vector2 AimDirection(Vector2 shipPosition) => GetAimDirection(shipPosition);
+    public Vector2 AimDirection(Vector2 shipPosition) => GetAimDirection(shipPosition);
 
     // Shooting: True if holding mouse button or using a controller/keyboard aim input
-    public static bool IsShooting => GetIsShooting();
+    public bool IsShooting => GetIsShooting();
 
-    public static bool WasPausePressed
-        => Core.Input.Keyboard.WasKeyJustPressed(Keys.P) ||
-           Core.Input.GamePad.WasButtonJustPressed(Buttons.Start);
+    public bool WasPausePressed
+        => _input.Keyboard.WasKeyJustPressed(Keys.P) ||
+           _input.GamePad.WasButtonJustPressed(Buttons.Start);
 
-    public static bool WasDebugTogglePressed
-        => Core.Input.Keyboard.WasKeyJustPressed(Keys.F3);
+    public bool WasDebugTogglePressed
+        => _input.Keyboard.WasKeyJustPressed(Keys.F3);
 
-    public static bool WasConfirmPressed
-        => Core.Input.Keyboard.WasKeyJustPressed(Keys.Enter) ||
-           Core.Input.GamePad.WasButtonJustPressed(Buttons.A);
+    public bool WasConfirmPressed
+        => _input.Keyboard.WasKeyJustPressed(Keys.Enter) ||
+           _input.GamePad.WasButtonJustPressed(Buttons.A);
 
-    public static bool WasExitPressed
-        => Core.Input.Keyboard.WasKeyJustPressed(Keys.Escape) ||
-           Core.Input.GamePad.WasButtonJustPressed(Buttons.Back);
+    public bool WasExitPressed
+        => _input.Keyboard.WasKeyJustPressed(Keys.Escape) ||
+           _input.GamePad.WasButtonJustPressed(Buttons.Back);
 
-    public static Vector2 MousePosition
-        => new(Core.Input.Mouse.X, Core.Input.Mouse.Y);
+    public Vector2 MousePosition
+        => new(_input.Mouse.X, _input.Mouse.Y);
 
     /// <summary>
     /// Updates the semantic state. Called once per logic frame (60Hz).
     /// </summary>
-    public static void Update()
+    public void Update()
     {
-        var mousePos = Core.Input.Mouse.Position;
+        var mousePos = _input.Mouse.Position;
 
         // Detect if the user is using the keyboard/gamepad to aim.
-        bool hasAimKeys = Core.Input.Keyboard.IsKeyDown(Keys.Left) ||
-                          Core.Input.Keyboard.IsKeyDown(Keys.Right) ||
-                          Core.Input.Keyboard.IsKeyDown(Keys.Up) ||
-                          Core.Input.Keyboard.IsKeyDown(Keys.Down);
-        bool hasAimStick = Core.Input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
+        bool hasAimKeys = _input.Keyboard.IsKeyDown(Keys.Left) ||
+                          _input.Keyboard.IsKeyDown(Keys.Right) ||
+                          _input.Keyboard.IsKeyDown(Keys.Up) ||
+                          _input.Keyboard.IsKeyDown(Keys.Down);
+        bool hasAimStick = _input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
 
         if (hasAimKeys || hasAimStick)
             _isAimingWithMouse = false;
@@ -62,15 +65,15 @@ public static class GameController
         _lastLogicMousePos = mousePos;
     }
 
-    private static Vector2 GetMovementDirection()
+    private Vector2 GetMovementDirection()
     {
-        Vector2 direction = Core.Input.GamePad.ThumbSticks.Left;
+        Vector2 direction = _input.GamePad.ThumbSticks.Left;
         direction.Y *= -1;
 
-        if (Core.Input.Keyboard.IsKeyDown(Keys.A)) direction.X -= 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.D)) direction.X += 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.W)) direction.Y -= 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.S)) direction.Y += 1;
+        if (_input.Keyboard.IsKeyDown(Keys.A)) direction.X -= 1;
+        if (_input.Keyboard.IsKeyDown(Keys.D)) direction.X += 1;
+        if (_input.Keyboard.IsKeyDown(Keys.W)) direction.Y -= 1;
+        if (_input.Keyboard.IsKeyDown(Keys.S)) direction.Y += 1;
 
         if (direction.LengthSquared() > 1)
             direction.Normalize();
@@ -78,7 +81,7 @@ public static class GameController
         return direction;
     }
 
-    private static Vector2 GetAimDirection(Vector2 shipPosition)
+    private Vector2 GetAimDirection(Vector2 shipPosition)
     {
         if (_isAimingWithMouse)
         {
@@ -86,26 +89,26 @@ public static class GameController
             return direction == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(direction);
         }
 
-        Vector2 aim = Core.Input.GamePad.ThumbSticks.Right;
+        Vector2 aim = _input.GamePad.ThumbSticks.Right;
         aim.Y *= -1;
 
-        if (Core.Input.Keyboard.IsKeyDown(Keys.Left)) aim.X -= 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.Right)) aim.X += 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.Up)) aim.Y -= 1;
-        if (Core.Input.Keyboard.IsKeyDown(Keys.Down)) aim.Y += 1;
+        if (_input.Keyboard.IsKeyDown(Keys.Left)) aim.X -= 1;
+        if (_input.Keyboard.IsKeyDown(Keys.Right)) aim.X += 1;
+        if (_input.Keyboard.IsKeyDown(Keys.Up)) aim.Y -= 1;
+        if (_input.Keyboard.IsKeyDown(Keys.Down)) aim.Y += 1;
 
         return aim == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(aim);
     }
 
-    private static bool GetIsShooting()
+    private bool GetIsShooting()
     {
         if (_isAimingWithMouse)
-            return Core.Input.Mouse.IsLeftButtonDown;
+            return _input.Mouse.IsLeftButtonDown;
 
-        return Core.Input.Keyboard.IsKeyDown(Keys.Left) ||
-               Core.Input.Keyboard.IsKeyDown(Keys.Right) ||
-               Core.Input.Keyboard.IsKeyDown(Keys.Up) ||
-               Core.Input.Keyboard.IsKeyDown(Keys.Down) ||
-               Core.Input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
+        return _input.Keyboard.IsKeyDown(Keys.Left) ||
+               _input.Keyboard.IsKeyDown(Keys.Right) ||
+               _input.Keyboard.IsKeyDown(Keys.Up) ||
+               _input.Keyboard.IsKeyDown(Keys.Down) ||
+               _input.GamePad.ThumbSticks.Right.LengthSquared() > 0.01f;
     }
 }

@@ -2,7 +2,7 @@ namespace GMDCore.Input;
 
 /// <summary>
 /// Owns one instance of each input device and advances them together each logic tick.
-/// Access via Core.Input from anywhere in the game.
+/// Inject into the systems that need it rather than reading hardware state directly.
 /// </summary>
 public class InputManager
 {

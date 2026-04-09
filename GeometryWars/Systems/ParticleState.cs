@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
@@ -9,7 +10,7 @@ public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
 
 public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
 {
-    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle, IReadOnlyList<BlackHole> blackHoles)
+    public static void UpdateParticle(ParticleManager<ParticleState>.Particle particle, IReadOnlyList<BlackHole> blackHoles, FrameInfo frame)
     {
         var vel = particle.State.Velocity;
         particle.Position += vel;
@@ -31,8 +32,8 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
         particle.Scale = scale;
 
         var pos = particle.Position;
-        int width = (int)FrameContext.ScreenSize.X;
-        int height = (int)FrameContext.ScreenSize.Y;
+        int width = (int)frame.ScreenSize.X;
+        int height = (int)frame.ScreenSize.Y;
 
         if (pos.X < 0) vel.X = Math.Abs(vel.X);
         else if (pos.X > width) vel.X = -Math.Abs(vel.X);

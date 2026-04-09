@@ -16,14 +16,13 @@ public abstract class Core : Game
 {
     protected GraphicsDeviceManager Graphics;
     public SpriteBatch SpriteBatch { get; private set; }
+    public InputManager Input { get; } = new();
 
     private GameStateBase _activeState;
     private double _accumulator;
     private readonly GameTime _fixedGameTime = new();
 
     protected GameStateBase ActiveState => _activeState;
-
-    public static InputManager Input { get; } = new();
 
     protected Core(int width, int height)
     {
@@ -56,7 +55,7 @@ public abstract class Core : Game
     }
 
     // Override to provide a game-specific exit condition.
-    // ShouldExit() is called after OnUpdateInput(), so Core.Input is current.
+    // ShouldExit() is called after OnUpdateInput(), so Input is current.
     protected virtual bool ShouldExit()
         => Input.Keyboard.IsKeyDown(Keys.Escape) ||
            Input.GamePad.IsButtonDown(Buttons.Back);

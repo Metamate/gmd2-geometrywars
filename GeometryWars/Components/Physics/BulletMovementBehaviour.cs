@@ -1,6 +1,7 @@
 using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -11,13 +12,15 @@ public sealed class BulletMovementBehaviour : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
+    private readonly GameRuntime _runtime;
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
 
-    public BulletMovementBehaviour(IParticleSystem<ParticleState> particles, IGridField grid)
+    public BulletMovementBehaviour(IParticleSystem<ParticleState> particles, IGridField grid, GameRuntime runtime)
     {
         _particles = particles;
         _grid = grid;
+        _runtime = runtime;
     }
 
     public override void OnStart(Entity owner)
@@ -31,12 +34,12 @@ public sealed class BulletMovementBehaviour : Component
         if (_rigidbody.Velocity.LengthSquared() > 0.01f)
             _transform.Orientation = _rigidbody.Velocity.ToAngle();
 
-        if (!FrameContext.Viewport.Bounds.Contains(_transform.Position.ToPoint()))
+        if (!_runtime.Frame.Viewport.Bounds.Contains(_transform.Position.ToPoint()))
         {
             owner.IsExpired = true;
             for (int i = 0; i < GameSettings.Visuals.BulletDeathParticles; i++)
             {
-                _particles.CreateParticle(Art.LineParticle, _transform.Position, Color.LightBlue, 50, 1,
+                _particles.CreateParticle(_runtime.Assets.LineParticle, _transform.Position, Color.LightBlue, 50, 1,
                     new ParticleState { Velocity = Random.Shared.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
             }
         }

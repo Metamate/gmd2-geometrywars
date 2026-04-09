@@ -12,14 +12,16 @@ namespace GeometryWars.Components.Combat;
 public sealed class PlayerInputComponent : Component
 {
     private readonly IBulletSpawner _bulletSpawner;
+    private readonly GameRuntime _runtime;
     private int _cooldownRemaining;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public PlayerInputComponent(IBulletSpawner bulletSpawner)
+    public PlayerInputComponent(IBulletSpawner bulletSpawner, GameRuntime runtime)
     {
         _bulletSpawner = bulletSpawner;
+        _runtime = runtime;
     }
 
     public override void OnStart(Entity owner)
@@ -34,10 +36,10 @@ public sealed class PlayerInputComponent : Component
         if (_player == null || _player.IsDead)
             return;
 
-        _rigidbody.AddForce(GameSettings.Player.Speed * GameController.Movement);
+        _rigidbody.AddForce(GameSettings.Player.Speed * _runtime.Controller.Movement);
 
-        var aim = GameController.AimDirection(_transform.Position);
-        if (GameController.IsShooting)
+        var aim = _runtime.Controller.AimDirection(_transform.Position);
+        if (_runtime.Controller.IsShooting)
         {
             _transform.Orientation = aim.ToAngle();
 
@@ -69,6 +71,6 @@ public sealed class PlayerInputComponent : Component
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel);
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel);
 
-        GameServices.Audio.Play(Sound.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
+        _runtime.Audio.Play(_runtime.Assets.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }

@@ -7,10 +7,10 @@ namespace GeometryWars;
 public static class Extensions
 {
     // Draws a line between two points using a scaled 1x1 pixel texture.
-    public static void DrawLine(this SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color, float thickness = 2f)
+    public static void DrawLine(this SpriteBatch spriteBatch, Texture2D pixel, Vector2 start, Vector2 end, Color color, float thickness = 2f)
     {
         Vector2 delta = end - start;
-        spriteBatch.Draw(Art.Pixel, start, null, color, delta.ToAngle(), new Vector2(0, 0.5f), new Vector2(delta.Length(), thickness), SpriteEffects.None, 0f);
+        spriteBatch.Draw(pixel, start, null, color, delta.ToAngle(), new Vector2(0, 0.5f), new Vector2(delta.Length(), thickness), SpriteEffects.None, 0f);
     }
 
     // Returns the angle (in radians) that this vector points toward.

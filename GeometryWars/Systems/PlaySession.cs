@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
@@ -16,22 +17,22 @@ public sealed class PlaySession
     public EnemyDirector Spawner { get; }
     public PlayerShip Player { get; }
 
-    public PlaySession(Rectangle viewportBounds)
+    public PlaySession(GameRuntime runtime, Rectangle viewportBounds)
     {
-        Score = new ScoreTracker(Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
+        Score = new ScoreTracker(runtime.Frame, Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
         var spawnResetBridge = new DeferredSpawnController();
 
         Entities = new EntityWorld();
         Particles = new ParticleManager<ParticleState>(
             GameSettings.Performance.MaxParticles,
-            particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles));
+            particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles, runtime.Frame));
 
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         Grid = new Grid(viewportBounds, gridSpacing);
 
-        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge);
+        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge, runtime);
         Entities.ConfigureBulletFactory(Factory.CreateBullet);
-        Spawner = new EnemyDirector(Entities, Factory);
+        Spawner = new EnemyDirector(Entities, Factory, runtime);
         spawnResetBridge.Attach(Spawner);
 
         Score.StartNewRun();

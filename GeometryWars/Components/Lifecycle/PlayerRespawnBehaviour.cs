@@ -2,6 +2,7 @@ using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Visuals;
 using GeometryWars.Entities;
+using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -16,15 +17,17 @@ public sealed class PlayerRespawnBehaviour : Component
     private readonly IScoreTracker _score;
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
+    private readonly GameRuntime _runtime;
     private int _framesUntilRespawn;
     private TransformComponent _transform;
     private SpriteComponent _sprite;
 
-    public PlayerRespawnBehaviour(IScoreTracker score, IParticleSystem<ParticleState> particles, IGridField grid)
+    public PlayerRespawnBehaviour(IScoreTracker score, IParticleSystem<ParticleState> particles, IGridField grid, GameRuntime runtime)
     {
         _score = score;
         _particles = particles;
         _grid = grid;
+        _runtime = runtime;
     }
 
     public bool IsDead => _framesUntilRespawn > 0;
@@ -54,7 +57,7 @@ public sealed class PlayerRespawnBehaviour : Component
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
             _particles.CreateParticle(
-                Art.LineParticle, pos, color,
+                _runtime.Assets.LineParticle, pos, color,
                 GameSettings.Visuals.DeathParticleLife,
                 GameSettings.Visuals.DeathParticleSize,
                 new ParticleState { Velocity = Random.Shared.NextVector2(speed, speed), Type = ParticleType.None, LengthMultiplier = 1 });

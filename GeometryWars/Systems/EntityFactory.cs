@@ -20,37 +20,40 @@ public sealed class EntityFactory
     private readonly Grid _grid;
     private readonly EntityWorld _world;
     private readonly ISpawnController _spawner;
+    private readonly GameRuntime _runtime;
 
     public EntityFactory(
         ScoreTracker score,
         ParticleManager<ParticleState> particles,
         Grid grid,
         EntityWorld world,
-        ISpawnController spawner)
+        ISpawnController spawner,
+        GameRuntime runtime)
     {
         _score = score;
         _particles = particles;
         _grid = grid;
         _world = world;
         _spawner = spawner;
+        _runtime = runtime;
     }
 
     public PlayerShip CreatePlayer()
     {
         var player = new PlayerShip
         {
-            Transform = { Position = FrameContext.ScreenSize / 2 }
+            Transform = { Position = _runtime.Frame.ScreenSize / 2 }
         };
 
-        Vector2 size = new(Art.Player.Width, Art.Player.Height);
-        var respawn = new PlayerRespawnBehaviour(_score, _particles, _grid);
+        Vector2 size = new(_runtime.Assets.Player.Width, _runtime.Assets.Player.Height);
+        var respawn = new PlayerRespawnBehaviour(_score, _particles, _grid, _runtime);
 
         player.AddComponent(new RigidbodyComponent(damping: 0f));
-        player.AddComponent(new ScreenClampBehaviour(size));
-        player.AddComponent(new SpriteComponent(Art.Player));
-        player.AddComponent(new PlayerInputComponent(_world));
-        player.AddComponent(new ExhaustFireComponent(_particles));
-        player.AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
+        player.AddComponent(new ScreenClampBehaviour(size, _runtime));
+        player.AddComponent(new SpriteComponent(_runtime.Assets.Player));
+        player.AddComponent(new PlayerInputComponent(_world, _runtime));
+        player.AddComponent(new ExhaustFireComponent(_particles, _runtime));
+        player.AddComponent(new GlowOverlay(_runtime.Assets.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         player.AddComponent(new PlayerCollisionBehaviour(_world, _spawner));
         player.AddComponent(respawn);
@@ -62,8 +65,8 @@ public sealed class EntityFactory
     {
         var bullet = new Bullet();
         bullet.AddComponent(new RigidbodyComponent(damping: 1f));
-        bullet.AddComponent(new SpriteComponent(Art.Bullet));
-        bullet.AddComponent(new BulletMovementBehaviour(_particles, _grid));
+        bullet.AddComponent(new SpriteComponent(_runtime.Assets.Bullet));
+        bullet.AddComponent(new BulletMovementBehaviour(_particles, _grid, _runtime));
         bullet.AddComponent(new BulletCollisionBehaviour());
         bullet.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         return bullet;
@@ -71,15 +74,15 @@ public sealed class EntityFactory
 
     public Enemy CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
-        var enemy = CreateEnemyBase(Art.Seeker, GameSettings.Enemy.SeekerPointValue, position);
+        var enemy = CreateEnemyBase(_runtime.Assets.Seeker, GameSettings.Enemy.SeekerPointValue, position);
         enemy.AddComponent(new SeekBehaviour(getTargetPosition, GameSettings.Enemy.SeekerAcceleration));
         return enemy;
     }
 
     public Enemy CreateWanderer(Vector2 position)
     {
-        var enemy = CreateEnemyBase(Art.Wanderer, GameSettings.Enemy.WandererPointValue, position);
-        enemy.AddComponent(new WanderBehaviour());
+        var enemy = CreateEnemyBase(_runtime.Assets.Wanderer, GameSettings.Enemy.WandererPointValue, position);
+        enemy.AddComponent(new WanderBehaviour(_runtime));
         return enemy;
     }
 
@@ -91,12 +94,12 @@ public sealed class EntityFactory
         };
 
         blackHole.AddComponent(new RigidbodyComponent());
-        blackHole.AddComponent(new SpriteComponent(Art.BlackHole));
-        blackHole.AddComponent(new GlowOverlay(Art.Glow, Color.DarkViolet * 0.4f));
+        blackHole.AddComponent(new SpriteComponent(_runtime.Assets.BlackHole));
+        blackHole.AddComponent(new GlowOverlay(_runtime.Assets.Glow, Color.DarkViolet * 0.4f));
         blackHole.AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
-        blackHole.AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange, _particles, _grid));
-        blackHole.AddComponent(new BlackHoleCollisionBehaviour(GameSettings.Hazards.BlackHoleHitpoints, _particles));
-        blackHole.AddComponent(new CircleColliderComponent(Art.BlackHole.Width / 2f));
+        blackHole.AddComponent(new SprayBehaviour(GameSettings.Hazards.BlackHoleGridRange, _particles, _grid, _runtime));
+        blackHole.AddComponent(new BlackHoleCollisionBehaviour(GameSettings.Hazards.BlackHoleHitpoints, _particles, _runtime));
+        blackHole.AddComponent(new CircleColliderComponent(_runtime.Assets.BlackHole.Width / 2f));
 
         return blackHole;
     }
@@ -110,20 +113,19 @@ public sealed class EntityFactory
 
         Vector2 size = new(texture.Width, texture.Height);
         enemy.AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
-        enemy.AddComponent(new ScreenClampBehaviour(size));
-
+        enemy.AddComponent(new ScreenClampBehaviour(size, _runtime));
         var sprite = enemy.AddComponent(new SpriteComponent(texture));
         sprite.Tint = Color.Transparent;
 
         enemy.AddComponent(new EnemyCollisionBehaviour(_score));
-        enemy.AddComponent(new EnemyDeathEffectsComponent(_particles, PlayExplosionSound));
+        enemy.AddComponent(new EnemyDeathEffectsComponent(_particles, PlayExplosionSound, _runtime));
         enemy.AddComponent(new CircleColliderComponent(size.X / 2f));
         enemy.AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
         return enemy;
     }
 
-    private static void PlayExplosionSound()
+    private void PlayExplosionSound()
     {
-        GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
+        _runtime.Audio.Play(_runtime.Assets.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }

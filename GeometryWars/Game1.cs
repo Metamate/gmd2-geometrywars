@@ -10,9 +10,11 @@ namespace GeometryWars;
 public sealed class Game1 : Core
 {
     private readonly BloomComponent _bloom;
+    public GameRuntime Runtime { get; }
 
     public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
     {
+        Runtime = new GameRuntime(Input);
         Graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
 
@@ -25,38 +27,35 @@ public sealed class Game1 : Core
     {
         base.Initialize();
 
-        // Register a placeholder GameTime so FrameContext is non-null before the first tick.
-        RegisterServices(new GameTime());
+        Runtime.Frame.Update(new GameTime(), GraphicsDevice.Viewport);
 
-        SetState(new PlayState(this));
+        SetState(new PlayState(this, Runtime));
     }
 
     protected override void Update(GameTime gameTime)
     {
-        GameServices.Performance.Update(gameTime);
-        Input.Mouse.UpdatePositionOnly();
+        Runtime.Performance.Update(gameTime);
+        Runtime.Input.Mouse.UpdatePositionOnly();
 
         base.Update(gameTime);
     }
 
     protected override void LoadContent()
     {
-        Art.Load(Content);
-        Sound.Load(Content);
+        Runtime.Assets.Load(Content);
     }
 
     protected override void OnUpdateInput()
     {
         base.OnUpdateInput();
-        GameController.Update();
+        Runtime.Controller.Update();
     }
 
-    protected override bool ShouldExit() => GameController.WasExitPressed;
+    protected override bool ShouldExit() => Runtime.Controller.WasExitPressed;
 
     protected override void RegisterServices(GameTime gameTime)
     {
-        FrameContext.Time = gameTime;
-        FrameContext.Viewport = GraphicsDevice.Viewport;
+        Runtime.Frame.Update(gameTime, GraphicsDevice.Viewport);
     }
 
     protected override void Draw(GameTime gameTime)

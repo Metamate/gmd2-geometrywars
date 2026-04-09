@@ -1,10 +1,12 @@
 using System.IO;
+using GeometryWars.Services;
 
 namespace GeometryWars.Systems;
 
 // Manages player score, lives, and score multiplier for one play session.
 public sealed class ScoreTracker : IScoreTracker
 {
+    private readonly FrameInfo _frame;
     private readonly string _highScorePath;
     private int _score;
     private int _lives;
@@ -18,8 +20,9 @@ public sealed class ScoreTracker : IScoreTracker
     public int HighScore => _highScore;
     public bool IsGameOver => _lives <= 0;
 
-    public ScoreTracker(string highScorePath)
+    public ScoreTracker(FrameInfo frame, string highScorePath)
     {
+        _frame = frame;
         _highScorePath = Path.GetFullPath(highScorePath);
         _highScore = LoadHighScore();
     }
@@ -36,7 +39,7 @@ public sealed class ScoreTracker : IScoreTracker
     {
         if (_multiplier > 1)
         {
-            _multiplierTimer += FrameContext.ElapsedSeconds;
+            _multiplierTimer += _frame.ElapsedSeconds;
             if (_multiplierTimer > GameSettings.Player.MultiplierExpiry)
             {
                 _multiplierTimer = 0;

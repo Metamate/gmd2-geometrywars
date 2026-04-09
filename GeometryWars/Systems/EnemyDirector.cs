@@ -10,12 +10,14 @@ public sealed class EnemyDirector : ISpawnController
 {
     private readonly EntityWorld _world;
     private readonly EntityFactory _factory;
+    private readonly GameRuntime _runtime;
     private float _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 
-    public EnemyDirector(EntityWorld world, EntityFactory factory)
+    public EnemyDirector(EntityWorld world, EntityFactory factory, GameRuntime runtime)
     {
         _world = world;
         _factory = factory;
+        _runtime = runtime;
     }
 
     public void Update(bool playerActive, Func<Vector2> getPlayerPosition)
@@ -39,14 +41,14 @@ public sealed class EnemyDirector : ISpawnController
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
             _world.Add(_factory.CreateWanderer(spawnPos));
-            GameServices.Audio.Play(Sound.Spawn, 0.15f);
+            _runtime.Audio.Play(_runtime.Assets.Spawn, 0.15f);
         }
 
         if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
             _world.Add(_factory.CreateSeeker(spawnPos, getPlayerPosition));
-            GameServices.Audio.Play(Sound.Spawn, 0.2f);
+            _runtime.Audio.Play(_runtime.Assets.Spawn, 0.2f);
         }
     }
 
@@ -56,11 +58,11 @@ public sealed class EnemyDirector : ISpawnController
             Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
         {
             _world.Add(_factory.CreateBlackHole(GetRandomSpawnPosition(getPlayerPosition())));
-            GameServices.Audio.Play(Sound.Spawn, 0.3f, -0.2f);
+            _runtime.Audio.Play(_runtime.Assets.Spawn, 0.3f, -0.2f);
         }
     }
 
-    private static Vector2 GetRandomSpawnPosition(Vector2 playerPosition)
+    private Vector2 GetRandomSpawnPosition(Vector2 playerPosition)
     {
         Vector2 pos;
         float minDistSq = GameSettings.Enemy.Spawning.MinDistance * GameSettings.Enemy.Spawning.MinDistance;
@@ -68,8 +70,8 @@ public sealed class EnemyDirector : ISpawnController
         do
         {
             pos = new Vector2(
-                Random.Shared.Next((int)FrameContext.ScreenSize.X),
-                Random.Shared.Next((int)FrameContext.ScreenSize.Y));
+                Random.Shared.Next((int)_runtime.Frame.ScreenSize.X),
+                Random.Shared.Next((int)_runtime.Frame.ScreenSize.Y));
         }
         while (Vector2.DistanceSquared(pos, playerPosition) < minDistSq);
         

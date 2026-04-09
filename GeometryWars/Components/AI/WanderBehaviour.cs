@@ -10,14 +10,16 @@ namespace GeometryWars.Components.AI;
 // Steers an entity in random directions.
 public sealed class WanderBehaviour : Component
 {
+    private readonly GameRuntime _runtime;
     private float _direction;
     private int _stepCounter;
     
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
 
-    public WanderBehaviour()
+    public WanderBehaviour(GameRuntime runtime)
     {
+        _runtime = runtime;
         _direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
     }
 
@@ -39,12 +41,12 @@ public sealed class WanderBehaviour : Component
             _direction += Random.Shared.NextFloat(-GameSettings.Enemy.WandererTurnRate, GameSettings.Enemy.WandererTurnRate);
             _direction = MathHelper.WrapAngle(_direction);
 
-            var bounds = FrameContext.Viewport.Bounds;
-            bounds.Inflate(-Art.Wanderer.Width, -Art.Wanderer.Height);
+            var bounds = _runtime.Frame.Viewport.Bounds;
+            bounds.Inflate(-_runtime.Assets.Wanderer.Width, -_runtime.Assets.Wanderer.Height);
             
             if (!bounds.Contains(_transform.Position.ToPoint()))
             {
-                _direction = (FrameContext.ScreenSize / 2 - _transform.Position).ToAngle() + 
+                _direction = (_runtime.Frame.ScreenSize / 2 - _transform.Position).ToAngle() + 
                              Random.Shared.NextFloat(-MathHelper.PiOver2, MathHelper.PiOver2);
             }
         }
