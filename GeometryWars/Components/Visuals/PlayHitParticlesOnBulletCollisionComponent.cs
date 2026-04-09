@@ -1,5 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
@@ -7,22 +8,31 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Visuals;
 
-// Plays the particle burst used when a black hole is hit.
-public sealed class BlackHoleHitEffectsComponent : Component
+// Plays a particle burst whenever the owner is hit by a bullet.
+public sealed class PlayHitParticlesOnBulletCollisionComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
+    private TransformComponent _transform;
 
-    public BlackHoleHitEffectsComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
+    public PlayHitParticlesOnBulletCollisionComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
         _particles = particles;
         _frame = frame;
         _lineParticle = lineParticle;
     }
 
-    public void PlayHit(Vector2 position)
+    public override void OnStart(Entity owner)
     {
+        _transform = owner.Transform;
+    }
+
+    public override void OnCollision(Entity owner, Entity other)
+    {
+        if (other is not Bullet)
+            return;
+
         float hue = (float)(3 * _frame.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
@@ -37,7 +47,7 @@ public sealed class BlackHoleHitEffectsComponent : Component
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            _particles.CreateParticle(_lineParticle, position + 2f * sprayVel, color,
+            _particles.CreateParticle(_lineParticle, _transform.Position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }

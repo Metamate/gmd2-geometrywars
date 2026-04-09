@@ -1,5 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
@@ -9,17 +10,17 @@ using Microsoft.Xna.Framework.Audio;
 namespace GeometryWars.Components.Input;
 
 // Translates firing input into aim, cooldown handling, bullet spawning, and shot audio.
-public sealed class PlayerWeaponInputComponent : Component
+public sealed class FireBulletsOnInputComponent : Component
 {
     private readonly IBulletSpawner _bulletSpawner;
     private readonly GameController _controller;
     private readonly AudioManager _audio;
     private readonly Func<SoundEffect> _getShotSound;
     private int _cooldownRemaining;
-    private PlayerShip _player;
+    private RespawnStateComponent _respawnState;
     private TransformComponent _transform;
 
-    public PlayerWeaponInputComponent(IBulletSpawner bulletSpawner, GameController controller, AudioManager audio, Func<SoundEffect> getShotSound)
+    public FireBulletsOnInputComponent(IBulletSpawner bulletSpawner, GameController controller, AudioManager audio, Func<SoundEffect> getShotSound)
     {
         _bulletSpawner = bulletSpawner;
         _controller = controller;
@@ -29,13 +30,13 @@ public sealed class PlayerWeaponInputComponent : Component
 
     public override void OnStart(Entity owner)
     {
-        _player = owner as PlayerShip;
+        _respawnState = owner.GetComponent<RespawnStateComponent>();
         _transform = owner.Transform;
     }
 
     public override void PreUpdate(Entity owner)
     {
-        if (_player == null || _player.IsDead)
+        if (_respawnState?.IsRespawning == true)
             return;
 
         var aim = _controller.AimDirection(_transform.Position);

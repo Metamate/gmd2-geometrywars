@@ -6,14 +6,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Lifecycle;
 
-// Owns the player's death particles and respawn shockwave effects.
-public sealed class PlayerRespawnEffectsComponent : Component
+// Plays the death burst and respawn shockwave around the owner.
+public sealed class PlayRespawnEffectsComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
     private readonly Texture2D _lineParticle;
 
-    public PlayerRespawnEffectsComponent(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
+    public PlayRespawnEffectsComponent(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
     {
         _particles = particles;
         _grid = grid;

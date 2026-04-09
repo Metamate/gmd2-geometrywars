@@ -8,8 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Visuals;
 
-// Spawns the black hole's orbiting particle spray.
-public sealed class BlackHoleSprayParticlesComponent : Component
+// Emits a repeating ring of orbiting particles around the owner.
+public sealed class EmitOrbitingParticlesComponent : Component
 {
     private float _sprayAngle;
     private readonly IParticleSystem<ParticleState> _particles;
@@ -17,7 +17,7 @@ public sealed class BlackHoleSprayParticlesComponent : Component
     private readonly Texture2D _lineParticle;
     private TransformComponent _transform;
 
-    public BlackHoleSprayParticlesComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
+    public EmitOrbitingParticlesComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
         _particles = particles;
         _frame = frame;

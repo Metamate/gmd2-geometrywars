@@ -47,20 +47,20 @@ public sealed class EntityFactory
         };
 
         Vector2 size = new(_context.Assets.Player.Width, _context.Assets.Player.Height);
-        var respawnEffects = new PlayerRespawnEffectsComponent(_particles, _grid, _context.Assets.LineParticle);
-        var life = new PlayerLifeComponent(_score);
+        var respawnEffects = new PlayRespawnEffectsComponent(_particles, _grid, _context.Assets.LineParticle);
+        var respawnState = new RespawnStateComponent(_score);
 
         player.AddComponent(new RigidbodyComponent(damping: 0f));
         player.AddComponent(new ScreenClampBehaviour(size, _context.Frame));
         player.AddComponent(new SpriteComponent(_context.Assets.Player));
-        player.AddComponent(new PlayerMovementInputComponent(_context.Controller));
-        player.AddComponent(new PlayerWeaponInputComponent(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
+        player.AddComponent(new ApplyMovementInputComponent(_context.Controller));
+        player.AddComponent(new FireBulletsOnInputComponent(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
         player.AddComponent(new ExhaustFireComponent(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
         player.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         player.AddComponent(new PlayerCollisionBehaviour(_world, _spawner));
         player.AddComponent(respawnEffects);
-        player.AddComponent(life);
+        player.AddComponent(respawnState);
 
         return player;
     }
@@ -70,9 +70,9 @@ public sealed class EntityFactory
         var bullet = new Bullet();
         bullet.AddComponent(new RigidbodyComponent(damping: 1f));
         bullet.AddComponent(new SpriteComponent(_context.Assets.Bullet));
-        bullet.AddComponent(new FaceVelocityBehaviour());
-        bullet.AddComponent(new BulletOffscreenExpiryComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        bullet.AddComponent(new VelocityGridForceBehaviour(_grid, GameSettings.Physics.BulletGridForce, GameSettings.Physics.BulletGridRadius));
+        bullet.AddComponent(new FaceVelocityComponent());
+        bullet.AddComponent(new ExpireOutsideViewportWithParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        bullet.AddComponent(new ApplyGridForceFromVelocityComponent(_grid, GameSettings.Physics.BulletGridForce, GameSettings.Physics.BulletGridRadius));
         bullet.AddComponent(new BulletCollisionBehaviour());
         bullet.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
         return bullet;
@@ -103,10 +103,12 @@ public sealed class EntityFactory
         blackHole.AddComponent(new SpriteComponent(_context.Assets.BlackHole));
         blackHole.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.DarkViolet * 0.4f));
         blackHole.AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
-        blackHole.AddComponent(new BlackHoleSprayParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        blackHole.AddComponent(new BlackHoleGridPulseComponent(GameSettings.Hazards.BlackHoleGridRange, _grid));
-        blackHole.AddComponent(new BlackHoleHitEffectsComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        blackHole.AddComponent(new BlackHoleHealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
+        blackHole.AddComponent(new EmitOrbitingParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new ApplyOscillatingImplosiveGridForceComponent(GameSettings.Hazards.BlackHoleGridRange, _grid));
+        blackHole.AddComponent(new HealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
+        blackHole.AddComponent(new TakeDamageOnBulletCollisionComponent());
+        blackHole.AddComponent(new ExpireWhenHealthDepletedComponent());
+        blackHole.AddComponent(new PlayHitParticlesOnBulletCollisionComponent(_particles, _context.Frame, _context.Assets.LineParticle));
         blackHole.AddComponent(new CircleColliderComponent(_context.Assets.BlackHole.Width / 2f));
 
         return blackHole;

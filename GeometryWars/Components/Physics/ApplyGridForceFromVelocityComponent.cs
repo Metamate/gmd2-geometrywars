@@ -5,7 +5,7 @@ using GeometryWars.Systems;
 namespace GeometryWars.Components.Physics;
 
 // Pushes the background grid based on the owner's current speed.
-public sealed class VelocityGridForceBehaviour : Component
+public sealed class ApplyGridForceFromVelocityComponent : Component
 {
     private readonly IGridField _grid;
     private readonly float _forceScale;
@@ -13,7 +13,7 @@ public sealed class VelocityGridForceBehaviour : Component
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
 
-    public VelocityGridForceBehaviour(IGridField grid, float forceScale, float radius)
+    public ApplyGridForceFromVelocityComponent(IGridField grid, float forceScale, float radius)
     {
         _grid = grid;
         _forceScale = forceScale;

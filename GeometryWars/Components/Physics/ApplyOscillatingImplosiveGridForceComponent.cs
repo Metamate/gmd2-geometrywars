@@ -6,15 +6,15 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Physics;
 
-// Applies the black hole's oscillating pull to the background grid.
-public sealed class BlackHoleGridPulseComponent : Component
+// Applies an oscillating implosive force to the background grid around the owner.
+public sealed class ApplyOscillatingImplosiveGridForceComponent : Component
 {
     private float _pulseAngle;
     private readonly float _gridRange;
     private readonly IGridField _grid;
     private TransformComponent _transform;
 
-    public BlackHoleGridPulseComponent(float gridRange, IGridField grid)
+    public ApplyOscillatingImplosiveGridForceComponent(float gridRange, IGridField grid)
     {
         _gridRange = gridRange;
         _grid = grid;

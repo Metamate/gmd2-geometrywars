@@ -1,4 +1,5 @@
 using GeometryWars.Components.Core;
+using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
 using GeometryWars.Entities;
 using GeometryWars.Services;
@@ -6,28 +7,28 @@ using GeometryWars.Services;
 namespace GeometryWars.Components.Input;
 
 // Translates movement input into thrust and idle-facing direction.
-public sealed class PlayerMovementInputComponent : Component
+public sealed class ApplyMovementInputComponent : Component
 {
     private readonly GameController _controller;
-    private PlayerShip _player;
+    private RespawnStateComponent _respawnState;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public PlayerMovementInputComponent(GameController controller)
+    public ApplyMovementInputComponent(GameController controller)
     {
         _controller = controller;
     }
 
     public override void OnStart(Entity owner)
     {
-        _player = owner as PlayerShip;
+        _respawnState = owner.GetComponent<RespawnStateComponent>();
         _rigidbody = owner.GetComponent<RigidbodyComponent>();
         _transform = owner.Transform;
     }
 
     public override void PreUpdate(Entity owner)
     {
-        if (_player == null || _player.IsDead)
+        if (_respawnState?.IsRespawning == true)
             return;
 
         _rigidbody.AddForce(GameSettings.Player.Speed * _controller.Movement);

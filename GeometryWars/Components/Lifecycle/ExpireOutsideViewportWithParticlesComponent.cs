@@ -8,15 +8,15 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Lifecycle;
 
-// Expires bullets that leave the viewport and spawns their trail burst.
-public sealed class BulletOffscreenExpiryComponent : Component
+// Expires an entity when it leaves the viewport and spawns an exit burst.
+public sealed class ExpireOutsideViewportWithParticlesComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
     private TransformComponent _transform;
 
-    public BulletOffscreenExpiryComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
+    public ExpireOutsideViewportWithParticlesComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
         _particles = particles;
         _frame = frame;

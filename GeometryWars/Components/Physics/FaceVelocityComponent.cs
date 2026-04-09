@@ -4,7 +4,7 @@ using GeometryWars.Entities;
 namespace GeometryWars.Components.Physics;
 
 // Rotates an entity to face its current velocity.
-public sealed class FaceVelocityBehaviour : Component
+public sealed class FaceVelocityComponent : Component
 {
     private TransformComponent _transform;
     private RigidbodyComponent _rigidbody;
