@@ -1,9 +1,9 @@
 using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
-using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Lifecycle;
 
@@ -12,13 +12,13 @@ public sealed class EnemyDeathEffectsComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly Action _playExplosionSound;
-    private readonly GameRuntime _runtime;
+    private readonly Texture2D _lineParticle;
 
-    public EnemyDeathEffectsComponent(IParticleSystem<ParticleState> particles, Action playExplosionSound, GameRuntime runtime)
+    public EnemyDeathEffectsComponent(IParticleSystem<ParticleState> particles, Action playExplosionSound, Texture2D lineParticle)
     {
         _particles = particles;
         _playExplosionSound = playExplosionSound;
-        _runtime = runtime;
+        _lineParticle = lineParticle;
     }
 
     public void Play(Enemy enemy)
@@ -39,7 +39,7 @@ public sealed class EnemyDeathEffectsComponent : Component
                 LengthMultiplier = 1f
             };
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
-            _particles.CreateParticle(_runtime.Assets.LineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
+            _particles.CreateParticle(_lineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
 
         _playExplosionSound();

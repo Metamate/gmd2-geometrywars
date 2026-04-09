@@ -4,6 +4,7 @@ using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Combat;
 
@@ -12,14 +13,16 @@ public sealed class BlackHoleCollisionBehaviour : Component
 {
     private int _hitpoints;
     private readonly IParticleSystem<ParticleState> _particles;
-    private readonly GameRuntime _runtime;
+    private readonly FrameInfo _frame;
+    private readonly Texture2D _lineParticle;
     private TransformComponent _transform;
 
-    public BlackHoleCollisionBehaviour(int hitpoints, IParticleSystem<ParticleState> particles, GameRuntime runtime)
+    public BlackHoleCollisionBehaviour(int hitpoints, IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
         _hitpoints = hitpoints;
         _particles = particles;
-        _runtime = runtime;
+        _frame = frame;
+        _lineParticle = lineParticle;
     }
 
     public override void OnStart(Entity owner)
@@ -40,7 +43,7 @@ public sealed class BlackHoleCollisionBehaviour : Component
         if (--_hitpoints <= 0)
             owner.IsExpired = true;
 
-        float hue = (float)(3 * _runtime.Frame.TotalSeconds % 6);
+        float hue = (float)(3 * _frame.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);
 
@@ -54,7 +57,7 @@ public sealed class BlackHoleCollisionBehaviour : Component
                 LengthMultiplier = 1,
                 Type = ParticleType.IgnoreGravity
             };
-            _particles.CreateParticle(_runtime.Assets.LineParticle, _transform.Position + 2f * sprayVel, color,
+            _particles.CreateParticle(_lineParticle, _transform.Position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }
     }

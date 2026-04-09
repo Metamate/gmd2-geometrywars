@@ -10,12 +10,12 @@ public sealed class ScreenClampBehaviour : Component
 {
     private TransformComponent _transform;
     private readonly Vector2 _size;
-    private readonly GameRuntime _runtime;
+    private readonly FrameInfo _frame;
 
-    public ScreenClampBehaviour(Vector2 size, GameRuntime runtime)
+    public ScreenClampBehaviour(Vector2 size, FrameInfo frame)
     {
         _size = size;
-        _runtime = runtime;
+        _frame = frame;
     }
 
     public override void OnStart(Entity owner)
@@ -27,6 +27,6 @@ public sealed class ScreenClampBehaviour : Component
     {
         _transform.Position = Vector2.Clamp(_transform.Position,
             _size / 2,
-            _runtime.Frame.ScreenSize - _size / 2);
+            _frame.ScreenSize - _size / 2);
     }
 }

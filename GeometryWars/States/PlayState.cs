@@ -11,31 +11,31 @@ namespace GeometryWars.States;
 public sealed class PlayState : GameStateBase
 {
     private readonly Game1 _game;
-    private readonly GameRuntime _runtime;
+    private readonly PlayContext _context;
     private PlaySession _session;
     private bool _paused;
 
-    public PlayState(Game1 game, GameRuntime runtime)
+    public PlayState(Game1 game, PlayContext context)
     {
         _game = game;
-        _runtime = runtime;
+        _context = context;
     }
 
     public override void Enter()
     {
         _paused = false;
-        _session = new PlaySession(_runtime, _runtime.Frame.Viewport.Bounds);
+        _session = new PlaySession(_context, _context.Frame.Viewport.Bounds);
         MediaPlayer.IsRepeating = true;
-        MediaPlayer.Play(_runtime.Assets.Music);
+        MediaPlayer.Play(_context.Assets.Music);
     }
 
     public override void Update()
     {
-        if (_runtime.Controller.WasPausePressed)
+        if (_context.Controller.WasPausePressed)
             _paused = !_paused;
 
-        if (_runtime.Controller.WasDebugTogglePressed)
-            _runtime.Performance.Toggle();
+        if (_context.Controller.WasDebugTogglePressed)
+            _context.Performance.Toggle();
 
         if (_paused) return;
 
@@ -44,7 +44,7 @@ public sealed class PlayState : GameStateBase
         if (_session.Score.IsGameOver && !_session.Player.IsDead)
         {
             _session.Score.SaveHighScore();
-            _game.SetState(new GameOverState(_game, _runtime, _session));
+            _game.SetState(new GameOverState(_game, _context, _session));
         }
     }
 
@@ -55,7 +55,7 @@ public sealed class PlayState : GameStateBase
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
-        _session.Grid.Draw(spriteBatch, _runtime.Assets.Pixel);
+        _session.Grid.Draw(spriteBatch, _context.Assets.Pixel);
         _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }
@@ -64,9 +64,9 @@ public sealed class PlayState : GameStateBase
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
 
-        spriteBatch.Draw(_runtime.Assets.Pointer, _runtime.Controller.MousePosition, Color.White);
-        spriteBatch.DrawString(_runtime.Assets.Font, "Lives: " + _session.Score.Lives, new Vector2(5), Color.White);
-        _runtime.Performance.Draw(spriteBatch, _runtime.Assets.Font, new Vector2(5, 35), _session.Entities.Count);
+        spriteBatch.Draw(_context.Assets.Pointer, _context.Controller.MousePosition, Color.White);
+        spriteBatch.DrawString(_context.Assets.Font, "Lives: " + _session.Score.Lives, new Vector2(5), Color.White);
+        _context.Performance.Draw(spriteBatch, _context.Assets.Font, new Vector2(5, 35), _session.Entities.Count);
         
         DrawRightAligned(spriteBatch, "Score: " + _session.Score.Score, 5);
         DrawRightAligned(spriteBatch, "Multiplier: " + _session.Score.Multiplier, 35);
@@ -74,8 +74,8 @@ public sealed class PlayState : GameStateBase
         if (_paused)
         {
             string text = "PAUSED";
-            Vector2 size = _runtime.Assets.Font.MeasureString(text);
-            spriteBatch.DrawString(_runtime.Assets.Font, text, _runtime.Frame.ScreenSize / 2 - size / 2, Color.White);
+            Vector2 size = _context.Assets.Font.MeasureString(text);
+            spriteBatch.DrawString(_context.Assets.Font, text, _context.Frame.ScreenSize / 2 - size / 2, Color.White);
         }
 
         spriteBatch.End();
@@ -83,8 +83,8 @@ public sealed class PlayState : GameStateBase
 
     private void DrawRightAligned(SpriteBatch spriteBatch, string text, float y)
     {
-        float width = _runtime.Assets.Font.MeasureString(text).X;
-        spriteBatch.DrawString(_runtime.Assets.Font, text,
-            new Vector2(_runtime.Frame.ScreenSize.X - width - 5, y), Color.White);
+        float width = _context.Assets.Font.MeasureString(text).X;
+        spriteBatch.DrawString(_context.Assets.Font, text,
+            new Vector2(_context.Frame.ScreenSize.X - width - 5, y), Color.White);
     }
 }

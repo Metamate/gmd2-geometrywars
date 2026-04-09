@@ -5,6 +5,7 @@ using GeometryWars.Entities;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace GeometryWars.Components.Combat;
 
@@ -12,16 +13,20 @@ namespace GeometryWars.Components.Combat;
 public sealed class PlayerInputComponent : Component
 {
     private readonly IBulletSpawner _bulletSpawner;
-    private readonly GameRuntime _runtime;
+    private readonly GameController _controller;
+    private readonly AudioManager _audio;
+    private readonly Func<SoundEffect> _getShotSound;
     private int _cooldownRemaining;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;
     private TransformComponent _transform;
 
-    public PlayerInputComponent(IBulletSpawner bulletSpawner, GameRuntime runtime)
+    public PlayerInputComponent(IBulletSpawner bulletSpawner, GameController controller, AudioManager audio, Func<SoundEffect> getShotSound)
     {
         _bulletSpawner = bulletSpawner;
-        _runtime = runtime;
+        _controller = controller;
+        _audio = audio;
+        _getShotSound = getShotSound;
     }
 
     public override void OnStart(Entity owner)
@@ -36,10 +41,10 @@ public sealed class PlayerInputComponent : Component
         if (_player == null || _player.IsDead)
             return;
 
-        _rigidbody.AddForce(GameSettings.Player.Speed * _runtime.Controller.Movement);
+        _rigidbody.AddForce(GameSettings.Player.Speed * _controller.Movement);
 
-        var aim = _runtime.Controller.AimDirection(_transform.Position);
-        if (_runtime.Controller.IsShooting)
+        var aim = _controller.AimDirection(_transform.Position);
+        if (_controller.IsShooting)
         {
             _transform.Orientation = aim.ToAngle();
 
@@ -71,6 +76,6 @@ public sealed class PlayerInputComponent : Component
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetA, aimQuat), vel);
         _bulletSpawner.SpawnBullet(_transform.Position + Vector2.Transform(offsetB, aimQuat), vel);
 
-        _runtime.Audio.Play(_runtime.Assets.Shot, 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
+        _audio.Play(_getShotSound(), 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }

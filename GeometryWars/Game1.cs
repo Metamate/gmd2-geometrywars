@@ -10,11 +10,13 @@ namespace GeometryWars;
 public sealed class Game1 : Core
 {
     private readonly BloomComponent _bloom;
-    public GameRuntime Runtime { get; }
+    private GameRuntime Runtime { get; }
+    public PlayContext PlayContext { get; }
 
     public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
     {
         Runtime = new GameRuntime(Input);
+        PlayContext = new PlayContext(Runtime.Frame, Runtime.Controller, Runtime.Assets, Runtime.Audio, Runtime.Performance);
         Graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
 
@@ -29,7 +31,7 @@ public sealed class Game1 : Core
 
         Runtime.Frame.Update(new GameTime(), GraphicsDevice.Viewport);
 
-        SetState(new PlayState(this, Runtime));
+        SetState(new PlayState(this, PlayContext));
     }
 
     protected override void Update(GameTime gameTime)

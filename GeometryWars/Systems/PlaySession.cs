@@ -17,22 +17,22 @@ public sealed class PlaySession
     public EnemyDirector Spawner { get; }
     public PlayerShip Player { get; }
 
-    public PlaySession(GameRuntime runtime, Rectangle viewportBounds)
+    public PlaySession(PlayContext context, Rectangle viewportBounds)
     {
-        Score = new ScoreTracker(runtime.Frame, Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
+        Score = new ScoreTracker(context.Frame, Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
         var spawnResetBridge = new DeferredSpawnController();
 
         Entities = new EntityWorld();
         Particles = new ParticleManager<ParticleState>(
             GameSettings.Performance.MaxParticles,
-            particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles, runtime.Frame));
+            particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles, context.Frame));
 
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         Grid = new Grid(viewportBounds, gridSpacing);
 
-        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge, runtime);
+        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge, context);
         Entities.ConfigureBulletFactory(Factory.CreateBullet);
-        Spawner = new EnemyDirector(Entities, Factory, runtime);
+        Spawner = new EnemyDirector(Entities, Factory, context);
         spawnResetBridge.Attach(Spawner);
 
         Score.StartNewRun();

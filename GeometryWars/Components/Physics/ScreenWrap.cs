@@ -10,10 +10,10 @@ namespace GeometryWars.Components.Physics;
 // Not currently assigned to any entity — kept as a teaching alternative.
 public sealed class ScreenWrap : Component
 {
-    private readonly GameRuntime _runtime;
+    private readonly FrameInfo _frame;
     private TransformComponent _transform;
 
-    public ScreenWrap(GameRuntime runtime) => _runtime = runtime;
+    public ScreenWrap(FrameInfo frame) => _frame = frame;
 
     public override void OnStart(Entity owner)
     {
@@ -23,7 +23,7 @@ public sealed class ScreenWrap : Component
     public override void PostUpdate(Entity owner)
     {
         var pos = _transform.Position;
-        var size = _runtime.Frame.ScreenSize;
+        var size = _frame.ScreenSize;
 
         if (pos.X < 0) pos.X += size.X;
         else if (pos.X > size.X) pos.X -= size.X;
