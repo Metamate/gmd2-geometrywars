@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using GeometryWars.Entities;
 using Microsoft.Xna.Framework;
 
@@ -6,5 +6,5 @@ namespace GeometryWars.Systems;
 
 public interface INeighborQuery
 {
-    List<Entity> GetNearbyEntities(Vector2 position, float radius);
+    void ForEachNearbyEntity(Vector2 position, float radius, Action<Entity> visitor);
 }

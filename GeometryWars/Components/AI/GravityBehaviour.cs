@@ -9,6 +9,8 @@ namespace GeometryWars.Components.AI;
 // Component that applies gravitational forces to nearby entities.
 public sealed class GravityBehaviour : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.Logic;
+
     private readonly float _range;
     private readonly float _force;
     private readonly INeighborQuery _neighborQuery;
@@ -28,16 +30,16 @@ public sealed class GravityBehaviour : Component
 
     public override void Update(Entity owner)
     {
-        foreach (var entity in _neighborQuery.GetNearbyEntities(_transform.Position, _range))
+        _neighborQuery.ForEachNearbyEntity(_transform.Position, _range, entity =>
         {
-            if (entity == owner || entity is BlackHole) continue;
+            if (entity == owner || entity is BlackHole) return;
 
             var targetTransform = entity.Transform;
             var targetRigidbody = entity.GetComponent<RigidbodyComponent>();
             
-            if (targetTransform == null || targetRigidbody == null) continue;
+            if (targetTransform == null || targetRigidbody == null) return;
 
-            if (!targetRigidbody.IsActive) continue;
+            if (!targetRigidbody.IsActive) return;
 
             if (entity is Bullet)
             {
@@ -48,6 +50,6 @@ public sealed class GravityBehaviour : Component
                 var dPos = _transform.Position - targetTransform.Position;
                 targetRigidbody.AddForce(dPos.ScaleTo(MathHelper.Lerp(_force, 0, dPos.Length() / _range)));
             }
-        }
+        });
     }
 }

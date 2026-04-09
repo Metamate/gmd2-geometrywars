@@ -8,6 +8,7 @@ namespace GeometryWars.Components.Physics;
 public sealed class RigidbodyComponent : Component
 {
     public Vector2 Velocity { get; set; }
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.Physics;
     
     private TransformComponent _transform;
     private readonly float _damping;

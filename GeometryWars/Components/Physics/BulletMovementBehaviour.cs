@@ -9,6 +9,8 @@ namespace GeometryWars.Components.Physics;
 // Handles bullet-specific movement, screen bounds, and grid effects.
 public sealed class BulletMovementBehaviour : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
+
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
     private TransformComponent _transform;

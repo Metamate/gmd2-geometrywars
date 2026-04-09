@@ -10,6 +10,8 @@ namespace GeometryWars.Components.AI;
 // Steers an entity in random directions.
 public sealed class WanderBehaviour : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.Logic;
+
     private float _direction;
     private int _stepCounter;
     

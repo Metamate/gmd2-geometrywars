@@ -17,24 +17,26 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
     
     private readonly List<(Entity Entity, ColliderComponent Collider)> _collidables = [];
 
-    private readonly ObjectPool<Bullet> _bulletPool;
+    private ObjectPool<Bullet> _bulletPool;
     private bool _isUpdating;
-
-    private readonly List<Entity> _nearbyEntitiesBuffer = [];
 
     public IReadOnlyList<BlackHole> BlackHoles => _blackHoles;
     public int Count => _entities.Count;
     public int BlackHoleCount => _blackHoles.Count;
 
-    public EntityWorld(System.Func<Bullet> createBullet)
+    public void ConfigureBulletFactory(System.Func<Bullet> createBullet)
     {
-        // The bullet factory is supplied by the composition root. Delay prewarming
-        // until after that root has fully assembled all collaborators.
+        if (_bulletPool != null)
+            throw new System.InvalidOperationException("Bullet factory has already been configured.");
+
         _bulletPool = new ObjectPool<Bullet>(createBullet);
     }
 
     public Bullet GetBullet(Vector2 position, Vector2 velocity)
     {
+        if (_bulletPool == null)
+            throw new System.InvalidOperationException("Bullet factory has not been configured.");
+
         var bullet = _bulletPool.Get();
         bullet.Reset(position, velocity);
         return bullet;
@@ -136,17 +138,13 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
         }
     }
 
-    // WARNING: Returns a shared internal buffer. Callers must not store or iterate the
-    // result after calling any other EntityWorld method — use it immediately.
-    public List<Entity> GetNearbyEntities(Vector2 position, float radius)
+    public void ForEachNearbyEntity(Vector2 position, float radius, System.Action<Entity> visitor)
     {
-        _nearbyEntitiesBuffer.Clear();
         float rSq = radius * radius;
         for (int i = 0; i < _entities.Count; i++)
         {
             if (Vector2.DistanceSquared(position, _entities[i].Position) < rSq)
-                _nearbyEntitiesBuffer.Add(_entities[i]);
+                visitor(_entities[i]);
         }
-        return _nearbyEntitiesBuffer;
     }
 }

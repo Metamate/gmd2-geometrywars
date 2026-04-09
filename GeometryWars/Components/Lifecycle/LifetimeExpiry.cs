@@ -7,6 +7,8 @@ namespace GeometryWars.Components.Lifecycle;
 // At 60Hz, 60 frames = 1 second.
 public sealed class LifetimeExpiry : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
+
     private int _framesRemaining;
 
     public LifetimeExpiry(int frames)

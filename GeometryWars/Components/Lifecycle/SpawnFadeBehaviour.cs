@@ -8,6 +8,8 @@ namespace GeometryWars.Components.Lifecycle;
 // Handles the initial fade-in and sibling activation after the spawn window.
 public sealed class SpawnFadeBehaviour : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PreUpdate;
+
     private int _timeUntilStart;
     private readonly int _spawnDelay;
     private SpriteComponent _sprite;

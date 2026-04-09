@@ -8,6 +8,8 @@ namespace GeometryWars.Components.Physics;
 // Prevents an entity from leaving the screen.
 public sealed class ScreenClampBehaviour : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
+
     private TransformComponent _transform;
     private readonly Vector2 _size;
 

@@ -10,6 +10,8 @@ namespace GeometryWars.Components.Visuals;
 // Spawns fire particles behind a moving entity.
 public sealed class ExhaustFireComponent : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
+
     private readonly IParticleSystem<ParticleState> _particles;
     private PlayerShip _player;
     private RigidbodyComponent _rigidbody;

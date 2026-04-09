@@ -10,6 +10,8 @@ namespace GeometryWars.Components.Physics;
 // Not currently assigned to any entity — kept as a teaching alternative.
 public sealed class ScreenWrap : Component
 {
+    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
+
     private TransformComponent _transform;
 
     public override void OnStart(Entity owner)

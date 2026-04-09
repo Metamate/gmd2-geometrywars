@@ -11,6 +11,13 @@ namespace GeometryWars.Entities;
 public abstract class Entity
 {
     private readonly List<IComponent> _components = [];
+    private static readonly ComponentUpdatePhase[] UpdatePhases =
+    [
+        ComponentUpdatePhase.PreUpdate,
+        ComponentUpdatePhase.Logic,
+        ComponentUpdatePhase.Physics,
+        ComponentUpdatePhase.PostPhysics,
+    ];
 
     public bool IsActive { get; set; } = true;
     public bool IsExpired { get; set; }
@@ -36,10 +43,14 @@ public abstract class Entity
     {
         if (!IsActive) return;
 
-        for (int i = 0; i < _components.Count; i++)
+        for (int phaseIndex = 0; phaseIndex < UpdatePhases.Length; phaseIndex++)
         {
-            if (_components[i].IsActive)
-                _components[i].Update(this);
+            var phase = UpdatePhases[phaseIndex];
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i].IsActive && _components[i].Phase == phase)
+                    _components[i].Update(this);
+            }
         }
     }
 

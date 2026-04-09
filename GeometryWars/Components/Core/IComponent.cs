@@ -6,6 +6,7 @@ namespace GeometryWars.Components.Core;
 public interface IComponent
 {
     bool IsActive { get; set; }
+    ComponentUpdatePhase Phase { get; }
 
     // Called immediately when the component is added to an entity.
     // Safe for self-setup only — siblings may not exist yet.

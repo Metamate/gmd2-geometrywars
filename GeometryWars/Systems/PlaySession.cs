@@ -19,9 +19,9 @@ public sealed class PlaySession
     public PlaySession(Rectangle viewportBounds)
     {
         Score = new ScoreTracker(Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
+        var spawnResetBridge = new DeferredSpawnController();
 
-        EntityFactory factory = null;
-        Entities = new EntityWorld(() => factory.CreateBullet());
+        Entities = new EntityWorld();
         Particles = new ParticleManager<ParticleState>(
             GameSettings.Performance.MaxParticles,
             particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles));
@@ -29,8 +29,10 @@ public sealed class PlaySession
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         Grid = new Grid(viewportBounds, gridSpacing);
 
-        Factory = factory = new EntityFactory(Score, Particles, Grid, Entities, () => Spawner.Reset());
+        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge);
+        Entities.ConfigureBulletFactory(Factory.CreateBullet);
         Spawner = new EnemyDirector(Entities, Factory);
+        spawnResetBridge.Attach(Spawner);
 
         Score.StartNewRun();
         Player = Factory.CreatePlayer();
@@ -44,5 +46,20 @@ public sealed class PlaySession
         Spawner.Update(!Player.IsDead, () => Player.Position);
         Grid.Update();
         Particles.Update();
+    }
+
+    private sealed class DeferredSpawnController : ISpawnController
+    {
+        private ISpawnController _target;
+
+        public void Attach(ISpawnController target) => _target = target;
+
+        public void Reset()
+        {
+            if (_target == null)
+                throw new InvalidOperationException("Spawn controller has not been attached.");
+
+            _target.Reset();
+        }
     }
 }

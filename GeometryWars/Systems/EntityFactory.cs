@@ -19,20 +19,20 @@ public sealed class EntityFactory
     private readonly ParticleManager<ParticleState> _particles;
     private readonly Grid _grid;
     private readonly EntityWorld _world;
-    private readonly Action _resetSpawner;
+    private readonly ISpawnController _spawner;
 
     public EntityFactory(
         ScoreTracker score,
         ParticleManager<ParticleState> particles,
         Grid grid,
         EntityWorld world,
-        Action resetSpawner)
+        ISpawnController spawner)
     {
         _score = score;
         _particles = particles;
         _grid = grid;
         _world = world;
-        _resetSpawner = resetSpawner;
+        _spawner = spawner;
     }
 
     public PlayerShip CreatePlayer()
@@ -52,7 +52,7 @@ public sealed class EntityFactory
         player.AddComponent(new ExhaustFireComponent(_particles));
         player.AddComponent(new GlowOverlay(Art.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
-        player.AddComponent(new PlayerCollisionBehaviour(_world, new SpawnResetAdapter(_resetSpawner)));
+        player.AddComponent(new PlayerCollisionBehaviour(_world, _spawner));
         player.AddComponent(respawn);
 
         return player;
@@ -125,14 +125,5 @@ public sealed class EntityFactory
     private static void PlayExplosionSound()
     {
         GameServices.Audio.Play(Sound.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
-    }
-
-    private sealed class SpawnResetAdapter : ISpawnController
-    {
-        private readonly Action _reset;
-
-        public SpawnResetAdapter(Action reset) => _reset = reset;
-
-        public void Reset() => _reset();
     }
 }
