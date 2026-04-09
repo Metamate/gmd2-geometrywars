@@ -59,5 +59,5 @@ public sealed class Game1 : Core
         Runtime.Frame.Update(gameTime, GraphicsDevice.Viewport);
     }
 
-    protected override void OnBeginDraw() => _bloom.BeginDraw();
+    protected override void OnBeforeDrawWorld() => _bloom.BeginDraw();
 }

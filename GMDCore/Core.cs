@@ -91,19 +91,20 @@ public abstract class Core : Game
         base.Update(gameTime);
     }
 
-    // Triggers MonoGame's DrawableGameComponent pipeline (e.g. BloomComponent).
-    // Must be called from Draw() after scene rendering is done.
-    protected void RunComponents(GameTime gameTime) => base.Draw(gameTime);
+    // Runs MonoGame's DrawableGameComponent pipeline (for example BloomComponent).
+    // This is invoked after the world is rendered and before HUD/UI is drawn.
+    protected void DrawRegisteredComponents(GameTime gameTime) => base.Draw(gameTime);
 
-    // Override to inject work between Clear and DrawWorld (e.g. post-process capture).
-    protected virtual void OnBeginDraw() { }
+    // Override to inject work right before the world is rendered
+    // (for example, redirecting draw output into a post-process render target).
+    protected virtual void OnBeforeDrawWorld() { }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
-        OnBeginDraw();
+        OnBeforeDrawWorld();
         _activeState?.DrawWorld(SpriteBatch);
-        RunComponents(gameTime);
+        DrawRegisteredComponents(gameTime);
         _activeState?.DrawHUD(SpriteBatch);
     }
 }
