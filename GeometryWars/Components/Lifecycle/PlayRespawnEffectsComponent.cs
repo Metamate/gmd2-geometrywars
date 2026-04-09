@@ -1,5 +1,6 @@
 using System;
 using GeometryWars.Components.Core;
+using GeometryWars.Entities;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,25 @@ public sealed class PlayRespawnEffectsComponent : Component
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
     private readonly Texture2D _lineParticle;
+    private TransformComponent _transform;
+    private RespawnStateComponent _respawnState;
+
+    public override void OnStart(Entity owner)
+    {
+        if (_respawnState != null)
+        {
+            _respawnState.Died -= PlayDeathAtOwner;
+            _respawnState.Respawned -= PlayRespawnAtOwner;
+        }
+
+        _transform = owner.Transform;
+        _respawnState = owner.GetComponent<RespawnStateComponent>();
+        if (_respawnState != null)
+        {
+            _respawnState.Died += PlayDeathAtOwner;
+            _respawnState.Respawned += PlayRespawnAtOwner;
+        }
+    }
 
     public PlayRespawnEffectsComponent(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
     {
@@ -39,4 +59,8 @@ public sealed class PlayRespawnEffectsComponent : Component
     {
         _grid.ApplyDirectedForce(new Vector3(0, 0, 5000), new Vector3(position, 0), 50);
     }
+
+    private void PlayDeathAtOwner() => PlayDeath(_transform.Position);
+
+    private void PlayRespawnAtOwner() => PlayRespawn(_transform.Position);
 }

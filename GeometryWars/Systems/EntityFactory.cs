@@ -108,7 +108,7 @@ public sealed class EntityFactory
         blackHole.AddComponent(new HealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
         blackHole.AddComponent(new TakeDamageOnBulletCollisionComponent());
         blackHole.AddComponent(new ExpireWhenHealthDepletedComponent());
-        blackHole.AddComponent(new PlayHitParticlesOnBulletCollisionComponent(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new PlayHitParticlesOnDamageComponent(_particles, _context.Frame, _context.Assets.LineParticle));
         blackHole.AddComponent(new CircleColliderComponent(_context.Assets.BlackHole.Width / 2f));
 
         return blackHole;

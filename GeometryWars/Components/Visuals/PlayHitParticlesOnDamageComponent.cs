@@ -1,4 +1,5 @@
 using System;
+using GeometryWars.Components.Combat;
 using GeometryWars.Components.Core;
 using GeometryWars.Entities;
 using GeometryWars.Services;
@@ -8,15 +9,16 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Visuals;
 
-// Plays a particle burst whenever the owner is hit by a bullet.
-public sealed class PlayHitParticlesOnBulletCollisionComponent : Component
+// Plays a particle burst whenever the owner's health component reports damage.
+public sealed class PlayHitParticlesOnDamageComponent : Component
 {
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly FrameInfo _frame;
     private readonly Texture2D _lineParticle;
     private TransformComponent _transform;
+    private HealthComponent _health;
 
-    public PlayHitParticlesOnBulletCollisionComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
+    public PlayHitParticlesOnDamageComponent(IParticleSystem<ParticleState> particles, FrameInfo frame, Texture2D lineParticle)
     {
         _particles = particles;
         _frame = frame;
@@ -25,14 +27,17 @@ public sealed class PlayHitParticlesOnBulletCollisionComponent : Component
 
     public override void OnStart(Entity owner)
     {
+        if (_health != null)
+            _health.Damaged -= PlayHitParticles;
+
         _transform = owner.Transform;
+        _health = owner.GetComponent<HealthComponent>();
+        if (_health != null)
+            _health.Damaged += PlayHitParticles;
     }
 
-    public override void OnCollision(Entity owner, Entity other)
+    private void PlayHitParticles()
     {
-        if (other is not Bullet)
-            return;
-
         float hue = (float)(3 * _frame.TotalSeconds % 6);
         Color color = ColorUtil.HSVToColor(hue, 0.25f, 1);
         float startOffset = Random.Shared.NextFloat(0, MathHelper.TwoPi / GameSettings.Visuals.BlackHoleHitParticles);

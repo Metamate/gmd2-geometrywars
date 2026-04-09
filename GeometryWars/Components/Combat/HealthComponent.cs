@@ -9,6 +9,9 @@ public sealed class HealthComponent : Component
     public int Current { get; private set; }
     public bool IsDepleted => Current <= 0;
 
+    public event Action Damaged;
+    public event Action Depleted;
+
     public HealthComponent(int startingHealth)
     {
         Current = Math.Max(0, startingHealth);
@@ -20,5 +23,9 @@ public sealed class HealthComponent : Component
             return;
 
         Current = Math.Max(0, Current - damage);
+        Damaged?.Invoke();
+
+        if (IsDepleted)
+            Depleted?.Invoke();
     }
 }

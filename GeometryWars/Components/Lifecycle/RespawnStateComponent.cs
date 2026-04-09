@@ -12,7 +12,9 @@ public sealed class RespawnStateComponent : Component
     private int _framesUntilRespawn;
     private TransformComponent _transform;
     private SpriteComponent _sprite;
-    private PlayRespawnEffectsComponent _effects;
+
+    public event System.Action Died;
+    public event System.Action Respawned;
 
     public RespawnStateComponent(IScoreTracker score)
     {
@@ -25,7 +27,6 @@ public sealed class RespawnStateComponent : Component
     {
         _transform = owner.Transform;
         _sprite = owner.GetComponent<SpriteComponent>();
-        _effects = owner.GetComponent<PlayRespawnEffectsComponent>();
     }
 
     // Called by PlayerCollisionBehaviour when the ship is hit.
@@ -40,7 +41,7 @@ public sealed class RespawnStateComponent : Component
         if (_sprite != null)
             _sprite.IsActive = false;
 
-        _effects?.PlayDeath(_transform.Position);
+        Died?.Invoke();
     }
 
     public override void PostUpdate(Entity owner)
@@ -55,7 +56,7 @@ public sealed class RespawnStateComponent : Component
             if (_sprite != null)
                 _sprite.IsActive = true;
 
-            _effects?.PlayRespawn(_transform.Position);
+            Respawned?.Invoke();
         }
     }
 }
