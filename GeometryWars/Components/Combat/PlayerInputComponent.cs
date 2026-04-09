@@ -11,8 +11,6 @@ namespace GeometryWars.Components.Combat;
 // Component that translates user input into movement and combat actions.
 public sealed class PlayerInputComponent : Component
 {
-    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PreUpdate;
-
     private readonly IBulletSpawner _bulletSpawner;
     private int _cooldownRemaining;
     private PlayerShip _player;
@@ -31,7 +29,7 @@ public sealed class PlayerInputComponent : Component
         _transform = owner.Transform;
     }
 
-    public override void Update(Entity owner)
+    public override void PreUpdate(Entity owner)
     {
         if (_player == null || _player.IsDead)
             return;

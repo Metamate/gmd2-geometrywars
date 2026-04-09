@@ -1,4 +1,5 @@
 using GeometryWars.Entities;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Components.Core;
 
@@ -6,7 +7,6 @@ namespace GeometryWars.Components.Core;
 public interface IComponent
 {
     bool IsActive { get; set; }
-    ComponentUpdatePhase Phase { get; }
 
     // Called immediately when the component is added to an entity.
     // Safe for self-setup only — siblings may not exist yet.
@@ -16,5 +16,10 @@ public interface IComponent
     // Safe for sibling lookups via owner.GetComponent<T>().
     void OnStart(Entity owner);
 
+    void PreUpdate(Entity owner);
     void Update(Entity owner);
+    void PhysicsUpdate(Entity owner);
+    void PostUpdate(Entity owner);
+    void OnCollision(Entity owner, Entity other);
+    void Draw(Entity owner, SpriteBatch spriteBatch);
 }

@@ -9,8 +9,6 @@ namespace GeometryWars.Components.AI;
 // Component that applies gravitational forces to nearby entities.
 public sealed class GravityBehaviour : Component
 {
-    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.Logic;
-
     private readonly float _range;
     private readonly float _force;
     private readonly INeighborQuery _neighborQuery;

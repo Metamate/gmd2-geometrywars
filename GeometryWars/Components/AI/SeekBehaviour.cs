@@ -9,8 +9,6 @@ namespace GeometryWars.Components.AI;
 // AI component that steers an entity towards a target position.
 public sealed class SeekBehaviour : Component
 {
-    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.Logic;
-
     private readonly Func<Vector2> _getTargetPosition;
     private readonly float _acceleration;
     

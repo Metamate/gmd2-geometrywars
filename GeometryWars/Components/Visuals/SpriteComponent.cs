@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars.Components.Visuals;
 
 // Renders a texture at the entity's position.
-public sealed class SpriteComponent : Component, IDrawableComponent
+public sealed class SpriteComponent : Component
 {
     private readonly Texture2D _texture;
     private TransformComponent _transform;
@@ -23,9 +23,7 @@ public sealed class SpriteComponent : Component, IDrawableComponent
         _transform = owner.Transform;
     }
 
-    public override void Update(Entity owner) { }
-
-    public void Draw(Entity owner, SpriteBatch spriteBatch)
+    public override void Draw(Entity owner, SpriteBatch spriteBatch)
     {
         Vector2 origin = new(_texture.Width / 2f, _texture.Height / 2f);
 

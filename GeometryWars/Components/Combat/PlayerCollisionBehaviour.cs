@@ -7,7 +7,7 @@ namespace GeometryWars.Components.Combat;
 
 // Handles collision response for the player ship.
 // Follows the same pattern as EnemyCollisionBehaviour and BulletCollisionBehaviour.
-public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
+public sealed class PlayerCollisionBehaviour : Component
 {
     private readonly IEntitySweeper _sweeper;
     private readonly ISpawnController _spawner;
@@ -26,9 +26,7 @@ public sealed class PlayerCollisionBehaviour : Component, ICollisionComponent
         _respawn = owner.GetComponent<PlayerRespawnBehaviour>();
     }
 
-    public override void Update(Entity owner) { }
-
-    public void OnCollision(Entity owner, Entity other)
+    public override void OnCollision(Entity owner, Entity other)
     {
         if (_player == null || _player.IsDead) return;
 

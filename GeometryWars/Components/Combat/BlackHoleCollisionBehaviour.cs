@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace GeometryWars.Components.Combat;
 
 // Handles damage and effects when a black hole is hit.
-public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
+public sealed class BlackHoleCollisionBehaviour : Component
 {
     private int _hitpoints;
     private readonly IParticleSystem<ParticleState> _particles;
@@ -24,9 +24,7 @@ public sealed class BlackHoleCollisionBehaviour : Component, ICollisionComponent
         _transform = owner.Transform;
     }
 
-    public override void Update(Entity owner) { }
-
-    public void OnCollision(Entity owner, Entity other)
+    public override void OnCollision(Entity owner, Entity other)
     {
         if (other is Bullet)
         {

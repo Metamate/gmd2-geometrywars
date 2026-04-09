@@ -6,7 +6,7 @@ using GeometryWars.Systems;
 namespace GeometryWars.Components.Combat;
 
 // Handles collision response for enemies, including death effects and score.
-public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
+public sealed class EnemyCollisionBehaviour : Component
 {
     private readonly IScoreTracker _score;
     private RigidbodyComponent _rigidbody;
@@ -23,9 +23,7 @@ public sealed class EnemyCollisionBehaviour : Component, ICollisionComponent
         _transform = owner.Transform;
     }
 
-    public override void Update(Entity owner) { }
-
-    public void OnCollision(Entity owner, Entity other)
+    public override void OnCollision(Entity owner, Entity other)
     {
         if (owner is not Enemy enemy) return;
 

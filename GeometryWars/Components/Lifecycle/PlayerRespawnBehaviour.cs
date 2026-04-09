@@ -13,8 +13,6 @@ namespace GeometryWars.Components.Lifecycle;
 //   3. After the timer expires, applies a grid shockwave at the respawn position.
 public sealed class PlayerRespawnBehaviour : Component
 {
-    public override ComponentUpdatePhase Phase => ComponentUpdatePhase.PostPhysics;
-
     private readonly IScoreTracker _score;
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
@@ -63,7 +61,7 @@ public sealed class PlayerRespawnBehaviour : Component
         }
     }
 
-    public override void Update(Entity owner)
+    public override void PostUpdate(Entity owner)
     {
         if (!IsDead) return;
 
