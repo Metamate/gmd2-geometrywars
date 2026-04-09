@@ -28,9 +28,9 @@ internal sealed class EntityCatalog
     {
         _entities.Add(entity);
 
-        if (entity.HasComponent<BulletTagComponent>()) _bullets.Add(entity);
-        else if (entity.HasComponent<BlackHoleTagComponent>()) _blackHoles.Add(entity);
-        else if (entity.HasComponent<EnemyTagComponent>()) _enemies.Add(entity);
+        if (entity.HasComponent<BulletTag>()) _bullets.Add(entity);
+        else if (entity.HasComponent<BlackHoleTag>()) _blackHoles.Add(entity);
+        else if (entity.HasComponent<EnemyTag>()) _enemies.Add(entity);
     }
 
     public void Clear()

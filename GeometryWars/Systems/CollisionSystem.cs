@@ -7,11 +7,11 @@ namespace GeometryWars.Systems;
 // Handles broad ownership of collidable registrations and collision dispatch.
 internal sealed class CollisionSystem
 {
-    private readonly List<(Entity Entity, ColliderComponent Collider)> _collidables = [];
+    private readonly List<(Entity Entity, Collider Collider)> _collidables = [];
 
     public void Register(Entity entity)
     {
-        var collider = entity.GetComponent<ColliderComponent>();
+        var collider = entity.GetComponent<Collider>();
         if (collider != null)
             _collidables.Add((entity, collider));
     }

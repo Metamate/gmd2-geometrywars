@@ -49,18 +49,18 @@ public sealed class EntityFactory
         };
 
         Vector2 size = new(_context.Assets.Player.Width, _context.Assets.Player.Height);
-        var respawnEffects = new PlayRespawnEffectsComponent(_particles, _grid, _context.Assets.LineParticle);
-        var respawnState = new RespawnStateComponent(_score);
+        var respawnEffects = new PlayRespawnEffects(_particles, _grid, _context.Assets.LineParticle);
+        var respawnState = new RespawnState(_score);
 
-        player.AddComponent(new RigidbodyComponent(damping: 0f));
-        player.AddComponent(new ScreenClampBehaviour(size, _context.Frame));
-        player.AddComponent(new SpriteComponent(_context.Assets.Player));
-        player.AddComponent(new ApplyMovementInputComponent(_context.Controller));
-        player.AddComponent(new FireBulletsOnInputComponent(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
-        player.AddComponent(new ExhaustFireComponent(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
+        player.AddComponent(new Rigidbody(damping: 0f));
+        player.AddComponent(new ClampToScreen(size, _context.Frame));
+        player.AddComponent(new Sprite(_context.Assets.Player));
+        player.AddComponent(new ApplyMovementInput(_context.Controller));
+        player.AddComponent(new FireBulletsOnInput(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
+        player.AddComponent(new ExhaustFire(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
         player.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.White * 0.15f));
-        player.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
-        player.AddComponent(new PlayerCollisionBehaviour(_world, _spawner));
+        player.AddComponent(new CircleCollider(GameSettings.Bullets.ColliderRadius));
+        player.AddComponent(new BeginRespawnOnLethalCollision(_world, _spawner));
         player.AddComponent(respawnEffects);
         player.AddComponent(respawnState);
 
@@ -70,28 +70,28 @@ public sealed class EntityFactory
     public Entity CreateBullet()
     {
         var bullet = new Entity();
-        bullet.AddComponent(new BulletTagComponent());
-        bullet.AddComponent(new RigidbodyComponent(damping: 1f));
-        bullet.AddComponent(new SpriteComponent(_context.Assets.Bullet));
-        bullet.AddComponent(new FaceVelocityComponent());
-        bullet.AddComponent(new ExpireOutsideViewportWithParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        bullet.AddComponent(new ApplyGridForceFromVelocityComponent(_grid, GameSettings.Physics.BulletGridForce, GameSettings.Physics.BulletGridRadius));
-        bullet.AddComponent(new BulletCollisionBehaviour());
-        bullet.AddComponent(new CircleColliderComponent(GameSettings.Bullets.ColliderRadius));
+        bullet.AddComponent(new BulletTag());
+        bullet.AddComponent(new Rigidbody(damping: 1f));
+        bullet.AddComponent(new Sprite(_context.Assets.Bullet));
+        bullet.AddComponent(new FaceVelocity());
+        bullet.AddComponent(new ExpireOutsideViewportWithParticles(_particles, _context.Frame, _context.Assets.LineParticle));
+        bullet.AddComponent(new ApplyGridForceFromVelocity(_grid, GameSettings.Physics.BulletGridForce, GameSettings.Physics.BulletGridRadius));
+        bullet.AddComponent(new ExpireOnEnemyOrBlackHoleCollision());
+        bullet.AddComponent(new CircleCollider(GameSettings.Bullets.ColliderRadius));
         return bullet;
     }
 
     public Entity CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var enemy = CreateEnemyBase(_context.Assets.Seeker, GameSettings.Enemy.SeekerPointValue, position);
-        enemy.AddComponent(new SeekBehaviour(getTargetPosition, GameSettings.Enemy.SeekerAcceleration));
+        enemy.AddComponent(new SeekTarget(getTargetPosition, GameSettings.Enemy.SeekerAcceleration));
         return enemy;
     }
 
     public Entity CreateWanderer(Vector2 position)
     {
         var enemy = CreateEnemyBase(_context.Assets.Wanderer, GameSettings.Enemy.WandererPointValue, position);
-        enemy.AddComponent(new WanderBehaviour(_context.Frame, new Vector2(_context.Assets.Wanderer.Width, _context.Assets.Wanderer.Height)));
+        enemy.AddComponent(new Wander(_context.Frame, new Vector2(_context.Assets.Wanderer.Width, _context.Assets.Wanderer.Height)));
         return enemy;
     }
 
@@ -102,19 +102,19 @@ public sealed class EntityFactory
             Transform = { Position = position }
         };
 
-        blackHole.AddComponent(new BlackHoleTagComponent());
-        blackHole.AddComponent(new RigidbodyComponent());
-        blackHole.AddComponent(new SpriteComponent(_context.Assets.BlackHole));
+        blackHole.AddComponent(new BlackHoleTag());
+        blackHole.AddComponent(new Rigidbody());
+        blackHole.AddComponent(new Sprite(_context.Assets.BlackHole));
         blackHole.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.DarkViolet * 0.4f));
-        blackHole.AddComponent(new GravityBehaviour(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
-        blackHole.AddComponent(new EmitOrbitingParticlesComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        blackHole.AddComponent(new ApplyOscillatingImplosiveGridForceComponent(GameSettings.Hazards.BlackHoleGridRange, _grid));
-        blackHole.AddComponent(new DestroyableComponent());
-        blackHole.AddComponent(new HealthComponent(GameSettings.Hazards.BlackHoleHitpoints));
-        blackHole.AddComponent(new TakeDamageOnBulletCollisionComponent());
-        blackHole.AddComponent(new DestroyWhenHealthDepletedComponent());
-        blackHole.AddComponent(new PlayHitParticlesOnDamageComponent(_particles, _context.Frame, _context.Assets.LineParticle));
-        blackHole.AddComponent(new CircleColliderComponent(_context.Assets.BlackHole.Width / 2f));
+        blackHole.AddComponent(new ApplyGravity(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
+        blackHole.AddComponent(new EmitOrbitingParticles(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new ApplyOscillatingImplosiveGridForce(GameSettings.Hazards.BlackHoleGridRange, _grid));
+        blackHole.AddComponent(new Destroyable());
+        blackHole.AddComponent(new Health(GameSettings.Hazards.BlackHoleHitpoints));
+        blackHole.AddComponent(new TakeDamageOnBulletCollision());
+        blackHole.AddComponent(new DestroyWhenHealthDepleted());
+        blackHole.AddComponent(new PlayHitParticlesOnDamage(_particles, _context.Frame, _context.Assets.LineParticle));
+        blackHole.AddComponent(new CircleCollider(_context.Assets.BlackHole.Width / 2f));
 
         return blackHole;
     }
@@ -127,19 +127,20 @@ public sealed class EntityFactory
         };
 
         Vector2 size = new(texture.Width, texture.Height);
-        enemy.AddComponent(new EnemyTagComponent());
-        enemy.AddComponent(new RigidbodyComponent(damping: GameSettings.Enemy.Damping));
-        enemy.AddComponent(new ScreenClampBehaviour(size, _context.Frame));
-        var sprite = enemy.AddComponent(new SpriteComponent(texture));
+        enemy.AddComponent(new EnemyTag());
+        enemy.AddComponent(new Rigidbody(damping: GameSettings.Enemy.Damping));
+        enemy.AddComponent(new ClampToScreen(size, _context.Frame));
+        var sprite = enemy.AddComponent(new Sprite(texture));
         sprite.Tint = Color.Transparent;
 
-        enemy.AddComponent(new DestroyableComponent());
-        enemy.AddComponent(new EnemyCollisionBehaviour());
-        enemy.AddComponent(new AwardScoreOnDestroyedComponent(_score, pointValue));
-        enemy.AddComponent(new PlayBurstParticlesOnDestroyedComponent(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, ParticleType.Enemy));
-        enemy.AddComponent(new PlaySoundOnDestroyedComponent(PlayExplosionSound));
-        enemy.AddComponent(new CircleColliderComponent(size.X / 2f));
-        enemy.AddComponent(new SpawnFadeBehaviour(GameSettings.Enemy.SpawnDelay));
+        enemy.AddComponent(new Destroyable());
+        enemy.AddComponent(new DestroyOnBulletOrBlackHoleCollision());
+        enemy.AddComponent(new RepelFromEnemies());
+        enemy.AddComponent(new AwardScoreOnDestroyed(_score, pointValue));
+        enemy.AddComponent(new PlayBurstParticlesOnDestroyed(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, ParticleType.Enemy));
+        enemy.AddComponent(new PlaySoundOnDestroyed(PlayExplosionSound));
+        enemy.AddComponent(new CircleCollider(size.X / 2f));
+        enemy.AddComponent(new FadeInOnSpawn(GameSettings.Enemy.SpawnDelay));
         return enemy;
     }
 

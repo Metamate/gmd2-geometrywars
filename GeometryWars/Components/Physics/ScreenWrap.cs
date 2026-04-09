@@ -6,12 +6,12 @@ using Microsoft.Xna.Framework;
 namespace GeometryWars.Components.Physics;
 
 // Wraps an entity to the opposite edge when it leaves the screen.
-// Alternative to ScreenClampBehaviour: clamp stops at the edge, wrap teleports.
+// Alternative to ClampToScreen: clamp stops at the edge, wrap teleports.
 // Not currently assigned to any entity — kept as a teaching alternative.
 public sealed class ScreenWrap : Component
 {
     private readonly FrameInfo _frame;
-    private TransformComponent _transform;
+    private Transform _transform;
 
     public ScreenWrap(FrameInfo frame) => _frame = frame;
 

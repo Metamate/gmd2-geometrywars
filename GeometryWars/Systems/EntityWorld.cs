@@ -37,10 +37,10 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
             throw new System.InvalidOperationException("Bullet factory has not been configured.");
 
         var bullet = _bulletPool.Get();
-        if (!bullet.HasComponent<BulletTagComponent>())
+        if (!bullet.HasComponent<BulletTag>())
             throw new System.InvalidOperationException("Bullet factory must create entities tagged as bullets.");
 
-        var rigidbody = bullet.GetComponent<RigidbodyComponent>() ?? throw new System.InvalidOperationException("Bullet entities must include a RigidbodyComponent.");
+        var rigidbody = bullet.GetComponent<Rigidbody>() ?? throw new System.InvalidOperationException("Bullet entities must include a Rigidbody.");
 
         bullet.IsExpired = false;
         bullet.Transform.Position = position;
@@ -71,7 +71,7 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
     {
         for (int i = 0; i < _catalog.Enemies.Count; i++)
         {
-            var destroyable = _catalog.Enemies[i].GetComponent<DestroyableComponent>();
+            var destroyable = _catalog.Enemies[i].GetComponent<Destroyable>();
             if (destroyable != null)
                 destroyable.Destroy();
             else
@@ -83,7 +83,7 @@ public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
     {
         for (int i = 0; i < _catalog.BlackHoles.Count; i++)
         {
-            var destroyable = _catalog.BlackHoles[i].GetComponent<DestroyableComponent>();
+            var destroyable = _catalog.BlackHoles[i].GetComponent<Destroyable>();
             if (destroyable != null)
                 destroyable.Destroy();
             else

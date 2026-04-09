@@ -13,14 +13,14 @@ public class Entity
     public bool IsActive { get; set; } = true;
     public bool IsExpired { get; set; }
 
-    public TransformComponent Transform { get; private set; }
+    public Transform Transform { get; private set; }
     public Vector2 Position => Transform.Position;
 
     public IReadOnlyList<IComponent> Components => _components;
 
     public Entity()
     {
-        Transform = AddComponent(new TransformComponent(Vector2.Zero));
+        Transform = AddComponent(new Transform(Vector2.Zero));
     }
 
     public T GetComponent<T>() where T : class, IComponent
@@ -75,7 +75,7 @@ public class Entity
     public T AddComponent<T>(T component) where T : IComponent
     {
         _components.Add(component);
-        if (component is TransformComponent tc) Transform = tc;
+        if (component is Transform tc) Transform = tc;
         component.OnAdded(this);
         return component;
     }
