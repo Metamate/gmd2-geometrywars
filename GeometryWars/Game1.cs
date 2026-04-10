@@ -1,6 +1,8 @@
 using GeometryWars.Graphics;
 using GMDCore;
+using GeometryWars.Input;
 using GeometryWars.Services;
+using GeometryWars.Systems;
 using GeometryWars.States;
 using Microsoft.Xna.Framework;
 
@@ -9,13 +11,17 @@ namespace GeometryWars;
 public sealed class Game1 : Core
 {
     private readonly BloomComponent _bloom;
-    private GameRuntime Runtime { get; }
+    private FrameInfo Frame { get; } = new();
+    private GameAssets Assets { get; } = new();
+    private AudioManager Audio { get; } = new();
+    private PerformanceMonitor Performance { get; } = new();
+    private GameController Controller { get; }
     public PlayContext PlayContext { get; }
 
     public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
     {
-        Runtime = new GameRuntime(Input);
-        PlayContext = new PlayContext(Runtime.Frame, Runtime.Controller, Runtime.Assets, Runtime.Audio, Runtime.Performance);
+        Controller = new GameController(Input);
+        PlayContext = new PlayContext(Frame, Controller, Assets, Audio, Performance);
         Graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
 
@@ -28,33 +34,33 @@ public sealed class Game1 : Core
     {
         base.Initialize();
 
-        Runtime.Frame.Update(new GameTime(), GraphicsDevice.Viewport);
+        Frame.Update(new GameTime(), GraphicsDevice.Viewport);
 
         SetState(new PlayState(this, PlayContext));
     }
 
     protected override void Update(GameTime gameTime)
     {
-        Runtime.Performance.Update(gameTime);
+        Performance.Update(gameTime);
         base.Update(gameTime);
     }
 
     protected override void LoadContent()
     {
-        Runtime.Assets.Load(Content);
+        Assets.Load(Content);
     }
 
     protected override void OnUpdateInput()
     {
         base.OnUpdateInput();
-        Runtime.Controller.Update();
+        Controller.Update();
     }
 
-    protected override bool ShouldExit() => Runtime.Controller.WasExitPressed;
+    protected override bool ShouldExit() => Controller.WasExitPressed;
 
     protected override void RegisterServices(GameTime gameTime)
     {
-        Runtime.Frame.Update(gameTime, GraphicsDevice.Viewport);
+        Frame.Update(gameTime, GraphicsDevice.Viewport);
     }
 
     protected override void OnBeforeDrawWorld() => _bloom.BeginDraw();
