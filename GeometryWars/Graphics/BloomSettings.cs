@@ -1,8 +1,7 @@
 namespace GeometryWars.Graphics
 {
-    /// <summary>
-    /// Class holds all the settings used to tweak the bloom effect.
-    /// </summary>
+
+    // Class holds all the settings used to tweak the bloom effect.
     public class BloomSettings
     {
         #region Fields
@@ -39,9 +38,8 @@ namespace GeometryWars.Graphics
         #endregion
 
 
-        /// <summary>
-        /// Constructs a new bloom settings descriptor.
-        /// </summary>
+
+        // Constructs a new bloom settings descriptor.
         public BloomSettings(string name, float bloomThreshold, float blurAmount,
                              float bloomIntensity, float baseIntensity,
                              float bloomSaturation, float baseSaturation)
@@ -54,11 +52,10 @@ namespace GeometryWars.Graphics
             BloomSaturation = bloomSaturation;
             BaseSaturation = baseSaturation;
         }
-        
 
-        /// <summary>
-        /// Table of preset bloom settings, used by the sample program.
-        /// </summary>
+
+
+        // Table of preset bloom settings, used by the sample program.
         public static BloomSettings[] PresetSettings =
         {
             //                Name           Thresh  Blur Bloom  Base  BloomSat BaseSat

@@ -63,16 +63,15 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Load your graphics content.
-        /// </summary>
+
+        // Load your graphics content.
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             bloomExtractEffect = this.Game.Content.Load<Effect>("Shaders/BloomExtract");
-			bloomCombineEffect = this.Game.Content.Load<Effect>("Shaders/BloomCombine");
-			gaussianBlurEffect = this.Game.Content.Load<Effect>("Shaders/GaussianBlur");
+            bloomCombineEffect = this.Game.Content.Load<Effect>("Shaders/BloomCombine");
+            gaussianBlurEffect = this.Game.Content.Load<Effect>("Shaders/GaussianBlur");
 
             // Look up the resolution and format of our main backbuffer.
             PresentationParameters pp = GraphicsDevice.PresentationParameters;
@@ -99,9 +98,8 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Unload your graphics content.
-        /// </summary>
+
+        // Unload your graphics content.
         protected override void UnloadContent()
         {
             sceneRenderTarget.Dispose();
@@ -115,11 +113,10 @@ namespace GeometryWars.Graphics
         #region Draw
 
 
-        /// <summary>
-        /// This should be called at the very start of the scene rendering. The bloom
-        /// component uses it to redirect drawing into its custom rendertarget, so it
-        /// can capture the scene image in preparation for applying the bloom filter.
-        /// </summary>
+
+        // This should be called at the very start of the scene rendering. The bloom
+        // component uses it to redirect drawing into its custom rendertarget, so it
+        // can capture the scene image in preparation for applying the bloom filter.
         public void BeginDraw()
         {
             if (Visible)
@@ -130,10 +127,9 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// This is where it all happens. Grabs a scene that has already been rendered,
-        /// and uses postprocess magic to add a glowing bloom effect over the top of it.
-        /// </summary>
+
+        // This is where it all happens. Grabs a scene that has already been rendered,
+        // and uses postprocess magic to add a glowing bloom effect over the top of it.
         public override void Draw(GameTime gameTime)
         {
             GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
@@ -187,10 +183,9 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Helper for drawing a texture into a rendertarget, using
-        /// a custom shader to apply postprocessing effects.
-        /// </summary>
+
+        // Helper for drawing a texture into a rendertarget, using
+        // a custom shader to apply postprocessing effects.
         void DrawFullscreenQuad(Texture2D texture, RenderTarget2D renderTarget,
                                 Effect effect, IntermediateBuffer currentBuffer)
         {
@@ -202,10 +197,9 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Helper for drawing a texture into the current rendertarget,
-        /// using a custom shader to apply postprocessing effects.
-        /// </summary>
+
+        // Helper for drawing a texture into the current rendertarget,
+        // using a custom shader to apply postprocessing effects.
         void DrawFullscreenQuad(Texture2D texture, int width, int height,
                                 Effect effect, IntermediateBuffer currentBuffer)
         {
@@ -223,10 +217,9 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Computes sample weightings and texture coordinate offsets
-        /// for one pass of a separable gaussian blur filter.
-        /// </summary>
+
+        // Computes sample weightings and texture coordinate offsets
+        // for one pass of a separable gaussian blur filter.
         void SetBlurEffectParameters(float dx, float dy)
         {
             // Look up the sample weight and offset effect parameters.
@@ -290,10 +283,9 @@ namespace GeometryWars.Graphics
         }
 
 
-        /// <summary>
-        /// Evaluates a single point on the gaussian falloff curve.
-        /// Used for setting up the blur filter weightings.
-        /// </summary>
+
+        // Evaluates a single point on the gaussian falloff curve.
+        // Used for setting up the blur filter weightings.
         float ComputeGaussian(float n)
         {
             float theta = Settings.BlurAmount;

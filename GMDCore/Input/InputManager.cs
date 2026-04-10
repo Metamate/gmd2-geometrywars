@@ -1,12 +1,12 @@
 namespace GMDCore.Input;
 
-/// Raw hardware is sampled every render frame, then buffered edge events are
-/// exposed to gameplay on the next fixed logic tick.
+// Raw hardware is sampled every render frame, then buffered edge events are
+// exposed to gameplay on the next fixed logic tick.
 public class InputManager
 {
     public KeyboardInfo Keyboard { get; } = new();
-    public MouseInfo    Mouse    { get; } = new();
-    public GamePadInfo  GamePad  { get; } = new();
+    public MouseInfo Mouse { get; } = new();
+    public GamePadInfo GamePad { get; } = new();
 
     public void SampleFrame()
     {

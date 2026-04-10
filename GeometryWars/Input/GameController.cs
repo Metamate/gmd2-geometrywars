@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GeometryWars.Input;
 
-/// Abstracts raw hardware input into semantic game actions.
-/// Uses an injected InputManager rather than reading hardware state directly.
+// Abstracts raw hardware input into semantic game actions.
+// Uses an injected InputManager rather than reading hardware state directly.
 public sealed class GameController
 {
     private readonly InputManager _input;
