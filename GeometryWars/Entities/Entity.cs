@@ -56,7 +56,7 @@ public class Entity
         for (int i = 0; i < _components.Count; i++)
         {
             if (_components[i].IsActive)
-                _components[i].PhysicsUpdate(this);
+                _components[i].Simulate(this);
         }
 
         for (int i = 0; i < _components.Count; i++)

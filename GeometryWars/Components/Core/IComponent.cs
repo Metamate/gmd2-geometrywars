@@ -16,14 +16,11 @@ public interface IComponent
     // Safe for sibling lookups via owner.GetComponent<T>().
     void OnStart(Entity owner);
 
-    // Called when the entity is being removed from the world.
-    // Use this for cleanup such as unregistering long-lived subscriptions.
-    void OnRemoved(Entity owner);
-
     void PreUpdate(Entity owner);
     void Update(Entity owner);
-    void PhysicsUpdate(Entity owner);
+    void Simulate(Entity owner);
     void PostUpdate(Entity owner);
+    void OnRemoved(Entity owner);
     void OnCollision(Entity owner, Entity other);
     void Draw(Entity owner, SpriteBatch spriteBatch);
 }

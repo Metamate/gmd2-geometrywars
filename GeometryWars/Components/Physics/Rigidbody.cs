@@ -28,7 +28,7 @@ public sealed class Rigidbody : Component
         Velocity += force;
     }
 
-    public override void PhysicsUpdate(Entity owner)
+    public override void Simulate(Entity owner)
     {
         _transform.Position += Velocity;
         Velocity *= _damping;

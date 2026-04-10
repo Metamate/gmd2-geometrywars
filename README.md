@@ -100,7 +100,7 @@ The lifecycle is Unity-like:
 - `OnStart`
 - `PreUpdate`
 - `Update`
-- `PhysicsUpdate`
+- `Simulate`
 - `PostUpdate`
 - `OnCollision`
 - `Draw`
