@@ -54,9 +54,8 @@ public sealed class PlayState : GameStateBase
         _session.Entities.Draw(spriteBatch);
         spriteBatch.End();
 
-        _session.Grid.Draw(_game.GraphicsDevice);
-
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+        _session.Grid.Draw(spriteBatch, _context.Assets.Pixel);
         _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }

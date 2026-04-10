@@ -31,9 +31,8 @@ public sealed class GameOverState : GameStateBase
 
     public override void DrawWorld(SpriteBatch spriteBatch)
     {
-        _session.Grid.Draw(_game.GraphicsDevice);
-
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+        _session.Grid.Draw(spriteBatch, _context.Assets.Pixel);
         _session.Particles.Draw(spriteBatch);
         spriteBatch.End();
     }

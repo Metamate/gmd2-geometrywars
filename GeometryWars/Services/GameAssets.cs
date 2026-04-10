@@ -18,6 +18,7 @@ public sealed class GameAssets
     public Texture2D BlackHole { get; private set; }
     public Texture2D LineParticle { get; private set; }
     public Texture2D Glow { get; private set; }
+    public Texture2D Pixel { get; private set; }
     public Texture2D Pointer { get; private set; }
     public SpriteFont Font { get; private set; }
 
@@ -41,6 +42,9 @@ public sealed class GameAssets
         Pointer = content.Load<Texture2D>("Art/Pointer");
         LineParticle = content.Load<Texture2D>("Art/Laser");
         Glow = content.Load<Texture2D>("Art/Glow");
+
+        Pixel = new Texture2D(Player.GraphicsDevice, 1, 1);
+        Pixel.SetData([Color.White]);
 
         Font = content.Load<SpriteFont>("font");
 
