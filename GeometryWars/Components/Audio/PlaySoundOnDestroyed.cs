@@ -21,9 +21,8 @@ public sealed class PlaySoundOnDestroyed : Component
         if (_destroyable != null)
             _destroyable.Destroyed -= OnDestroyed;
 
-        _destroyable = owner.GetComponent<Destroyable>();
-        if (_destroyable != null)
-            _destroyable.Destroyed += OnDestroyed;
+        _destroyable = owner.RequireComponent<Destroyable>();
+        _destroyable.Destroyed += OnDestroyed;
     }
 
     private void OnDestroyed(Entity owner)

@@ -13,7 +13,7 @@ public sealed class FaceVelocity : Component
     public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
-        _rigidbody = owner.GetComponent<Rigidbody>();
+        _rigidbody = owner.RequireComponent<Rigidbody>();
     }
 
     public override void PostUpdate(Entity owner)

@@ -32,9 +32,8 @@ public sealed class PlayHitParticlesOnDamage : Component
             _health.Damaged -= PlayHitParticles;
 
         _transform = owner.Transform;
-        _health = owner.GetComponent<Health>();
-        if (_health != null)
-            _health.Damaged += PlayHitParticles;
+        _health = owner.RequireComponent<Health>();
+        _health.Damaged += PlayHitParticles;
     }
 
     private void PlayHitParticles()

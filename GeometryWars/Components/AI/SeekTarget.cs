@@ -25,7 +25,7 @@ public sealed class SeekTarget : Component
     public override void OnStart(Entity owner)
     {
         _transform = owner.Transform;
-        _rigidbody = owner.GetComponent<Rigidbody>();
+        _rigidbody = owner.RequireComponent<Rigidbody>();
     }
 
     public override void Update(Entity owner)

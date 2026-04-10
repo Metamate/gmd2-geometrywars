@@ -15,10 +15,9 @@ public sealed class DestroyWhenHealthDepleted : Component
         if (_health != null)
             _health.Depleted -= HandleHealthDepleted;
 
-        _destroyable = owner.GetComponent<Destroyable>();
-        _health = owner.GetComponent<Health>();
-        if (_health != null)
-            _health.Depleted += HandleHealthDepleted;
+        _destroyable = owner.RequireComponent<Destroyable>();
+        _health = owner.RequireComponent<Health>();
+        _health.Depleted += HandleHealthDepleted;
     }
 
     private void HandleHealthDepleted()

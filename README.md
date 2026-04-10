@@ -83,7 +83,7 @@ Supporting classes such as [EntityCatalog](C:/Users/jakik/projects/GMDPlayground
 This is where you can read how an entity is assembled.
 
 Examples:
-- the player is composed from movement input, firing input, collision response, respawn state, respawn effects, rendering, and physics
+- the player is composed from movement input, weapon trigger/input, weapon firing pattern, weapon feedback, collision response, respawn state, respawn effects, rendering, and physics
 - bullets are composed from physics, collision, facing velocity, viewport expiry, and grid force
 - black holes are composed from gravity, orbiting particles, grid force, health, bullet damage, expiry-on-zero-health, and hit effects
 
@@ -109,23 +109,60 @@ The intended design rule is:
 - entity-specific naming should be avoided unless the behavior is genuinely unique
 
 Good examples:
-- `HealthComponent`
-- `TakeDamageOnBulletCollisionComponent`
-- `FaceVelocityComponent`
-- `ApplyMovementInputComponent`
+- `Health`
+- `TakeDamageOnBulletCollision`
+- `FaceVelocity`
+- `ApplyMovementInput`
+
+## Components Vs Systems
+
+This project does not use a strict ECS where components are data-only.
+
+Instead, it uses a hybrid model:
+- components may contain behavior, as long as that behavior is local to one entity
+- systems/session objects coordinate behavior that spans multiple entities or the whole run
+
+A good rule of thumb is:
+- use a component when the logic is mostly about the owner and its own state
+- use a system when the logic touches many entities, owns game/session rules, or needs central ordering
+
+Good component responsibilities:
+- `Health`
+- `RespawnState`
+- `Weapon`
+- `FaceVelocity`
+- `FadeInOnSpawn`
+- `SeekTarget`
+
+Good system/session responsibilities:
+- collision detection in `CollisionSystem`
+- spawn pacing in `EnemyDirector`
+- pooled entity management in `EntityWorld`
+- run-level consequences in `PlaySession`
+
+Examples from this codebase:
+- `BeginRespawnOnLethalCollision` is a component because it only decides when the player has taken a lethal hit
+- `PlaySession` handles the arena-wide consequences of player death, because clearing enemies and resetting spawning are run-level rules
+- the weapon flow is split so `FireWeaponOnInput` handles trigger input, `Weapon` handles cadence, `SpawnTwinBulletsOnFired` handles the projectile pattern, and `PlaySoundOnWeaponFired` handles feedback
+
+For a larger game, prefer this rule:
+- local behavior in components
+- cross-entity orchestration in systems
+- explicit composition in `EntityFactory`
+- move hot/shared processing into systems when scale or performance demands it
 
 ## Local Events
 
 The project uses small local events inside an entity's component graph, not a global event bus.
 
 Examples:
-- [HealthComponent](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Combat/HealthComponent.cs) publishes `Damaged` and `Depleted`
-- [RespawnStateComponent](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/RespawnStateComponent.cs) publishes `Died` and `Respawned`
+- [Health](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Combat/Health.cs) publishes `Damaged` and `Depleted`
+- [RespawnState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/RespawnState.cs) publishes `Died` and `Respawned`
 
 This allows reactive components such as:
-- [PlayHitParticlesOnDamageComponent](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Visuals/PlayHitParticlesOnDamageComponent.cs)
-- [ExpireWhenHealthDepletedComponent](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/ExpireWhenHealthDepletedComponent.cs)
-- [PlayRespawnEffectsComponent](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/PlayRespawnEffectsComponent.cs)
+- [PlayHitParticlesOnDamage](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Visuals/PlayHitParticlesOnDamage.cs)
+- [DestroyWhenHealthDepleted](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/DestroyWhenHealthDepleted.cs)
+- [PlayRespawnEffects](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/PlayRespawnEffects.cs)
 
 to react without tightly coupling everything together.
 
@@ -139,10 +176,11 @@ When adding or changing gameplay code, prefer these rules:
 2. Put run-specific orchestration in `PlaySession` and systems.
 3. Put archetype assembly in `EntityFactory`.
 4. Put reusable behavior in components.
-5. Prefer capability-based component names over entity-specific names.
-6. Use direct calls for core flow, and local events only for state-change reactions.
-7. Split a component when it has multiple unrelated reasons to change.
-8. Avoid over-fragmenting behavior into tiny components if it makes the design harder to teach.
+5. Put cross-entity or run-level orchestration in systems or `PlaySession`.
+6. Prefer capability-based component names over entity-specific names.
+7. Use direct calls for core flow, and local events only for state-change reactions.
+8. Split a component when it has multiple unrelated reasons to change.
+9. Avoid over-fragmenting behavior into tiny components if it makes the design harder to teach.
 
 ## Suggested Reading Order
 
