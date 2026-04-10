@@ -15,15 +15,15 @@ public sealed class PlayBurstParticlesOnDestroyed : Component
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly Texture2D _lineParticle;
     private readonly int _particleCount;
-    private readonly ParticleType _particleType;
+    private readonly Func<Vector2, ParticleState> _createParticleState;
     private Destroyable _destroyable;
 
-    public PlayBurstParticlesOnDestroyed(IParticleSystem<ParticleState> particles, Texture2D lineParticle, int particleCount, ParticleType particleType)
+    public PlayBurstParticlesOnDestroyed(IParticleSystem<ParticleState> particles, Texture2D lineParticle, int particleCount, Func<Vector2, ParticleState> createParticleState)
     {
         _particles = particles;
         _lineParticle = lineParticle;
         _particleCount = particleCount;
-        _particleType = particleType;
+        _createParticleState = createParticleState;
     }
 
     public override void OnStart(Entity owner)
@@ -49,12 +49,7 @@ public sealed class PlayBurstParticlesOnDestroyed : Component
         for (int i = 0; i < _particleCount; i++)
         {
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
-            var state = new ParticleState
-            {
-                Velocity = Random.Shared.NextVector2(speed, speed),
-                Type = _particleType,
-                LengthMultiplier = 1f
-            };
+            var state = _createParticleState(Random.Shared.NextVector2(speed, speed));
             Color color = Color.Lerp(color1, color2, Random.Shared.NextFloat(0, 1));
             _particles.CreateParticle(_lineParticle, pos, color, GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }

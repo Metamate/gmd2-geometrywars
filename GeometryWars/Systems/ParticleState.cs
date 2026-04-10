@@ -7,10 +7,43 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
 
-public enum ParticleType { None, Enemy, Bullet, IgnoreGravity }
-
-public record struct ParticleState(Vector2 Velocity, ParticleType Type, float LengthMultiplier = 1f)
+public record struct ParticleState
 {
+    public ParticleState(
+        Vector2 velocity,
+        float lengthMultiplier = 1f,
+        float stretchFromSpeed = 0.2f,
+        bool affectedByGravity = true,
+        float damping = GameSettings.Physics.ParticleDefaultDamping,
+        bool addPositionDampingJitter = true)
+    {
+        Velocity = velocity;
+        LengthMultiplier = lengthMultiplier;
+        StretchFromSpeed = stretchFromSpeed;
+        AffectedByGravity = affectedByGravity;
+        Damping = damping;
+        AddPositionDampingJitter = addPositionDampingJitter;
+    }
+
+    public Vector2 Velocity { get; init; }
+    public float LengthMultiplier { get; init; }
+    public float StretchFromSpeed { get; init; }
+    public bool AffectedByGravity { get; init; }
+    public float Damping { get; init; }
+    public bool AddPositionDampingJitter { get; init; }
+
+    public static ParticleState EnemyTrail(Vector2 velocity, float lengthMultiplier = 1f)
+        => new(velocity, lengthMultiplier, stretchFromSpeed: 0.2f, affectedByGravity: true, damping: GameSettings.Physics.ParticleEnemyDamping, addPositionDampingJitter: false);
+
+    public static ParticleState BulletTrail(Vector2 velocity, float lengthMultiplier = 1f)
+        => new(velocity, lengthMultiplier, stretchFromSpeed: 0.1f);
+
+    public static ParticleState FreeBurst(Vector2 velocity, float lengthMultiplier = 1f)
+        => new(velocity, lengthMultiplier);
+
+    public static ParticleState NoGravity(Vector2 velocity, float lengthMultiplier = 1f)
+        => new(velocity, lengthMultiplier, affectedByGravity: false);
+
     public static void UpdateParticle(ParticleInstance<ParticleState> particle, IReadOnlyList<Entity> blackHoles, FrameInfo frame)
     {
         var vel = particle.State.Velocity;
@@ -26,10 +59,8 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
         particle.Tint = tint;
 
         var scale = particle.Scale;
-        if (particle.State.Type == ParticleType.Bullet)
-            scale.X = particle.State.LengthMultiplier * Math.Min(Math.Min(1f, 0.1f * speed + 0.1f), alpha);
-        else
-            scale.X = particle.State.LengthMultiplier * Math.Min(Math.Min(1f, 0.2f * speed + 0.1f), alpha);
+        scale.X = particle.State.LengthMultiplier
+            * Math.Min(Math.Min(1f, particle.State.StretchFromSpeed * speed + 0.1f), alpha);
         particle.Scale = scale;
 
         var pos = particle.Position;
@@ -41,7 +72,7 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
         if (pos.Y < 0) vel.Y = Math.Abs(vel.Y);
         else if (pos.Y > height) vel.Y = -Math.Abs(vel.Y);
 
-        if (particle.State.Type != ParticleType.IgnoreGravity)
+        if (particle.State.AffectedByGravity)
         {
             for (int i = 0; i < blackHoles.Count; i++)
             {
@@ -60,10 +91,8 @@ public record struct ParticleState(Vector2 Velocity, ParticleType Type, float Le
 
         if (Math.Abs(vel.X) + Math.Abs(vel.Y) < 0.00000000001f)
             vel = Vector2.Zero;
-        else if (particle.State.Type == ParticleType.Enemy)
-            vel *= GameSettings.Physics.ParticleEnemyDamping;
         else
-            vel *= GameSettings.Physics.ParticleDefaultDamping + Math.Abs(pos.X) % 0.04f;
+            vel *= particle.State.Damping + (particle.State.AddPositionDampingJitter ? Math.Abs(pos.X) % 0.04f : 0f);
 
         particle.State = particle.State with { Velocity = vel };
     }

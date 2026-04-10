@@ -38,7 +38,7 @@ public sealed class ExpireOutsideViewportWithParticles : Component
         for (int i = 0; i < GameSettings.Visuals.BulletDeathParticles; i++)
         {
             _particles.CreateParticle(_lineParticle, _transform.Position, Color.LightBlue, 50, 1,
-                new ParticleState { Velocity = Random.Shared.NextVector2(0, 9), Type = ParticleType.Bullet, LengthMultiplier = 1 });
+                ParticleState.BulletTrail(Random.Shared.NextVector2(0, 9)));
         }
     }
 }

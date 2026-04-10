@@ -137,7 +137,7 @@ public sealed class EntityFactory
         enemy.AddComponent(new DestroyOnBulletOrBlackHoleCollision());
         enemy.AddComponent(new RepelFromEnemies());
         enemy.AddComponent(new AwardScoreOnDestroyed(_score, pointValue));
-        enemy.AddComponent(new PlayBurstParticlesOnDestroyed(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, ParticleType.Enemy));
+        enemy.AddComponent(new PlayBurstParticlesOnDestroyed(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, velocity => ParticleState.EnemyTrail(velocity)));
         enemy.AddComponent(new PlaySoundOnDestroyed(PlayExplosionSound));
         enemy.AddComponent(new CircleCollider(size.X / 2f));
         enemy.AddComponent(new FadeInOnSpawn(GameSettings.Enemy.SpawnDelay));

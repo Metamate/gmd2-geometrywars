@@ -38,7 +38,7 @@ public sealed class EmitOrbitingParticles : Component
             Color color = ColorUtil.HSVToColor(5, 0.5f, 0.8f);
             Vector2 pos = _transform.Position + 2f * new Vector2(sprayVel.Y, -sprayVel.X) + Random.Shared.NextVector2(4, 8);
             _particles.CreateParticle(_lineParticle, pos, color, 190, 1.5f,
-                new ParticleState { Velocity = sprayVel, LengthMultiplier = 1, Type = ParticleType.Enemy });
+                ParticleState.EnemyTrail(sprayVel));
         }
 
         _sprayAngle -= MathHelper.TwoPi / 50f;
