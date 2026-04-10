@@ -44,9 +44,9 @@ public static class GameSettings
         public const float WandererOrientationDecay = 0.05f;
         public const int WandererStepsPerTick = 6;
 
-        public const int   SeekerPointValue   = 2;
+        public const int SeekerPointValue = 2;
         public const float SeekerAcceleration = 1f;
-        public const int   WandererPointValue  = 1;
+        public const int WandererPointValue = 1;
 
         public static class Spawning
         {
@@ -64,7 +64,7 @@ public static class GameSettings
         public const float BlackHoleGravityForce = 2f;
         public const float BlackHoleGridRange = 200f;
         public const float BlackHoleSpawnChance = 200f;
-        public const int MaxBlackHoles = 5;
+        public const int MaxBlackHoles = 0;
     }
 
     public static class Physics

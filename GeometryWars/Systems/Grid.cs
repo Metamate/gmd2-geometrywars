@@ -10,24 +10,29 @@ public class Grid : IGridField
 {
     private readonly Spring[] _springs;
     private readonly PointMass[,] _points;
-    private readonly Vector2 _screenSize;
+    private readonly Vector2 _screenCenter;
     private readonly int _cols;
     private readonly int _rows;
 
     public Grid(Rectangle size, Vector2 spacing)
     {
-        _screenSize = new Vector2(size.Width, size.Height);
+        _screenCenter = new Vector2(size.Center.X, size.Center.Y);
         _cols = (int)(size.Width / spacing.X) + 1;
         _rows = (int)(size.Height / spacing.Y) + 1;
 
         _points = new PointMass[_cols, _rows];
+
+        float gridWidth = (_cols - 1) * spacing.X;
+        float gridHeight = (_rows - 1) * spacing.Y;
+        float originX = size.Left + (size.Width - gridWidth) * 0.5f;
+        float originY = size.Top + (size.Height - gridHeight) * 0.5f;
 
         // 1. Create the points
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                _points[x, y] = new PointMass(new Vector3(size.Left + x * spacing.X, size.Top + y * spacing.Y, 0), 1f);
+                _points[x, y] = new PointMass(new Vector3(originX + x * spacing.X, originY + y * spacing.Y, 0), 1f);
             }
         }
 
@@ -118,45 +123,54 @@ public class Grid : IGridField
     private Vector2 ToVec2(Vector3 v)
     {
         float factor = (v.Z + 2000) / 2000;
-        return (new Vector2(v.X, v.Y) - _screenSize / 2f) * factor + _screenSize / 2;
+        return (new Vector2(v.X, v.Y) - _screenCenter) * factor + _screenCenter;
     }
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
         Color color = new(30, 30, 139, 85);
-        for (int y = 1; y < _rows; y++)
+        for (int y = 0; y < _rows; y++)
         {
-            for (int x = 1; x < _cols; x++)
+            for (int x = 0; x < _cols; x++)
             {
                 Vector2 p = ToVec2(_points[x, y].Position);
 
-                if (x > 1)
+                if (x > 0)
                 {
                     Vector2 left = ToVec2(_points[x - 1, y].Position);
                     float thickness = y % 3 == 1 ? 3f : 1f;
 
-                    int xNext = Math.Min(x + 1, _cols - 1);
-                    Vector2 pNext = ToVec2(_points[xNext, y].Position);
-                    Vector2 pPrev = ToVec2(_points[x - 2, y].Position);
-                    Vector2 mid = Vector2.CatmullRom(pPrev, left, p, pNext, 0.5f);
-
-                    if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
+                    if (x == 1)
                     {
-                        spriteBatch.DrawLine(pixel, left, mid, color, thickness);
-                        spriteBatch.DrawLine(pixel, mid, p, color, thickness);
+                        spriteBatch.DrawLine(pixel, left, p, color, thickness);
                     }
                     else
-                        spriteBatch.DrawLine(pixel, left, p, color, thickness);
+                    {
+                        int xNext = Math.Min(x + 1, _cols - 1);
+                        Vector2 pNext = ToVec2(_points[xNext, y].Position);
+                        Vector2 pPrev = ToVec2(_points[x - 2, y].Position);
+                        Vector2 mid = Vector2.CatmullRom(pPrev, left, p, pNext, 0.5f);
+
+                        if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
+                        {
+                            spriteBatch.DrawLine(pixel, left, mid, color, thickness);
+                            spriteBatch.DrawLine(pixel, mid, p, color, thickness);
+                        }
+                        else
+                        {
+                            spriteBatch.DrawLine(pixel, left, p, color, thickness);
+                        }
+                    }
                 }
 
-                if (y > 1)
+                if (y > 0)
                 {
                     Vector2 up = ToVec2(_points[x, y - 1].Position);
                     float thickness = x % 3 == 1 ? 3f : 1f;
                     spriteBatch.DrawLine(pixel, up, p, color, thickness);
                 }
 
-                if (x > 1 && y > 1)
+                if (x > 0 && y > 0)
                 {
                     Vector2 up = ToVec2(_points[x, y - 1].Position);
                     Vector2 left = ToVec2(_points[x - 1, y].Position);
