@@ -28,12 +28,15 @@ public sealed class PlayHitParticlesOnDamage : Component
 
     public override void OnStart(Entity owner)
     {
-        if (_health != null)
-            _health.Damaged -= PlayHitParticles;
-
         _transform = owner.Transform;
         _health = owner.RequireComponent<Health>();
         _health.Damaged += PlayHitParticles;
+    }
+
+    public override void OnRemoved(Entity owner)
+    {
+        if (_health != null)
+            _health.Damaged -= PlayHitParticles;
     }
 
     private void PlayHitParticles()

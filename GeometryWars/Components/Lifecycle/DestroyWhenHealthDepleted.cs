@@ -12,12 +12,15 @@ public sealed class DestroyWhenHealthDepleted : Component
 
     public override void OnStart(Entity owner)
     {
-        if (_health != null)
-            _health.Depleted -= HandleHealthDepleted;
-
         _destroyable = owner.RequireComponent<Destroyable>();
         _health = owner.RequireComponent<Health>();
         _health.Depleted += HandleHealthDepleted;
+    }
+
+    public override void OnRemoved(Entity owner)
+    {
+        if (_health != null)
+            _health.Depleted -= HandleHealthDepleted;
     }
 
     private void HandleHealthDepleted()

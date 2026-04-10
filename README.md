@@ -94,14 +94,19 @@ This is an important teaching point: entities should emerge from composition rat
 All components inherit from [Component](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Core/Component.cs).
 
 The lifecycle is Unity-like:
+- `OnAdded`
+- `OnStart`
 - `PreUpdate`
 - `Update`
 - `PhysicsUpdate`
 - `PostUpdate`
 - `OnCollision`
 - `Draw`
+- `OnRemoved`
 
 [Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Entities/Entity.cs) runs those phases in a fixed order every frame.
+
+`OnRemoved` is intended for engine-level cleanup such as unregistering subscriptions when an entity leaves the world. It is not the same as a gameplay destruction event like `Destroyable.Destroyed`.
 
 The intended design rule is:
 - each component should represent one clear capability or behavior

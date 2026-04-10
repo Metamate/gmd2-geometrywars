@@ -20,11 +20,14 @@ public sealed class SpawnTwinBulletsOnFired : Component
 
     public override void OnStart(Entity owner)
     {
-        if (_weapon != null)
-            _weapon.Fired -= HandleFired;
-
         _weapon = owner.RequireComponent<Weapon>();
         _weapon.Fired += HandleFired;
+    }
+
+    public override void OnRemoved(Entity owner)
+    {
+        if (_weapon != null)
+            _weapon.Fired -= HandleFired;
     }
 
     private void HandleFired(WeaponFired shot)

@@ -19,19 +19,10 @@ public sealed class PlayRespawnEffects : Component
 
     public override void OnStart(Entity owner)
     {
-        if (_respawnState != null)
-        {
-            _respawnState.Died -= PlayDeathAtOwner;
-            _respawnState.Respawned -= PlayRespawnAtOwner;
-        }
-
         _transform = owner.Transform;
         _respawnState = owner.RequireComponent<RespawnState>();
-        if (_respawnState != null)
-        {
-            _respawnState.Died += PlayDeathAtOwner;
-            _respawnState.Respawned += PlayRespawnAtOwner;
-        }
+        _respawnState.Died += PlayDeathAtOwner;
+        _respawnState.Respawned += PlayRespawnAtOwner;
     }
 
     public PlayRespawnEffects(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
@@ -64,4 +55,13 @@ public sealed class PlayRespawnEffects : Component
     private void PlayDeathAtOwner() => PlayDeath(_transform.Position);
 
     private void PlayRespawnAtOwner() => PlayRespawn(_transform.Position);
+
+    public override void OnRemoved(Entity owner)
+    {
+        if (_respawnState != null)
+        {
+            _respawnState.Died -= PlayDeathAtOwner;
+            _respawnState.Respawned -= PlayRespawnAtOwner;
+        }
+    }
 }

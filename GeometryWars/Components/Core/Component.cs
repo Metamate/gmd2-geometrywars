@@ -9,6 +9,7 @@ public abstract class Component : IComponent
     public bool IsActive { get; set; } = true;
     public virtual void OnAdded(Entity owner) { }
     public virtual void OnStart(Entity owner) { }
+    public virtual void OnRemoved(Entity owner) { }
     public virtual void PreUpdate(Entity owner) { }
     public virtual void Update(Entity owner) { }
     public virtual void PhysicsUpdate(Entity owner) { }

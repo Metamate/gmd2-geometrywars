@@ -33,8 +33,11 @@ internal sealed class EntityCatalog
         else if (entity.HasComponent<EnemyTag>()) _enemies.Add(entity);
     }
 
-    public void Clear()
+    public void Clear(Action<Entity> onRemoved)
     {
+        for (int i = 0; i < _entities.Count; i++)
+            onRemoved(_entities[i]);
+
         _entities.Clear();
         _enemies.Clear();
         _bullets.Clear();
@@ -57,12 +60,12 @@ internal sealed class EntityCatalog
         }
     }
 
-    public void RemoveExpired(Action<Entity> onBulletExpired)
+    public void RemoveExpired(Action<Entity> onRemoved)
     {
-        for (int i = 0; i < _bullets.Count; i++)
+        for (int i = 0; i < _entities.Count; i++)
         {
-            if (_bullets[i].IsExpired)
-                onBulletExpired(_bullets[i]);
+            if (_entities[i].IsExpired)
+                onRemoved(_entities[i]);
         }
 
         _entities.RemoveAll(entity => entity.IsExpired);

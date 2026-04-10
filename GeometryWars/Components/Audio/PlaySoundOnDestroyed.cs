@@ -18,11 +18,14 @@ public sealed class PlaySoundOnDestroyed : Component
 
     public override void OnStart(Entity owner)
     {
-        if (_destroyable != null)
-            _destroyable.Destroyed -= OnDestroyed;
-
         _destroyable = owner.RequireComponent<Destroyable>();
         _destroyable.Destroyed += OnDestroyed;
+    }
+
+    public override void OnRemoved(Entity owner)
+    {
+        if (_destroyable != null)
+            _destroyable.Destroyed -= OnDestroyed;
     }
 
     private void OnDestroyed(Entity owner)

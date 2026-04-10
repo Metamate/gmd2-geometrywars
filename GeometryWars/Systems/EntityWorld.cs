@@ -62,7 +62,7 @@ public sealed class EntityWorld : INeighborQuery, IBulletSpawner
 
     public void Clear()
     {
-        _catalog.Clear();
+        _catalog.Clear(HandleRemovedEntity);
         _pendingAdd.Clear();
         _collisions.Clear();
     }
@@ -103,7 +103,7 @@ public sealed class EntityWorld : INeighborQuery, IBulletSpawner
             RegisterEntity(_pendingAdd[i]);
         _pendingAdd.Clear();
 
-        _catalog.RemoveExpired(bullet => _bulletPool.Return(bullet));
+        _catalog.RemoveExpired(HandleRemovedEntity);
         _collisions.RemoveExpired();
     }
 
@@ -114,6 +114,14 @@ public sealed class EntityWorld : INeighborQuery, IBulletSpawner
         entity.Start();
         _catalog.Add(entity);
         _collisions.Register(entity);
+    }
+
+    private void HandleRemovedEntity(Entity entity)
+    {
+        entity.Remove();
+
+        if (entity.HasComponent<BulletTag>())
+            _bulletPool?.Return(entity);
     }
 
     public void ForEachNearbyEntity(Vector2 position, float radius, System.Action<Entity> visitor)

@@ -92,6 +92,12 @@ public class Entity
             _components[i].OnStart(this);
     }
 
+    public void Remove()
+    {
+        for (int i = 0; i < _components.Count; i++)
+            _components[i].OnRemoved(this);
+    }
+
     public virtual void Draw(SpriteBatch spriteBatch)
     {
         if (!IsActive) return;
