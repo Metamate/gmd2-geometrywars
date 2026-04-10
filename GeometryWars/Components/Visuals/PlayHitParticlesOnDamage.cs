@@ -49,7 +49,7 @@ public sealed class PlayHitParticlesOnDamage : Component
         {
             float speed = Random.Shared.NextFloat(GameSettings.Visuals.BlackHoleHitParticleMinSpeed, GameSettings.Visuals.BlackHoleHitParticleMaxSpeed);
             Vector2 sprayVel = MathUtil.FromPolar(MathHelper.TwoPi * i / GameSettings.Visuals.BlackHoleHitParticles + startOffset, speed);
-            var state = ParticleState.NoGravity(sprayVel);
+            var state = ParticleState.UnboundBurst(sprayVel);
             _particles.CreateParticle(_lineParticle, _transform.Position + 2f * sprayVel, color,
                 GameSettings.Visuals.DeathParticleLife, GameSettings.Visuals.DeathParticleSize, state);
         }

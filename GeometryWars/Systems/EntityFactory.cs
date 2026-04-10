@@ -38,6 +38,8 @@ public sealed class EntityFactory
         _context = context;
     }
 
+    // Direct-control player ship with movement, twin-shot firing,
+    // death/respawn flow, and ship-specific presentation effects.
     public Entity CreatePlayer()
     {
         var player = new Entity
@@ -67,6 +69,8 @@ public sealed class EntityFactory
         return player;
     }
 
+    // Lightweight pooled projectile with simple motion, collision expiry,
+    // and trail/grid feedback.
     public Entity CreateBullet()
     {
         var bullet = new Entity();
@@ -81,6 +85,7 @@ public sealed class EntityFactory
         return bullet;
     }
 
+    // Pursuit enemy that reuses the shared enemy shell and adds target seeking.
     public Entity CreateSeeker(Vector2 position, Func<Vector2> getTargetPosition)
     {
         var enemy = CreateEnemyBase(_context.Assets.Seeker, GameSettings.Enemy.SeekerPointValue, position);
@@ -88,6 +93,7 @@ public sealed class EntityFactory
         return enemy;
     }
 
+    // Erratic enemy that reuses the shared enemy shell and adds wandering motion.
     public Entity CreateWanderer(Vector2 position)
     {
         var enemy = CreateEnemyBase(_context.Assets.Wanderer, GameSettings.Enemy.WandererPointValue, position);
@@ -95,6 +101,8 @@ public sealed class EntityFactory
         return enemy;
     }
 
+    // Environmental hazard that pulls nearby objects, disturbs the grid,
+    // emits ambient particles, and can be worn down by bullets.
     public Entity CreateBlackHole(Vector2 position)
     {
         var blackHole = new Entity
@@ -119,6 +127,8 @@ public sealed class EntityFactory
         return blackHole;
     }
 
+    // Shared enemy shell: movement, spawn-in, collision rules, scoring,
+    // and destruction feedback. Specific enemy types add only their unique AI.
     private Entity CreateEnemyBase(Microsoft.Xna.Framework.Graphics.Texture2D texture, int pointValue, Vector2 position)
     {
         var enemy = new Entity
@@ -137,7 +147,7 @@ public sealed class EntityFactory
         enemy.AddComponent(new DestroyOnBulletOrBlackHoleCollision());
         enemy.AddComponent(new RepelFromEnemies());
         enemy.AddComponent(new AwardScoreOnDestroyed(_score, pointValue));
-        enemy.AddComponent(new PlayBurstParticlesOnDestroyed(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, velocity => ParticleState.EnemyTrail(velocity)));
+        enemy.AddComponent(new PlayBurstParticlesOnDestroyed(_particles, _context.Assets.LineParticle, GameSettings.Visuals.EnemyDeathParticles, velocity => ParticleState.StableTrail(velocity)));
         enemy.AddComponent(new PlaySoundOnDestroyed(PlayExplosionSound));
         enemy.AddComponent(new CircleCollider(size.X / 2f));
         enemy.AddComponent(new FadeInOnSpawn(GameSettings.Enemy.SpawnDelay));

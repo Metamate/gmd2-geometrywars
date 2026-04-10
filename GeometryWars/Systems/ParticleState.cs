@@ -32,16 +32,20 @@ public record struct ParticleState
     public float Damping { get; init; }
     public bool AddPositionDampingJitter { get; init; }
 
-    public static ParticleState EnemyTrail(Vector2 velocity, float lengthMultiplier = 1f)
+    // Smooth trail that stays coherent while still being affected by gravity forces.
+    public static ParticleState StableTrail(Vector2 velocity, float lengthMultiplier = 1f)
         => new(velocity, lengthMultiplier, stretchFromSpeed: 0.2f, affectedByGravity: true, damping: GameSettings.Physics.ParticleEnemyDamping, addPositionDampingJitter: false);
 
-    public static ParticleState BulletTrail(Vector2 velocity, float lengthMultiplier = 1f)
+    // Slightly noisier trail that keeps more visual flicker as it slows down.
+    public static ParticleState JitteredTrail(Vector2 velocity, float lengthMultiplier = 1f)
         => new(velocity, lengthMultiplier, stretchFromSpeed: 0.1f);
 
-    public static ParticleState FreeBurst(Vector2 velocity, float lengthMultiplier = 1f)
+    // General-purpose burst particle that drifts, damps, and responds to gravity.
+    public static ParticleState DriftingBurst(Vector2 velocity, float lengthMultiplier = 1f)
         => new(velocity, lengthMultiplier);
 
-    public static ParticleState NoGravity(Vector2 velocity, float lengthMultiplier = 1f)
+    // Burst particle that ignores gravity forces and simply flies outward.
+    public static ParticleState UnboundBurst(Vector2 velocity, float lengthMultiplier = 1f)
         => new(velocity, lengthMultiplier, affectedByGravity: false);
 
     public static void UpdateParticle(ParticleInstance<ParticleState> particle, IReadOnlyList<Entity> blackHoles, FrameInfo frame)

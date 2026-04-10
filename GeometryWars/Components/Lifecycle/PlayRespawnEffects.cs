@@ -43,7 +43,7 @@ public sealed class PlayRespawnEffects : Component
                 _lineParticle, position, color,
                 GameSettings.Visuals.DeathParticleLife,
                 GameSettings.Visuals.DeathParticleSize,
-                ParticleState.FreeBurst(Random.Shared.NextVector2(speed, speed)));
+                ParticleState.DriftingBurst(Random.Shared.NextVector2(speed, speed)));
         }
     }
 

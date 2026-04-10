@@ -57,19 +57,19 @@ public sealed class ExhaustFire : Component
 
         Vector2 velMid = baseVel + Random.Shared.NextVector2(0, 1);
         _particles.CreateParticle(_lineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(velMid));
+            ParticleState.StableTrail(velMid));
         _particles.CreateParticle(_glow, pos, midColor * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(velMid));
+            ParticleState.StableTrail(velMid));
 
         Vector2 vel1 = baseVel + perpVel + Random.Shared.NextVector2(0, 0.3f);
         Vector2 vel2 = baseVel - perpVel + Random.Shared.NextVector2(0, 0.3f);
         _particles.CreateParticle(_lineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(vel1));
+            ParticleState.StableTrail(vel1));
         _particles.CreateParticle(_lineParticle, pos, Color.White * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(vel2));
+            ParticleState.StableTrail(vel2));
         _particles.CreateParticle(_glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(vel1));
+            ParticleState.StableTrail(vel1));
         _particles.CreateParticle(_glow, pos, sideColor * alpha, 60f, new Vector2(0.5f, 1),
-            ParticleState.EnemyTrail(vel2));
+            ParticleState.StableTrail(vel2));
     }
 }
