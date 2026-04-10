@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -16,9 +15,11 @@ public sealed class Grid : IGridField
     private readonly SpringData[] _springs;
     private readonly PointMassData[] _points;
     private readonly Vector2[] _projectedPoints;
+    private readonly VertexPositionColor[] _lineVertices;
     private readonly Vector2 _screenCenter;
     private readonly int _cols;
     private readonly int _rows;
+    private BasicEffect _lineEffect;
 
     public Grid(Rectangle size, Vector2 spacing)
     {
@@ -64,6 +65,7 @@ public sealed class Grid : IGridField
         }
 
         _springs = [.. springList];
+        _lineVertices = new VertexPositionColor[GetMaxSegmentCount() * 6];
     }
 
     public void Update()
@@ -143,11 +145,13 @@ public sealed class Grid : IGridField
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
+    public void Draw(GraphicsDevice graphicsDevice)
     {
         UpdateProjectedPoints();
+        EnsureLineEffect(graphicsDevice);
 
         Color color = new(30, 30, 139, 85);
+        int vertexCount = 0;
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
@@ -162,7 +166,7 @@ public sealed class Grid : IGridField
 
                     if (x == 1)
                     {
-                        spriteBatch.DrawLine(pixel, left, point, color, thickness);
+                        AddLineQuad(_lineVertices, ref vertexCount, left, point, color, thickness);
                     }
                     else
                     {
@@ -173,12 +177,12 @@ public sealed class Grid : IGridField
 
                         if (Vector2.DistanceSquared(midpoint, (left + point) * 0.5f) > 1f)
                         {
-                            spriteBatch.DrawLine(pixel, left, midpoint, color, thickness);
-                            spriteBatch.DrawLine(pixel, midpoint, point, color, thickness);
+                            AddLineQuad(_lineVertices, ref vertexCount, left, midpoint, color, thickness);
+                            AddLineQuad(_lineVertices, ref vertexCount, midpoint, point, color, thickness);
                         }
                         else
                         {
-                            spriteBatch.DrawLine(pixel, left, point, color, thickness);
+                            AddLineQuad(_lineVertices, ref vertexCount, left, point, color, thickness);
                         }
                     }
                 }
@@ -187,7 +191,7 @@ public sealed class Grid : IGridField
                 {
                     Vector2 up = _projectedPoints[Index(x, y - 1)];
                     float thickness = x % 3 == 1 ? 3f : 1f;
-                    spriteBatch.DrawLine(pixel, up, point, color, thickness);
+                    AddLineQuad(_lineVertices, ref vertexCount, up, point, color, thickness);
                 }
 
                 if (x > 0 && y > 0)
@@ -195,11 +199,36 @@ public sealed class Grid : IGridField
                     Vector2 up = _projectedPoints[Index(x, y - 1)];
                     Vector2 left = _projectedPoints[Index(x - 1, y)];
                     Vector2 upLeft = _projectedPoints[Index(x - 1, y - 1)];
-                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + up), 0.5f * (left + point), color, 1f);
-                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + left), 0.5f * (up + point), color, 1f);
+                    AddLineQuad(_lineVertices, ref vertexCount, 0.5f * (upLeft + up), 0.5f * (left + point), color, 1f);
+                    AddLineQuad(_lineVertices, ref vertexCount, 0.5f * (upLeft + left), 0.5f * (up + point), color, 1f);
                 }
             }
         }
+
+        if (vertexCount == 0)
+            return;
+
+        var previousBlend = graphicsDevice.BlendState;
+        var previousDepth = graphicsDevice.DepthStencilState;
+        var previousRasterizer = graphicsDevice.RasterizerState;
+
+        graphicsDevice.BlendState = BlendState.Additive;
+        graphicsDevice.DepthStencilState = DepthStencilState.None;
+        graphicsDevice.RasterizerState = RasterizerState.CullNone;
+
+        foreach (var pass in _lineEffect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+            graphicsDevice.DrawUserPrimitives(
+                PrimitiveType.TriangleList,
+                _lineVertices,
+                0,
+                vertexCount / 3);
+        }
+
+        graphicsDevice.BlendState = previousBlend;
+        graphicsDevice.DepthStencilState = previousDepth;
+        graphicsDevice.RasterizerState = previousRasterizer;
     }
 
     private int Index(int x, int y) => x + y * _cols;
@@ -208,6 +237,14 @@ public sealed class Grid : IGridField
     {
         float targetLength = Vector3.Distance(_points[end1].Position, _points[end2].Position) * RestLengthFactor;
         return SpringData.CreateDynamic(end1, end2, targetLength, stiffness, damping);
+    }
+
+    private int GetMaxSegmentCount()
+    {
+        int horizontalSegments = _rows * Math.Max(0, 2 * _cols - 3);
+        int verticalSegments = _cols * Math.Max(0, _rows - 1);
+        int diagonalSegments = 2 * Math.Max(0, _cols - 1) * Math.Max(0, _rows - 1);
+        return horizontalSegments + verticalSegments + diagonalSegments;
     }
 
     private void UpdateProjectedPoints()
@@ -220,6 +257,50 @@ public sealed class Grid : IGridField
     {
         float factor = (position.Z + 2000) / 2000;
         return (new Vector2(position.X, position.Y) - _screenCenter) * factor + _screenCenter;
+    }
+
+    private void EnsureLineEffect(GraphicsDevice graphicsDevice)
+    {
+        _lineEffect ??= new BasicEffect(graphicsDevice)
+        {
+            VertexColorEnabled = true,
+            TextureEnabled = false,
+            World = Matrix.Identity,
+            View = Matrix.Identity
+        };
+
+        var viewport = graphicsDevice.Viewport;
+        _lineEffect.Projection = Matrix.CreateOrthographicOffCenter(
+            0f,
+            viewport.Width,
+            viewport.Height,
+            0f,
+            0f,
+            1f);
+    }
+
+    private static void AddLineQuad(VertexPositionColor[] vertices, ref int vertexCount, Vector2 start, Vector2 end, Color color, float thickness)
+    {
+        Vector2 delta = end - start;
+        float lengthSq = delta.LengthSquared();
+        if (lengthSq < 0.0001f)
+            return;
+
+        Vector2 normal = new(-delta.Y, delta.X);
+        normal /= MathF.Sqrt(lengthSq);
+        Vector2 offset = normal * (thickness * 0.5f);
+
+        var v0 = new VertexPositionColor(new Vector3(start - offset, 0f), color);
+        var v1 = new VertexPositionColor(new Vector3(start + offset, 0f), color);
+        var v2 = new VertexPositionColor(new Vector3(end + offset, 0f), color);
+        var v3 = new VertexPositionColor(new Vector3(end - offset, 0f), color);
+
+        vertices[vertexCount++] = v0;
+        vertices[vertexCount++] = v1;
+        vertices[vertexCount++] = v2;
+        vertices[vertexCount++] = v0;
+        vertices[vertexCount++] = v2;
+        vertices[vertexCount++] = v3;
     }
 
     private void UpdateSpring(in SpringData spring)
