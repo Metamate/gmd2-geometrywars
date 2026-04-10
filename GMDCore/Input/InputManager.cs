@@ -1,10 +1,7 @@
 namespace GMDCore.Input;
 
-/// <summary>
-/// Owns one instance of each input device.
 /// Raw hardware is sampled every render frame, then buffered edge events are
 /// exposed to gameplay on the next fixed logic tick.
-/// </summary>
 public class InputManager
 {
     public KeyboardInfo Keyboard { get; } = new();

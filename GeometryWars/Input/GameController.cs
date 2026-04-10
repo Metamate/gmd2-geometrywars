@@ -4,10 +4,8 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GeometryWars.Input;
 
-/// <summary>
 /// Abstracts raw hardware input into semantic game actions.
 /// Uses an injected InputManager rather than reading hardware state directly.
-/// </summary>
 public sealed class GameController
 {
     private readonly InputManager _input;
@@ -43,9 +41,6 @@ public sealed class GameController
     public Vector2 MousePosition
         => new(_input.Mouse.X, _input.Mouse.Y);
 
-    /// <summary>
-    /// Updates the semantic state. Called once per logic frame (60Hz).
-    /// </summary>
     public void Update()
     {
         var mousePos = _input.Mouse.Position;
