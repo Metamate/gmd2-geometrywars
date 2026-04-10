@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Systems;
+namespace GMDCore.Particles;
 
 // Runtime storage for one live particle inside the particle manager.
 public sealed class ParticleInstance<T>
@@ -15,3 +15,4 @@ public sealed class ParticleInstance<T>
     public float PercentLife { get; set; }
     public T State { get; set; }
 }
+

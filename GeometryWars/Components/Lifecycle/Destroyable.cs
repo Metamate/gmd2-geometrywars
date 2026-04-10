@@ -1,6 +1,6 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Lifecycle;
 
@@ -25,3 +25,4 @@ public sealed class Destroyable : Component
         _owner.IsExpired = true;
     }
 }
+

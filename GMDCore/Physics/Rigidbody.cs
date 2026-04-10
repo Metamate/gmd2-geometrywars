@@ -1,8 +1,8 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components.Physics;
+namespace GMDCore.Physics;
 
 // Handles velocity integration and damping.
 public sealed class Rigidbody : Component
@@ -34,3 +34,4 @@ public sealed class Rigidbody : Component
         Velocity *= _damping;
     }
 }
+

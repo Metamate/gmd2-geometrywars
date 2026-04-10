@@ -1,5 +1,5 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Lifecycle;
 
@@ -20,3 +20,4 @@ public sealed class LifetimeExpiry : Component
             owner.IsExpired = true;
     }
 }
+

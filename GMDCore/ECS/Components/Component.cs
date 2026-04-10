@@ -1,7 +1,7 @@
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components.Core;
+namespace GMDCore.ECS.Components;
 
 // Provides default activation and lifecycle hooks for all components.
 public abstract class Component : IComponent
@@ -17,3 +17,4 @@ public abstract class Component : IComponent
     public virtual void OnCollision(Entity owner, Entity other) { }
     public virtual void Draw(Entity owner, SpriteBatch spriteBatch) { }
 }
+

@@ -1,5 +1,5 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
@@ -30,3 +30,4 @@ public sealed class ClampToScreen : Component
             _frame.ScreenSize - _size / 2);
     }
 }
+

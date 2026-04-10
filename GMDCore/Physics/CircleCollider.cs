@@ -1,4 +1,4 @@
-namespace GeometryWars.Components.Physics;
+namespace GMDCore.Physics;
 
 // Circle-shaped collider. Collision dispatch is handled by CollisionRegistry,
 // which maps (Type, Type) pairs to handler delegates.
@@ -11,3 +11,4 @@ public sealed class CircleCollider : Collider
         Radius = radius;
     }
 }
+

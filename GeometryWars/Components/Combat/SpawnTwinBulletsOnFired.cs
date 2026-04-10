@@ -1,6 +1,6 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -44,3 +44,4 @@ public sealed class SpawnTwinBulletsOnFired : Component
         _bulletSpawner.SpawnBullet(shot.Origin + Vector2.Transform(offsetB, aimQuat), velocity);
     }
 }
+

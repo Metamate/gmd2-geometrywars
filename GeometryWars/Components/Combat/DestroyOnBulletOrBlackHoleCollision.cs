@@ -1,8 +1,8 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Combat;
 
@@ -22,3 +22,4 @@ public sealed class DestroyOnBulletOrBlackHoleCollision : Component
             _destroyable?.Destroy();
     }
 }
+

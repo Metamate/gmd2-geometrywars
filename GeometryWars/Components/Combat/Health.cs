@@ -1,5 +1,5 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 
 namespace GeometryWars.Components.Combat;
 
@@ -29,3 +29,4 @@ public sealed class Health : Component
             Depleted?.Invoke();
     }
 }
+

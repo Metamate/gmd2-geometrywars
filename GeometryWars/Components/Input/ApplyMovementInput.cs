@@ -1,7 +1,7 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using GeometryWars.Input;
 using GeometryWars.Utils;
 
@@ -38,3 +38,4 @@ public sealed class ApplyMovementInput : Component
             _transform.Orientation = _rigidbody.Velocity.ToAngle();
     }
 }
+

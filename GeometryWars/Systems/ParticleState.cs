@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using GeometryWars.Entities;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Services;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -101,3 +102,4 @@ public record struct ParticleState
         particle.State = particle.State with { Velocity = vel };
     }
 }
+

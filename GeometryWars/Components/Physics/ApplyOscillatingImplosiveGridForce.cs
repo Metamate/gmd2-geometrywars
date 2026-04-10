@@ -1,6 +1,6 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using GeometryWars.Systems;
 using Microsoft.Xna.Framework;
 
@@ -31,3 +31,4 @@ public sealed class ApplyOscillatingImplosiveGridForce : Component
         _grid.ApplyImplosiveForce((float)Math.Sin(_pulseAngle / 2) * 10 + 20, _transform.Position, _gridRange);
     }
 }
+

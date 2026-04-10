@@ -1,6 +1,6 @@
 using GeometryWars.Components.Combat;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Lifecycle;
 
@@ -28,3 +28,4 @@ public sealed class DestroyWhenHealthDepleted : Component
         _destroyable?.Destroy();
     }
 }
+

@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Systems;
+namespace GMDCore.Particles;
 
 public class ParticleManager<T> : IParticleSystem<T>
 {
@@ -79,3 +79,4 @@ public class ParticleManager<T> : IParticleSystem<T>
         }
     }
 }
+

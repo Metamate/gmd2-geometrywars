@@ -1,5 +1,5 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -31,3 +31,4 @@ public sealed class Sprite : Component
             _transform.Orientation, origin, _transform.Scale, SpriteEffects.None, 0f);
     }
 }
+

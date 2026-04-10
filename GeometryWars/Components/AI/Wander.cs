@@ -1,7 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using GeometryWars.Services;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -55,3 +55,4 @@ public sealed class Wander : Component
         _transform.Orientation -= GameSettings.Enemy.WandererOrientationDecay;
     }
 }
+

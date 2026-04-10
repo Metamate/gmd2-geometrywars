@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Collections;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -127,3 +128,4 @@ public sealed class EntityWorld : INeighborQuery, IBulletSpawner
     public void ForEachNearbyEntity(Vector2 position, float radius, System.Action<Entity> visitor)
         => _catalog.ForEachNearbyEntity(position, radius, visitor);
 }
+

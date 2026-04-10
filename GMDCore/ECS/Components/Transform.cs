@@ -1,7 +1,7 @@
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components.Core;
+namespace GMDCore.ECS.Components;
 
 // Defines an entity's position, rotation, and scale.
 public sealed class Transform : Component
@@ -17,3 +17,4 @@ public sealed class Transform : Component
         Scale = scale;
     }
 }
+

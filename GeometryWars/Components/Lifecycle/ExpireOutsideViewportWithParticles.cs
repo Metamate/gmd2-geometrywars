@@ -1,6 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
@@ -42,3 +43,4 @@ public sealed class ExpireOutsideViewportWithParticles : Component
         }
     }
 }
+

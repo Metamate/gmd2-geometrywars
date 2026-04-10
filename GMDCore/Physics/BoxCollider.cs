@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Components.Physics;
+namespace GMDCore.Physics;
 
 // Axis-aligned box collider. Collision dispatch is handled by CollisionRegistry,
 // which maps (Type, Type) pairs to handler delegates.
@@ -13,3 +13,4 @@ public sealed class BoxCollider : Collider
         Size = size;
     }
 }
+

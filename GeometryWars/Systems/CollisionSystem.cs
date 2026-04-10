@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Collision;
+using GMDCore.Physics;
+using GMDCore.ECS;
 
 namespace GeometryWars.Systems;
 
@@ -44,3 +45,4 @@ internal sealed class CollisionSystem
         }
     }
 }
+

@@ -1,7 +1,7 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Identity;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -53,3 +53,4 @@ public sealed class ApplyGravity : Component
         });
     }
 }
+

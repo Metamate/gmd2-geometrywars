@@ -1,5 +1,6 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS;
+using GMDCore.ECS.Components;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Combat;
@@ -30,9 +31,10 @@ public sealed class Weapon : Component
         Fired?.Invoke(new WeaponFired(origin, aimAngle));
     }
 
-    public override void PostUpdate(Entities.Entity owner)
+    public override void PostUpdate(Entity owner)
     {
         if (_cooldownRemaining > 0)
             _cooldownRemaining--;
     }
 }
+

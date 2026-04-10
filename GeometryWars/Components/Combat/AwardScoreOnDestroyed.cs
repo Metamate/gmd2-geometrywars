@@ -1,6 +1,6 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using GeometryWars.Systems;
 
 namespace GeometryWars.Components.Combat;
@@ -39,3 +39,4 @@ public sealed class AwardScoreOnDestroyed : Component
             _score.IncreaseMultiplier();
     }
 }
+

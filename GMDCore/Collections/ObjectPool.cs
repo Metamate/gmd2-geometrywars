@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GeometryWars.Systems;
+namespace GMDCore.Collections;
 
 // Generic stack-based object pool. Avoids per-frame heap allocations for
 // frequently created/destroyed objects (e.g. pooled entities).
@@ -21,3 +21,4 @@ public sealed class ObjectPool<T> where T : class
 
     public void Return(T item) => _pool.Push(item);
 }
+

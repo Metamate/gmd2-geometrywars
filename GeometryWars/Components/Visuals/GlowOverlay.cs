@@ -1,5 +1,5 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -29,3 +29,4 @@ public sealed class GlowOverlay : Component
         spriteBatch.Draw(_texture, _transform.Position, null, _color, _transform.Orientation, origin, _transform.Scale, SpriteEffects.None, 0f);
     }
 }
+

@@ -1,7 +1,7 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Identity;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Combat;
 
@@ -30,3 +30,4 @@ public sealed class RepelFromEnemies : Component
         _rigidbody.AddForce(10 * d / (d.LengthSquared() + 1));
     }
 }
+

@@ -1,7 +1,8 @@
 using System;
 using System.IO;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Entities;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
@@ -59,3 +60,4 @@ public sealed class PlaySession
         Spawner.Reset();
     }
 }
+

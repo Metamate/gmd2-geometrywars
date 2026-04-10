@@ -1,4 +1,4 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 
 namespace GeometryWars.Components.Identity;
 
@@ -6,3 +6,4 @@ namespace GeometryWars.Components.Identity;
 public sealed class EnemyTag : Component
 {
 }
+

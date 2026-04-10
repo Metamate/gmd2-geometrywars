@@ -1,7 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Audio;
 
@@ -33,3 +33,4 @@ public sealed class PlaySoundOnDestroyed : Component
         _playSound();
     }
 }
+

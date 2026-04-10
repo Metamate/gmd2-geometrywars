@@ -1,6 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -65,3 +66,4 @@ public sealed class PlayRespawnEffects : Component
         }
     }
 }
+

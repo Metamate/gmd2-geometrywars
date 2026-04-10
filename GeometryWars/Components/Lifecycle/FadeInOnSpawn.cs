@@ -1,6 +1,6 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Visuals;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Lifecycle;
@@ -52,3 +52,4 @@ public sealed class FadeInOnSpawn : Component
         }
     }
 }
+

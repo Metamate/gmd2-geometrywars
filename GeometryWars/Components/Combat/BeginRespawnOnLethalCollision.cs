@@ -1,7 +1,7 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Identity;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Combat;
 
@@ -27,3 +27,4 @@ public sealed class BeginRespawnOnLethalCollision : Component
             _respawnState.BeginRespawn();
     }
 }
+

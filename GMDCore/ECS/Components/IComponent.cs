@@ -1,7 +1,7 @@
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Components.Core;
+namespace GMDCore.ECS.Components;
 
 // Base contract for all entity capabilities.
 public interface IComponent
@@ -24,3 +24,4 @@ public interface IComponent
     void OnCollision(Entity owner, Entity other);
     void Draw(Entity owner, SpriteBatch spriteBatch);
 }
+

@@ -1,7 +1,7 @@
 using System;
 using GeometryWars.Components.Combat;
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
 using GeometryWars.Services;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework.Audio;
@@ -38,3 +38,4 @@ public sealed class PlaySoundOnWeaponFired : Component
         _audio.Play(_getSound(), 0.2f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }
+

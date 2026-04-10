@@ -1,6 +1,6 @@
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Identity;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 
 namespace GeometryWars.Components.Combat;
 
@@ -28,3 +28,4 @@ public sealed class TakeDamageOnBulletCollision : Component
         _health?.ApplyDamage(_damagePerHit);
     }
 }
+

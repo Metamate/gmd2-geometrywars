@@ -1,7 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Visuals;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using GeometryWars.Systems;
 
 namespace GeometryWars.Components.Lifecycle;
@@ -61,3 +61,4 @@ public sealed class RespawnState : Component
         }
     }
 }
+

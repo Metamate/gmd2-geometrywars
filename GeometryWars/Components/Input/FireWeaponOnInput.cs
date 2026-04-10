@@ -1,8 +1,8 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Combat;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using GeometryWars.Input;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -42,3 +42,4 @@ public sealed class FireWeaponOnInput : Component
         _weapon.TryFire(_transform.Position, _transform.Orientation);
     }
 }
+

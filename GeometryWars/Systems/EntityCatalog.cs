@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using GeometryWars.Components.Identity;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -74,3 +74,4 @@ internal sealed class EntityCatalog
         _blackHoles.RemoveAll(blackHole => blackHole.IsExpired);
     }
 }
+

@@ -1,5 +1,6 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
+using GMDCore.Physics;
 using GeometryWars.Systems;
 
 namespace GeometryWars.Components.Physics;
@@ -31,3 +32,4 @@ public sealed class ApplyGridForceFromVelocity : Component
         _grid.ApplyExplosiveForce(_forceScale * _rigidbody.Velocity.Length(), _transform.Position, _radius);
     }
 }
+

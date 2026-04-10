@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using Microsoft.Xna.Framework;
 
-namespace GeometryWars.Systems;
+namespace GMDCore.Collision;
 
 // Maps pairs of Collider types to their specific collision math.
 public static class CollisionRegistry
@@ -67,3 +67,4 @@ public static class CollisionRegistry
         return Vector2.DistanceSquared(a.Position, new Vector2(closestX, closestY)) < (circle.Radius * circle.Radius);
     }
 }
+

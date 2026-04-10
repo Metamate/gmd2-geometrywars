@@ -1,7 +1,7 @@
 using System;
-using GeometryWars.Components.Core;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.Physics;
+using GMDCore.ECS;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
 
@@ -36,3 +36,4 @@ public sealed class SeekTarget : Component
             _transform.Orientation = _rigidbody.Velocity.ToAngle();
     }
 }
+

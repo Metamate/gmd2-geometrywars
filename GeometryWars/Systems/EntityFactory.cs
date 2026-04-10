@@ -6,8 +6,10 @@ using GeometryWars.Components.Identity;
 using GeometryWars.Components.Input;
 using GeometryWars.Components.Lifecycle;
 using GeometryWars.Components.Physics;
+using GMDCore.Physics;
 using GeometryWars.Components.Visuals;
-using GeometryWars.Entities;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Services;
 using GeometryWars.Utils;
 using Microsoft.Xna.Framework;
@@ -159,3 +161,4 @@ public sealed class EntityFactory
         _context.Audio.Play(_context.Assets.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }
+

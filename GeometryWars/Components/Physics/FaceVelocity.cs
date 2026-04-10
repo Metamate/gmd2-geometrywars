@@ -1,5 +1,6 @@
-using GeometryWars.Components.Core;
-using GeometryWars.Entities;
+using GMDCore.ECS.Components;
+using GMDCore.ECS;
+using GMDCore.Physics;
 using GeometryWars.Utils;
 
 namespace GeometryWars.Components.Physics;
@@ -22,3 +23,4 @@ public sealed class FaceVelocity : Component
             _transform.Orientation = _rigidbody.Velocity.ToAngle();
     }
 }
+

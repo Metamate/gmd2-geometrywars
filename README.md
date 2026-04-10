@@ -11,6 +11,13 @@ The codebase is designed to support discussion around:
 - simple event-driven decoupling
 - rendering and post-processing
 
+## Repository Layout
+
+The repository is intentionally split into two projects:
+
+- `GMDCore` contains reusable engine-style code such as the game shell, input handling, the entity/component model, generic physics/collision primitives, particle infrastructure, and pooling.
+- `GeometryWars` contains the actual game: states, gameplay systems, archetype composition, assets, and Geometry Wars-specific components and rules.
+
 ## Architecture Overview
 
 At a high level, the game is structured like this:

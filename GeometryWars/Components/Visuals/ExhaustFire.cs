@@ -1,8 +1,9 @@
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Components.Physics;
-using GeometryWars.Entities;
+using GMDCore.Physics;
+using GMDCore.ECS;
+using GMDCore.Particles;
 using GeometryWars.Services;
 using GeometryWars.Systems;
 using GeometryWars.Utils;
@@ -73,3 +74,4 @@ public sealed class ExhaustFire : Component
             ParticleState.StableTrail(vel2));
     }
 }
+

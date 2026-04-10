@@ -1,5 +1,5 @@
 using System;
-using GeometryWars.Entities;
+using GMDCore.ECS;
 using GeometryWars.Services;
 using Microsoft.Xna.Framework;
 
@@ -80,3 +80,4 @@ public sealed class EnemyDirector
 
     public void Reset() => _inverseSpawnChance = GameSettings.Enemy.Spawning.ChanceStart;
 }
+

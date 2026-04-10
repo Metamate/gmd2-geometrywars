@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System;
-using GeometryWars.Components.Core;
+using GMDCore.ECS.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GeometryWars.Entities;
+namespace GMDCore.ECS;
 
 // Base class for all game objects.
 public class Entity
@@ -107,3 +107,4 @@ public class Entity
                 _components[i].Draw(this, spriteBatch);
     }
 }
+
