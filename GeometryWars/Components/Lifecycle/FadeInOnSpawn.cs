@@ -18,9 +18,8 @@ public sealed class FadeInOnSpawn : Component
         _timeUntilStart = spawnDelay;
     }
 
-    // OnStart runs after EntityWorld calls entity.Start(), which happens once all
-    // components have been added. Every sibling — including those from factory methods
-    // — is present, so we can safely disable them all here.
+    // OnStart runs after the full component set has been assembled, so we can
+    // safely gate sibling behavior until the spawn window completes.
     public override void OnStart(Entity owner)
     {
         _sprite = owner.GetComponent<Sprite>();

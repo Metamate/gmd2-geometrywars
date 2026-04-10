@@ -26,13 +26,13 @@ At a high level, the game is structured like this:
 2. `PlayState` owns one active play session.
 3. `PlaySession` builds and updates the mutable game world for a run.
 4. `EntityWorld` updates entities, collisions, and pooled bullets.
-5. `EntityFactory` defines entity archetypes by composing components.
+5. `EntityFactory` defines entity recipes by composing components.
 6. Components implement the actual behavior attached to each entity.
 
 This means the code is intentionally split between:
 - shell/runtime concerns
 - session/world concerns
-- archetype composition
+- entity composition
 - reusable gameplay behavior
 
 ## Runtime Layer
@@ -87,7 +87,7 @@ Supporting classes such as [EntityCatalog](C:/Users/jakik/projects/GMDPlayground
 
 ## Entity Composition
 
-[EntityFactory](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityFactory.cs) defines the entity archetypes.
+[EntityFactory](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityFactory.cs) defines the entity recipes.
 
 This is where you can read how an entity is assembled.
 
@@ -100,9 +100,9 @@ This is an important teaching point: entities should emerge from composition rat
 
 ## Component Model
 
-All components inherit from [Component](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Core/Component.cs).
+All components inherit from [Component](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Components/Component.cs).
 
-The lifecycle is Unity-like:
+The lifecycle is callback-based:
 - `OnAdded`
 - `OnStart`
 - `PreUpdate`
@@ -113,7 +113,7 @@ The lifecycle is Unity-like:
 - `Draw`
 - `OnRemoved`
 
-[Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Entities/Entity.cs) runs those phases in a fixed order every frame.
+[Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Entity.cs) runs those phases in a fixed order every frame.
 
 `OnRemoved` is intended for engine-level cleanup such as unregistering subscriptions when an entity leaves the world. It is not the same as a gameplay destruction event like `Destroyable.Destroyed`.
 
@@ -188,7 +188,7 @@ When adding or changing gameplay code, prefer these rules:
 
 1. Put shell and application concerns in `Game1` or game states.
 2. Put run-specific orchestration in `PlaySession` and systems.
-3. Put archetype assembly in `EntityFactory`.
+3. Put entity recipe assembly in `EntityFactory`.
 4. Put reusable behavior in components.
 5. Put cross-entity or run-level orchestration in systems or `PlaySession`.
 6. Prefer capability-based component names over entity-specific names.
@@ -204,7 +204,7 @@ If you are new to the project, a good reading order is:
 2. [PlayState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/States/PlayState.cs)
 3. [PlaySession](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/PlaySession.cs)
 4. [EntityFactory](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityFactory.cs)
-5. [Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Entities/Entity.cs)
+5. [Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Entity.cs)
 6. a few concrete components from `Components/`
 
 That gives the clearest top-down view of how the game fits together.

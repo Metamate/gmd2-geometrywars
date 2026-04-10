@@ -84,8 +84,8 @@ public class Entity
         return component;
     }
 
-    // Call once after all components have been added to wire up sibling references.
-    // Invoked by EntityWorld when the entity enters the current play session.
+    // Call once after all components have been added so components can safely
+    // look up siblings and subscribe to local events.
     public void Start()
     {
         for (int i = 0; i < _components.Count; i++)
