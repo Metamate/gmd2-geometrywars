@@ -6,10 +6,16 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GeometryWars.Systems;
 
-public class Grid : IGridField
+// Dense spring grid stored in flat arrays so the hot update path has better
+// data locality than the gameplay ECS layer.
+public sealed class Grid : IGridField
 {
-    private readonly Spring[] _springs;
-    private readonly PointMass[,] _points;
+    private const float PointDamping = 0.98f;
+    private const float RestLengthFactor = 0.95f;
+
+    private readonly SpringData[] _springs;
+    private readonly PointMassData[] _points;
+    private readonly Vector2[] _projectedPoints;
     private readonly Vector2 _screenCenter;
     private readonly int _cols;
     private readonly int _rows;
@@ -20,90 +26,103 @@ public class Grid : IGridField
         _cols = (int)(size.Width / spacing.X) + 1;
         _rows = (int)(size.Height / spacing.Y) + 1;
 
-        _points = new PointMass[_cols, _rows];
+        _points = new PointMassData[_cols * _rows];
+        _projectedPoints = new Vector2[_points.Length];
 
         float gridWidth = (_cols - 1) * spacing.X;
         float gridHeight = (_rows - 1) * spacing.Y;
         float originX = size.Left + (size.Width - gridWidth) * 0.5f;
         float originY = size.Top + (size.Height - gridHeight) * 0.5f;
 
-        // 1. Create the points
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                _points[x, y] = new PointMass(new Vector3(originX + x * spacing.X, originY + y * spacing.Y, 0), 1f);
+                int index = Index(x, y);
+                _points[index] = new PointMassData(new Vector3(originX + x * spacing.X, originY + y * spacing.Y, 0), inverseMass: 1f);
             }
         }
 
-        // 2. Link points with springs
-        var springList = new List<Spring>();
+        var springList = new List<SpringData>();
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                // Anchor the border and some interior points to "fixed" positions
-                if (x == 0 || y == 0 || x == _cols - 1 || y == _rows - 1)
-                    springList.Add(new Spring(_points[x, y], _points[x, y], 0.1f, 0.1f, true));
-                else if (x % 3 == 0 && y % 3 == 0)
-                    springList.Add(new Spring(_points[x, y], _points[x, y], 0.002f, 0.02f, true));
+                int index = Index(x, y);
+                var pointPosition = _points[index].Position;
 
-                // Mesh connections
+                if (x == 0 || y == 0 || x == _cols - 1 || y == _rows - 1)
+                    springList.Add(SpringData.CreateFixed(index, pointPosition, stiffness: 0.1f, damping: 0.1f));
+                else if (x % 3 == 0 && y % 3 == 0)
+                    springList.Add(SpringData.CreateFixed(index, pointPosition, stiffness: 0.002f, damping: 0.02f));
+
                 const float stiffness = 0.28f;
                 const float damping = 0.06f;
-                if (x > 0) springList.Add(new Spring(_points[x - 1, y], _points[x, y], stiffness, damping));
-                if (y > 0) springList.Add(new Spring(_points[x, y - 1], _points[x, y], stiffness, damping));
+                if (x > 0) springList.Add(CreateSpring(Index(x - 1, y), index, stiffness, damping));
+                if (y > 0) springList.Add(CreateSpring(Index(x, y - 1), index, stiffness, damping));
             }
         }
+
         _springs = [.. springList];
     }
 
     public void Update()
     {
-        foreach (var spring in _springs) spring.Update();
-        foreach (var mass in _points) mass.Update();
+        for (int i = 0; i < _springs.Length; i++)
+            UpdateSpring(in _springs[i]);
+
+        for (int i = 0; i < _points.Length; i++)
+            UpdatePoint(i);
     }
 
     public void ApplyDirectedForce(Vector2 force, Vector2 position, float radius)
     {
         var force3 = new Vector3(force, 0);
         var pos3 = new Vector3(position, 0);
-        float rSq = radius * radius;
-        foreach (var mass in _points)
+        float radiusSq = radius * radius;
+
+        for (int i = 0; i < _points.Length; i++)
         {
-            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
-            if (distSq < rSq)
-                mass.ApplyForce(10 * force3 / (10 + MathF.Sqrt(distSq)));
+            ref var point = ref _points[i];
+            float distanceSq = Vector3.DistanceSquared(pos3, point.Position);
+            if (distanceSq >= radiusSq)
+                continue;
+
+            ApplyForce(i, 10 * force3 / (10 + MathF.Sqrt(distanceSq)));
         }
     }
 
     public void ApplyImplosiveForce(float force, Vector2 position, float radius)
     {
         var pos3 = new Vector3(position, 0);
-        float rSq = radius * radius;
-        foreach (var mass in _points)
+        float radiusSq = radius * radius;
+
+        for (int i = 0; i < _points.Length; i++)
         {
-            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
-            if (distSq < rSq)
-            {
-                mass.ApplyForce(10 * force * (pos3 - mass.Position) / (100 + distSq));
-                mass.IncreaseDamping(0.6f);
-            }
+            ref var point = ref _points[i];
+            float distanceSq = Vector3.DistanceSquared(pos3, point.Position);
+            if (distanceSq >= radiusSq)
+                continue;
+
+            ApplyForce(i, 10 * force * (pos3 - point.Position) / (100 + distanceSq));
+            IncreaseDamping(i, 0.6f);
         }
     }
 
     public void ApplyExplosiveForce(float force, Vector2 position, float radius)
     {
         var pos3 = new Vector3(position, 0);
-        float rSq = radius * radius;
-        foreach (var mass in _points)
+        float radiusSq = radius * radius;
+
+        for (int i = 0; i < _points.Length; i++)
         {
-            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
-            if (distSq < rSq)
-            {
-                mass.ApplyForce(100 * force * (mass.Position - pos3) / (10000 + distSq));
-                mass.IncreaseDamping(0.6f);
-            }
+            ref var point = ref _points[i];
+            float distanceSq = Vector3.DistanceSquared(pos3, point.Position);
+            if (distanceSq >= radiusSq)
+                continue;
+
+            ApplyForce(i, 100 * force * (point.Position - pos3) / (10000 + distanceSq));
+            IncreaseDamping(i, 0.6f);
         }
     }
 
@@ -111,136 +130,186 @@ public class Grid : IGridField
     {
         var force3 = new Vector3(0, 0, force);
         var pos3 = new Vector3(position, 0);
-        float rSq = radius * radius;
-        foreach (var mass in _points)
-        {
-            float distSq = Vector3.DistanceSquared(pos3, mass.Position);
-            if (distSq < rSq)
-                mass.ApplyForce(10 * force3 / (10 + MathF.Sqrt(distSq)));
-        }
-    }
+        float radiusSq = radius * radius;
 
-    private Vector2 ToVec2(Vector3 v)
-    {
-        float factor = (v.Z + 2000) / 2000;
-        return (new Vector2(v.X, v.Y) - _screenCenter) * factor + _screenCenter;
+        for (int i = 0; i < _points.Length; i++)
+        {
+            ref var point = ref _points[i];
+            float distanceSq = Vector3.DistanceSquared(pos3, point.Position);
+            if (distanceSq >= radiusSq)
+                continue;
+
+            ApplyForce(i, 10 * force3 / (10 + MathF.Sqrt(distanceSq)));
+        }
     }
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
     {
+        UpdateProjectedPoints();
+
         Color color = new(30, 30, 139, 85);
         for (int y = 0; y < _rows; y++)
         {
             for (int x = 0; x < _cols; x++)
             {
-                Vector2 p = ToVec2(_points[x, y].Position);
+                int index = Index(x, y);
+                Vector2 point = _projectedPoints[index];
 
                 if (x > 0)
                 {
-                    Vector2 left = ToVec2(_points[x - 1, y].Position);
+                    Vector2 left = _projectedPoints[Index(x - 1, y)];
                     float thickness = y % 3 == 1 ? 3f : 1f;
 
                     if (x == 1)
                     {
-                        spriteBatch.DrawLine(pixel, left, p, color, thickness);
+                        spriteBatch.DrawLine(pixel, left, point, color, thickness);
                     }
                     else
                     {
-                        int xNext = Math.Min(x + 1, _cols - 1);
-                        Vector2 pNext = ToVec2(_points[xNext, y].Position);
-                        Vector2 pPrev = ToVec2(_points[x - 2, y].Position);
-                        Vector2 mid = Vector2.CatmullRom(pPrev, left, p, pNext, 0.5f);
+                        int nextIndex = Index(Math.Min(x + 1, _cols - 1), y);
+                        Vector2 next = _projectedPoints[nextIndex];
+                        Vector2 previous = _projectedPoints[Index(x - 2, y)];
+                        Vector2 midpoint = Vector2.CatmullRom(previous, left, point, next, 0.5f);
 
-                        if (Vector2.DistanceSquared(mid, (left + p) / 2) > 1)
+                        if (Vector2.DistanceSquared(midpoint, (left + point) * 0.5f) > 1f)
                         {
-                            spriteBatch.DrawLine(pixel, left, mid, color, thickness);
-                            spriteBatch.DrawLine(pixel, mid, p, color, thickness);
+                            spriteBatch.DrawLine(pixel, left, midpoint, color, thickness);
+                            spriteBatch.DrawLine(pixel, midpoint, point, color, thickness);
                         }
                         else
                         {
-                            spriteBatch.DrawLine(pixel, left, p, color, thickness);
+                            spriteBatch.DrawLine(pixel, left, point, color, thickness);
                         }
                     }
                 }
 
                 if (y > 0)
                 {
-                    Vector2 up = ToVec2(_points[x, y - 1].Position);
+                    Vector2 up = _projectedPoints[Index(x, y - 1)];
                     float thickness = x % 3 == 1 ? 3f : 1f;
-                    spriteBatch.DrawLine(pixel, up, p, color, thickness);
+                    spriteBatch.DrawLine(pixel, up, point, color, thickness);
                 }
 
                 if (x > 0 && y > 0)
                 {
-                    Vector2 up = ToVec2(_points[x, y - 1].Position);
-                    Vector2 left = ToVec2(_points[x - 1, y].Position);
-                    Vector2 upLeft = ToVec2(_points[x - 1, y - 1].Position);
-                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + up), 0.5f * (left + p), color, 1f);
-                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + left), 0.5f * (up + p), color, 1f);
+                    Vector2 up = _projectedPoints[Index(x, y - 1)];
+                    Vector2 left = _projectedPoints[Index(x - 1, y)];
+                    Vector2 upLeft = _projectedPoints[Index(x - 1, y - 1)];
+                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + up), 0.5f * (left + point), color, 1f);
+                    spriteBatch.DrawLine(pixel, 0.5f * (upLeft + left), 0.5f * (up + point), color, 1f);
                 }
             }
         }
     }
 
-    private class PointMass(Vector3 position, float invMass)
+    private int Index(int x, int y) => x + y * _cols;
+
+    private SpringData CreateSpring(int end1, int end2, float stiffness, float damping)
     {
-        public Vector3 Position { get; set; } = position;
-        public Vector3 Velocity { get; set; }
-        public float InverseMass { get; set; } = invMass;
-        private Vector3 _acceleration;
-        private float _damping = 0.98f;
+        float targetLength = Vector3.Distance(_points[end1].Position, _points[end2].Position) * RestLengthFactor;
+        return SpringData.CreateDynamic(end1, end2, targetLength, stiffness, damping);
+    }
 
-        public void ApplyForce(Vector3 force) => _acceleration += force * InverseMass;
-        public void IncreaseDamping(float factor) => _damping *= factor;
+    private void UpdateProjectedPoints()
+    {
+        for (int i = 0; i < _points.Length; i++)
+            _projectedPoints[i] = ToVec2(_points[i].Position);
+    }
 
-        public void Update()
+    private Vector2 ToVec2(Vector3 position)
+    {
+        float factor = (position.Z + 2000) / 2000;
+        return (new Vector2(position.X, position.Y) - _screenCenter) * factor + _screenCenter;
+    }
+
+    private void UpdateSpring(in SpringData spring)
+    {
+        Vector3 end1Position = spring.ToFixed ? spring.FixedPosition : _points[spring.End1].Position;
+        Vector3 delta = end1Position - _points[spring.End2].Position;
+        float length = delta.Length();
+
+        if (length <= spring.TargetLength || length < 0.0001f)
+            return;
+
+        delta = delta / length * (length - spring.TargetLength);
+        Vector3 velocityDelta = _points[spring.End2].Velocity - (spring.ToFixed ? Vector3.Zero : _points[spring.End1].Velocity);
+        Vector3 force = spring.Stiffness * delta - velocityDelta * spring.Damping;
+
+        if (!spring.ToFixed)
+            ApplyForce(spring.End1, -force);
+
+        ApplyForce(spring.End2, force);
+    }
+
+    private void UpdatePoint(int index)
+    {
+        ref var point = ref _points[index];
+        point.Velocity += point.Acceleration;
+        point.Position += point.Velocity;
+        point.Acceleration = Vector3.Zero;
+
+        if (point.Velocity.LengthSquared() < 0.000001f)
+            point.Velocity = Vector3.Zero;
+
+        point.Velocity *= point.Damping;
+        point.Damping = PointDamping;
+    }
+
+    private void ApplyForce(int index, Vector3 force)
+    {
+        ref var point = ref _points[index];
+        point.Acceleration += force * point.InverseMass;
+    }
+
+    private void IncreaseDamping(int index, float factor)
+    {
+        ref var point = ref _points[index];
+        point.Damping *= factor;
+    }
+
+    private struct PointMassData
+    {
+        public Vector3 Position;
+        public Vector3 Velocity;
+        public Vector3 Acceleration;
+        public float InverseMass;
+        public float Damping;
+
+        public PointMassData(Vector3 position, float inverseMass)
         {
-            Velocity += _acceleration;
-            Position += Velocity;
-            _acceleration = Vector3.Zero;
-            if (Velocity.LengthSquared() < 0.000001f) Velocity = Vector3.Zero;
-            Velocity *= _damping;
-            _damping = 0.98f;
+            Position = position;
+            Velocity = Vector3.Zero;
+            Acceleration = Vector3.Zero;
+            InverseMass = inverseMass;
+            Damping = PointDamping;
         }
     }
 
-    private class Spring
+    private readonly struct SpringData
     {
-        private readonly PointMass _end1;
-        private readonly PointMass _end2;
-        private readonly float _targetLength;
-        private readonly float _stiffness;
-        private readonly float _damping;
-        private readonly bool _toFixed;
-        private readonly Vector3 _fixedPos;
+        public int End1 { get; }
+        public int End2 { get; }
+        public float TargetLength { get; }
+        public float Stiffness { get; }
+        public float Damping { get; }
+        public bool ToFixed { get; }
+        public Vector3 FixedPosition { get; }
 
-        public Spring(PointMass end1, PointMass end2, float stiffness, float damping, bool toFixed = false)
+        private SpringData(int end1, int end2, float targetLength, float stiffness, float damping, bool toFixed, Vector3 fixedPosition)
         {
-            _end1 = end1;
-            _end2 = end2;
-            _stiffness = stiffness;
-            _damping = damping;
-            _toFixed = toFixed;
-            _fixedPos = end1.Position;
-            _targetLength = Vector3.Distance(end1.Position, end2.Position) * 0.95f;
+            End1 = end1;
+            End2 = end2;
+            TargetLength = targetLength;
+            Stiffness = stiffness;
+            Damping = damping;
+            ToFixed = toFixed;
+            FixedPosition = fixedPosition;
         }
 
-        public void Update()
-        {
-            var p1Pos = _toFixed ? _fixedPos : _end1.Position;
-            var p2Pos = _end2.Position;
+        public static SpringData CreateFixed(int index, Vector3 fixedPosition, float stiffness, float damping)
+            => new(index, index, 0f, stiffness, damping, true, fixedPosition);
 
-            var x = p1Pos - p2Pos;
-            float length = x.Length();
-
-            if (length <= _targetLength) return;
-
-            x = (x / length) * (length - _targetLength);
-            var dv = _end2.Velocity - (_toFixed ? Vector3.Zero : _end1.Velocity);
-            var force = _stiffness * x - dv * _damping;
-
-            if (!_toFixed) _end1.ApplyForce(-force);
-            _end2.ApplyForce(force);
-        }
+        public static SpringData CreateDynamic(int end1, int end2, float targetLength, float stiffness, float damping)
+            => new(end1, end2, targetLength, stiffness, damping, false, Vector3.Zero);
     }
 }

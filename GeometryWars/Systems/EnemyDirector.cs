@@ -41,14 +41,14 @@ public sealed class EnemyDirector
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
             _world.Add(_factory.CreateWanderer(spawnPos));
-            _context.Audio.Play(_context.Assets.Spawn, 0.15f);
+            _context.Audio.Play(_context.Assets.GetRandomSpawn(), 0.15f);
         }
 
         if (Random.Shared.NextSingle() < 1f / (_inverseSpawnChance * 2f))
         {
             var spawnPos = GetRandomSpawnPosition(getPlayerPosition());
             _world.Add(_factory.CreateSeeker(spawnPos, getPlayerPosition));
-            _context.Audio.Play(_context.Assets.Spawn, 0.2f);
+            _context.Audio.Play(_context.Assets.GetRandomSpawn(), 0.2f);
         }
     }
 
@@ -58,7 +58,7 @@ public sealed class EnemyDirector
             Random.Shared.NextSingle() < 1f / GameSettings.Hazards.BlackHoleSpawnChance)
         {
             _world.Add(_factory.CreateBlackHole(GetRandomSpawnPosition(getPlayerPosition())));
-            _context.Audio.Play(_context.Assets.Spawn, 0.3f, -0.2f);
+            _context.Audio.Play(_context.Assets.GetRandomSpawn(), 0.3f, -0.2f);
         }
     }
 

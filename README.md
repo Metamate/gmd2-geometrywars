@@ -16,7 +16,7 @@ The codebase is designed to support discussion around:
 The repository is intentionally split into two projects:
 
 - `GMDCore` contains reusable engine-style code such as the game shell, input handling, the entity/component model, generic physics/collision primitives, particle infrastructure, and pooling.
-- `GeometryWars` contains the actual game: states, gameplay systems, archetype composition, assets, and Geometry Wars-specific components and rules.
+- `GeometryWars` contains the actual game: states, gameplay systems, entity recipe composition, assets, and Geometry Wars-specific components and rules.
 
 ## Architecture Overview
 
@@ -25,7 +25,7 @@ At a high level, the game is structured like this:
 1. `Game1` owns the runtime shell.
 2. `PlayState` owns one active play session.
 3. `PlaySession` builds and updates the mutable game world for a run.
-4. `EntityWorld` updates entities, collisions, and pooled bullets.
+4. `EntityWorld` updates entities and collisions.
 5. `EntityFactory` defines entity recipes by composing components.
 6. Components implement the actual behavior attached to each entity.
 
@@ -81,9 +81,11 @@ It builds:
 - entity registration and updates
 - collision handling
 - pending additions during update
-- pooled bullet spawning
+- deferred entity removal
 
 Supporting classes such as [EntityCatalog](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityCatalog.cs) and [CollisionSystem](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/CollisionSystem.cs) keep those responsibilities separated.
+
+Projectile pooling lives in [BulletSpawner](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/BulletSpawner.cs), so the world can stay focused on generic entity lifetime and update flow.
 
 ## Entity Composition
 
@@ -151,7 +153,7 @@ Good component responsibilities:
 Good system/session responsibilities:
 - collision detection in `CollisionSystem`
 - spawn pacing in `EnemyDirector`
-- pooled entity management in `EntityWorld`
+- projectile pooling in `BulletSpawner`
 - run-level consequences in `PlaySession`
 
 Examples from this codebase:
@@ -181,6 +183,15 @@ This allows reactive components such as:
 to react without tightly coupling everything together.
 
 The intent is to show a simple use of events where they help, without making control flow hard to follow.
+
+## Data-Oriented Notes
+
+Not every subsystem uses the same style on purpose.
+
+- `Entity` and gameplay components favor clarity and composition.
+- [Grid](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/Grid.cs) is a denser simulation-oriented subsystem that favors flat arrays and tight loops for better data locality.
+- [ParticleManager](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/Particles/ParticleManager.cs) is a specialized high-volume visual system rather than a normal entity/component workflow.
+- [GameAssets](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Services/GameAssets.cs) acts as a simple shared asset catalog, which is a lightweight example of a flyweight-style resource holder.
 
 ## Design Guidelines For Students
 

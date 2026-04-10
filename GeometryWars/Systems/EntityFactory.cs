@@ -16,27 +16,30 @@ using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Systems;
 
-// Centralizes entity archetype wiring so entities stay self-contained and
+// Centralizes entity recipe wiring so entities stay self-contained and
 // components receive only the dependencies they actually need.
 public sealed class EntityFactory
 {
     private readonly ScoreTracker _score;
     private readonly ParticleManager<ParticleState> _particles;
     private readonly Grid _grid;
-    private readonly EntityWorld _world;
+    private readonly INeighborQuery _neighborQuery;
+    private readonly IBulletSpawner _bulletSpawner;
     private readonly PlayContext _context;
 
     public EntityFactory(
         ScoreTracker score,
         ParticleManager<ParticleState> particles,
         Grid grid,
-        EntityWorld world,
+        INeighborQuery neighborQuery,
+        IBulletSpawner bulletSpawner,
         PlayContext context)
     {
         _score = score;
         _particles = particles;
         _grid = grid;
-        _world = world;
+        _neighborQuery = neighborQuery;
+        _bulletSpawner = bulletSpawner;
         _context = context;
     }
 
@@ -59,8 +62,8 @@ public sealed class EntityFactory
         player.AddComponent(new ApplyMovementInput(_context.Controller));
         player.AddComponent(new Weapon(GameSettings.Bullets.ShotCooldown));
         player.AddComponent(new FireWeaponOnInput(_context.Controller));
-        player.AddComponent(new SpawnTwinBulletsOnFired(_world));
-        player.AddComponent(new PlaySoundOnWeaponFired(_context.Audio, () => _context.Assets.Shot));
+        player.AddComponent(new SpawnTwinBulletsOnFired(_bulletSpawner));
+        player.AddComponent(new PlaySoundOnWeaponFired(_context.Audio, _context.Assets.GetRandomShot));
         player.AddComponent(new ExhaustFire(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
         player.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleCollider(GameSettings.Bullets.ColliderRadius));
@@ -116,7 +119,7 @@ public sealed class EntityFactory
         blackHole.AddComponent(new Rigidbody());
         blackHole.AddComponent(new Sprite(_context.Assets.BlackHole));
         blackHole.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.DarkViolet * 0.4f));
-        blackHole.AddComponent(new ApplyGravity(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _world));
+        blackHole.AddComponent(new ApplyGravity(GameSettings.Hazards.BlackHoleGravityRange, GameSettings.Hazards.BlackHoleGravityForce, _neighborQuery));
         blackHole.AddComponent(new EmitOrbitingParticles(_particles, _context.Frame, _context.Assets.LineParticle));
         blackHole.AddComponent(new ApplyOscillatingImplosiveGridForce(GameSettings.Hazards.BlackHoleGridRange, _grid));
         blackHole.AddComponent(new Destroyable());
@@ -158,7 +161,7 @@ public sealed class EntityFactory
 
     private void PlayExplosionSound()
     {
-        _context.Audio.Play(_context.Assets.Explosion, 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
+        _context.Audio.Play(_context.Assets.GetRandomExplosion(), 0.5f, Random.Shared.NextFloat(-0.2f, 0.2f));
     }
 }
 

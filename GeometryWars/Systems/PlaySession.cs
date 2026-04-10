@@ -15,6 +15,7 @@ public sealed class PlaySession
     public Grid Grid { get; }
     public ScoreTracker Score { get; }
     public EntityWorld Entities { get; }
+    public BulletSpawner BulletSpawner { get; }
     public EntityFactory Factory { get; }
     public EnemyDirector Spawner { get; }
     public Entity Player { get; }
@@ -26,6 +27,7 @@ public sealed class PlaySession
         Score = new ScoreTracker(context.Frame, Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
 
         Entities = new EntityWorld();
+        BulletSpawner = new BulletSpawner(Entities);
         Particles = new ParticleManager<ParticleState>(
             GameSettings.Performance.MaxParticles,
             particle => ParticleState.UpdateParticle(particle, Entities.BlackHoles, context.Frame));
@@ -33,8 +35,8 @@ public sealed class PlaySession
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         Grid = new Grid(viewportBounds, gridSpacing);
 
-        Factory = new EntityFactory(Score, Particles, Grid, Entities, context);
-        Entities.ConfigureBulletFactory(Factory.CreateBullet);
+        Factory = new EntityFactory(Score, Particles, Grid, Entities, BulletSpawner, context);
+        BulletSpawner.ConfigureFactory(Factory.CreateBullet);
         Spawner = new EnemyDirector(Entities, Factory, context);
 
         Score.StartNewRun();

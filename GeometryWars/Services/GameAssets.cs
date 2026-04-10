@@ -28,9 +28,9 @@ public sealed class GameAssets
     private SoundEffect[] _shots = Array.Empty<SoundEffect>();
     private SoundEffect[] _spawns = Array.Empty<SoundEffect>();
 
-    public SoundEffect Explosion => _explosions[Random.Shared.Next(_explosions.Length)];
-    public SoundEffect Shot => _shots[Random.Shared.Next(_shots.Length)];
-    public SoundEffect Spawn => _spawns[Random.Shared.Next(_spawns.Length)];
+    public SoundEffect GetRandomExplosion() => _explosions[Random.Shared.Next(_explosions.Length)];
+    public SoundEffect GetRandomShot() => _shots[Random.Shared.Next(_shots.Length)];
+    public SoundEffect GetRandomSpawn() => _spawns[Random.Shared.Next(_spawns.Length)];
 
     public void Load(ContentManager content)
     {

@@ -125,6 +125,7 @@ namespace GeometryWars.Graphics
             if (Visible)
             {
                 GraphicsDevice.SetRenderTarget(sceneRenderTarget);
+                GraphicsDevice.Clear(Color.Black);
             }
         }
 

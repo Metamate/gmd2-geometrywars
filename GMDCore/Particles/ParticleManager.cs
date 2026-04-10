@@ -56,7 +56,7 @@ public class ParticleManager<T> : IParticleSystem<T>
         }
         else
         {
-            p = _list[Random.Shared.Next(0, _capacity)];
+            p = _list[FindReplacementIndex()];
         }
 
         p.Texture = texture;
@@ -67,6 +67,25 @@ public class ParticleManager<T> : IParticleSystem<T>
         p.Scale = scale;
         p.Orientation = theta;
         p.State = state;
+    }
+
+    private int FindReplacementIndex()
+    {
+        // When the pool is saturated, replace the particle closest to death so
+        // long-lived effects are less likely to disappear abruptly.
+        int replacementIndex = 0;
+        float lowestPercentLife = _list[0].PercentLife;
+
+        for (int i = 1; i < _count; i++)
+        {
+            if (_list[i].PercentLife < lowestPercentLife)
+            {
+                lowestPercentLife = _list[i].PercentLife;
+                replacementIndex = i;
+            }
+        }
+
+        return replacementIndex;
     }
 
     public void Draw(SpriteBatch spriteBatch)
