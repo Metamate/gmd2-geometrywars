@@ -22,7 +22,6 @@ public sealed class EntityFactory
     private readonly ParticleManager<ParticleState> _particles;
     private readonly Grid _grid;
     private readonly EntityWorld _world;
-    private readonly ISpawnController _spawner;
     private readonly PlayContext _context;
 
     public EntityFactory(
@@ -30,14 +29,12 @@ public sealed class EntityFactory
         ParticleManager<ParticleState> particles,
         Grid grid,
         EntityWorld world,
-        ISpawnController spawner,
         PlayContext context)
     {
         _score = score;
         _particles = particles;
         _grid = grid;
         _world = world;
-        _spawner = spawner;
         _context = context;
     }
 
@@ -56,11 +53,14 @@ public sealed class EntityFactory
         player.AddComponent(new ClampToScreen(size, _context.Frame));
         player.AddComponent(new Sprite(_context.Assets.Player));
         player.AddComponent(new ApplyMovementInput(_context.Controller));
-        player.AddComponent(new FireBulletsOnInput(_world, _context.Controller, _context.Audio, () => _context.Assets.Shot));
+        player.AddComponent(new Weapon(GameSettings.Bullets.ShotCooldown));
+        player.AddComponent(new FireWeaponOnInput(_context.Controller));
+        player.AddComponent(new SpawnTwinBulletsOnFired(_world));
+        player.AddComponent(new PlaySoundOnWeaponFired(_context.Audio, () => _context.Assets.Shot));
         player.AddComponent(new ExhaustFire(_particles, _context.Frame, _context.Assets.LineParticle, _context.Assets.Glow));
         player.AddComponent(new GlowOverlay(_context.Assets.Glow, Color.White * 0.15f));
         player.AddComponent(new CircleCollider(GameSettings.Bullets.ColliderRadius));
-        player.AddComponent(new BeginRespawnOnLethalCollision(_world, _spawner));
+        player.AddComponent(new BeginRespawnOnLethalCollision());
         player.AddComponent(respawnEffects);
         player.AddComponent(respawnState);
 

@@ -26,7 +26,7 @@ public sealed class PlayRespawnEffects : Component
         }
 
         _transform = owner.Transform;
-        _respawnState = owner.GetComponent<RespawnState>();
+        _respawnState = owner.RequireComponent<RespawnState>();
         if (_respawnState != null)
         {
             _respawnState.Died += PlayDeathAtOwner;

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 namespace GeometryWars.Systems;
 
 // Handles the timing and positioning of enemy spawns.
-public sealed class EnemyDirector : ISpawnController
+public sealed class EnemyDirector
 {
     private readonly EntityWorld _world;
     private readonly EntityFactory _factory;

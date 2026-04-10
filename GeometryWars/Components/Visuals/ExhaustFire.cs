@@ -32,8 +32,8 @@ public sealed class ExhaustFire : Component
 
     public override void OnStart(Entity owner)
     {
-        _respawnState = owner.GetComponent<RespawnState>();
-        _rigidbody = owner.GetComponent<Rigidbody>();
+        _respawnState = owner.RequireComponent<RespawnState>();
+        _rigidbody = owner.RequireComponent<Rigidbody>();
         _transform = owner.Transform;
     }
 

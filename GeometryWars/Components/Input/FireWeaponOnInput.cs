@@ -1,21 +1,23 @@
+using System;
 using GeometryWars.Components.Core;
 using GeometryWars.Components.Lifecycle;
-using GeometryWars.Components.Physics;
+using GeometryWars.Components.Combat;
 using GeometryWars.Entities;
 using GeometryWars.Input;
 using GeometryWars.Utils;
+using Microsoft.Xna.Framework;
 
 namespace GeometryWars.Components.Input;
 
-// Translates movement input into thrust and idle-facing direction.
-public sealed class ApplyMovementInput : Component
+// Translates firing input into aiming and weapon trigger requests.
+public sealed class FireWeaponOnInput : Component
 {
     private readonly GameController _controller;
     private RespawnState _respawnState;
-    private Rigidbody _rigidbody;
     private Transform _transform;
+    private Weapon _weapon;
 
-    public ApplyMovementInput(GameController controller)
+    public FireWeaponOnInput(GameController controller)
     {
         _controller = controller;
     }
@@ -23,8 +25,8 @@ public sealed class ApplyMovementInput : Component
     public override void OnStart(Entity owner)
     {
         _respawnState = owner.RequireComponent<RespawnState>();
-        _rigidbody = owner.RequireComponent<Rigidbody>();
         _transform = owner.Transform;
+        _weapon = owner.RequireComponent<Weapon>();
     }
 
     public override void PreUpdate(Entity owner)
@@ -32,9 +34,11 @@ public sealed class ApplyMovementInput : Component
         if (_respawnState?.IsRespawning == true)
             return;
 
-        _rigidbody.AddForce(GameSettings.Player.Speed * _controller.Movement);
+        var aim = _controller.AimDirection(_transform.Position);
+        if (!_controller.IsShooting || aim == Vector2.Zero)
+            return;
 
-        if (!_controller.IsShooting && _rigidbody.Velocity.LengthSquared() > 0.01f)
-            _transform.Orientation = _rigidbody.Velocity.ToAngle();
+        _transform.Orientation = aim.ToAngle();
+        _weapon.TryFire(_transform.Position, _transform.Orientation);
     }
 }

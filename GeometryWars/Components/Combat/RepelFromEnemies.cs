@@ -13,7 +13,7 @@ public sealed class RepelFromEnemies : Component
 
     public override void OnStart(Entity owner)
     {
-        _rigidbody = owner.GetComponent<Rigidbody>();
+        _rigidbody = owner.RequireComponent<Rigidbody>();
         _transform = owner.Transform;
     }
 

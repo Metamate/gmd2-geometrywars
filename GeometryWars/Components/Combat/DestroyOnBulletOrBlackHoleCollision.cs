@@ -13,7 +13,7 @@ public sealed class DestroyOnBulletOrBlackHoleCollision : Component
 
     public override void OnStart(Entity owner)
     {
-        _destroyable = owner.GetComponent<Destroyable>();
+        _destroyable = owner.RequireComponent<Destroyable>();
     }
 
     public override void OnCollision(Entity owner, Entity other)

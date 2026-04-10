@@ -17,12 +17,12 @@ public sealed class PlaySession
     public EntityFactory Factory { get; }
     public EnemyDirector Spawner { get; }
     public Entity Player { get; }
-    public bool IsPlayerRespawning => Player.GetComponent<RespawnState>()?.IsRespawning ?? false;
+    private readonly RespawnState _playerRespawnState;
+    public bool IsPlayerRespawning => _playerRespawnState.IsRespawning;
 
     public PlaySession(PlayContext context, Rectangle viewportBounds)
     {
         Score = new ScoreTracker(context.Frame, Path.Combine(AppContext.BaseDirectory, "highscore.txt"));
-        var spawnResetBridge = new DeferredSpawnController();
 
         Entities = new EntityWorld();
         Particles = new ParticleManager<ParticleState>(
@@ -32,13 +32,14 @@ public sealed class PlaySession
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         Grid = new Grid(viewportBounds, gridSpacing);
 
-        Factory = new EntityFactory(Score, Particles, Grid, Entities, spawnResetBridge, context);
+        Factory = new EntityFactory(Score, Particles, Grid, Entities, context);
         Entities.ConfigureBulletFactory(Factory.CreateBullet);
         Spawner = new EnemyDirector(Entities, Factory, context);
-        spawnResetBridge.Attach(Spawner);
 
         Score.StartNewRun();
         Player = Factory.CreatePlayer();
+        _playerRespawnState = Player.RequireComponent<RespawnState>();
+        _playerRespawnState.Died += HandlePlayerDied;
         Entities.Add(Player);
     }
 
@@ -51,18 +52,10 @@ public sealed class PlaySession
         Particles.Update();
     }
 
-    private sealed class DeferredSpawnController : ISpawnController
+    private void HandlePlayerDied()
     {
-        private ISpawnController _target;
-
-        public void Attach(ISpawnController target) => _target = target;
-
-        public void Reset()
-        {
-            if (_target == null)
-                throw new InvalidOperationException("Spawn controller has not been attached.");
-
-            _target.Reset();
-        }
+        Entities.KillAllEnemies();
+        Entities.KillAllBlackHoles();
+        Spawner.Reset();
     }
 }

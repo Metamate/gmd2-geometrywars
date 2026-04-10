@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using GeometryWars.Components.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,6 +33,9 @@ public class Entity
 
     public bool HasComponent<T>() where T : class, IComponent
         => GetComponent<T>() != null;
+
+    public T RequireComponent<T>() where T : class, IComponent
+        => GetComponent<T>() ?? throw new InvalidOperationException($"{GetType().Name} is missing required component {typeof(T).Name}.");
 
     public void Update()
     {

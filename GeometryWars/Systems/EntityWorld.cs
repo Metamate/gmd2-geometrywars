@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace GeometryWars.Systems;
 
 // Manages the lifecycle, updates, and rendering of all game entities.
-public sealed class EntityWorld : INeighborQuery, IEntitySweeper, IBulletSpawner
+public sealed class EntityWorld : INeighborQuery, IBulletSpawner
 {
     private readonly List<Entity> _pendingAdd = [];
     private readonly EntityCatalog _catalog = new();
