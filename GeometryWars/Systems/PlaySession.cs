@@ -34,10 +34,10 @@ public sealed class PlaySession
 
         Vector2 gridSpacing = new(MathF.Sqrt(viewportBounds.Width * viewportBounds.Height / (float)GameSettings.Performance.MaxGridPoints));
         var gridBounds = viewportBounds;
-        // gridBounds.Inflate(
-        //     (int)MathF.Ceiling(gridSpacing.X * 2f),
-        //     (int)MathF.Ceiling(gridSpacing.Y * 2f));
-        Grid = new Grid(viewportBounds, gridSpacing);//Grid = new Grid(gridBounds, gridSpacing);
+        gridBounds.Inflate(
+            (int)MathF.Ceiling(gridSpacing.X * 2f),
+            (int)MathF.Ceiling(gridSpacing.Y * 2f));
+        Grid = new Grid(gridBounds, gridSpacing);
 
         Factory = new EntityFactory(Score, Particles, Grid, Entities, BulletSpawner, context);
         BulletSpawner.ConfigureFactory(Factory.CreateBullet);
