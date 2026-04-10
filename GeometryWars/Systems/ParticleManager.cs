@@ -6,32 +6,32 @@ namespace GeometryWars.Systems;
 
 public class ParticleManager<T> : IParticleSystem<T>
 {
-    private readonly Action<Particle> _updateParticle;
-    private readonly Particle[] _list;
+    private readonly Action<ParticleInstance<T>> _updateParticle;
+    private readonly ParticleInstance<T>[] _list;
     private int _count;
     private readonly int _capacity;
 
-    public ParticleManager(int capacity, Action<Particle> updateParticle)
+    public ParticleManager(int capacity, Action<ParticleInstance<T>> updateParticle)
     {
         _capacity = capacity;
         _updateParticle = updateParticle;
-        _list = new Particle[capacity];
+        _list = new ParticleInstance<T>[capacity];
 
         for (int i = 0; i < capacity; i++)
-            _list[i] = new Particle();
+            _list[i] = new ParticleInstance<T>();
     }
 
     public void Update()
     {
         for (int i = 0; i < _count; i++)
         {
-            Particle p = _list[i];
+            ParticleInstance<T> p = _list[i];
             _updateParticle(p);
             p.PercentLife -= 1f / p.Duration;
 
             if (p.PercentLife < 0)
             {
-                Particle last = _list[_count - 1];
+                ParticleInstance<T> last = _list[_count - 1];
                 _list[i] = last;
                 _list[_count - 1] = p;
 
@@ -48,7 +48,7 @@ public class ParticleManager<T> : IParticleSystem<T>
 
     public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, Vector2 scale, T state, float theta = 0)
     {
-        Particle p;
+        ParticleInstance<T> p;
         if (_count < _capacity)
         {
             p = _list[_count];
@@ -73,21 +73,9 @@ public class ParticleManager<T> : IParticleSystem<T>
     {
         for (int i = 0; i < _count; i++)
         {
-            Particle p = _list[i];
+            ParticleInstance<T> p = _list[i];
             Vector2 origin = new(p.Texture.Width / 2f, p.Texture.Height / 2f);
             spriteBatch.Draw(p.Texture, p.Position, null, p.Tint, p.Orientation, origin, p.Scale, SpriteEffects.None, 0f);
         }
-    }
-
-    public class Particle
-    {
-        public Texture2D Texture { get; set; }
-        public Vector2 Position { get; set; }
-        public float Orientation { get; set; }
-        public Vector2 Scale { get; set; }
-        public Color Tint { get; set; }
-        public float Duration { get; set; }
-        public float PercentLife { get; set; }
-        public T State { get; set; }
     }
 }
