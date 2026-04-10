@@ -5,6 +5,10 @@ namespace GMDCore.Input;
 
 public class MouseInfo
 {
+    private MouseState _sampledState;
+    private bool _leftPressedBuffer;
+    private bool _leftPressedThisTick;
+
     public MouseState PreviousState { get; private set; }
     public MouseState CurrentState { get; private set; }
 
@@ -12,32 +16,37 @@ public class MouseInfo
     {
         PreviousState = new MouseState();
         CurrentState = Mouse.GetState();
+        _sampledState = CurrentState;
     }
 
-    /// <summary>
-    /// Full update: saves previous state and samples fresh hardware state.
-    /// Called once per logic tick (60Hz).
-    /// </summary>
-    public void Update()
+    public void SampleFrame()
+    {
+        var nextState = Mouse.GetState();
+
+        if (_sampledState.LeftButton == ButtonState.Released &&
+            nextState.LeftButton == ButtonState.Pressed)
+        {
+            _leftPressedBuffer = true;
+        }
+
+        _sampledState = nextState;
+    }
+
+    public void AdvanceLogicTick()
     {
         PreviousState = CurrentState;
-        CurrentState = Mouse.GetState();
+        CurrentState = _sampledState;
+        _leftPressedThisTick = _leftPressedBuffer;
+        _leftPressedBuffer = false;
     }
 
-    /// <summary>
-    /// Samples only the current state without advancing previous.
-    /// Called every render frame to keep the cursor responsive between logic ticks.
-    /// </summary>
-    public void UpdatePositionOnly() => CurrentState = Mouse.GetState();
-
-    public int X        => CurrentState.X;
-    public int Y        => CurrentState.Y;
-    public Point Position => CurrentState.Position;
+    public int X => _sampledState.X;
+    public int Y => _sampledState.Y;
+    public Point Position => _sampledState.Position;
 
     public bool IsLeftButtonDown
-        => CurrentState.LeftButton == ButtonState.Pressed;
+        => _sampledState.LeftButton == ButtonState.Pressed;
 
     public bool WasLeftButtonJustPressed
-        => CurrentState.LeftButton == ButtonState.Pressed &&
-           PreviousState.LeftButton == ButtonState.Released;
+        => _leftPressedThisTick;
 }

@@ -1,8 +1,9 @@
 namespace GMDCore.Input;
 
 /// <summary>
-/// Owns one instance of each input device and advances them together each logic tick.
-/// Inject into the systems that need it rather than reading hardware state directly.
+/// Owns one instance of each input device.
+/// Raw hardware is sampled every render frame, then buffered edge events are
+/// exposed to gameplay on the next fixed logic tick.
 /// </summary>
 public class InputManager
 {
@@ -10,10 +11,17 @@ public class InputManager
     public MouseInfo    Mouse    { get; } = new();
     public GamePadInfo  GamePad  { get; } = new();
 
-    public void Update()
+    public void SampleFrame()
     {
-        Keyboard.Update();
-        Mouse.Update();
-        GamePad.Update();
+        Keyboard.SampleFrame();
+        Mouse.SampleFrame();
+        GamePad.SampleFrame();
+    }
+
+    public void AdvanceLogicTick()
+    {
+        Keyboard.AdvanceLogicTick();
+        Mouse.AdvanceLogicTick();
+        GamePad.AdvanceLogicTick();
     }
 }

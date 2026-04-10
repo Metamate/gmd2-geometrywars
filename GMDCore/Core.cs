@@ -51,7 +51,7 @@ public abstract class Core : Game
 
     protected virtual void OnUpdateInput()
     {
-        Input.Update();
+        Input.AdvanceLogicTick();
     }
 
     // Override to provide a game-specific exit condition.
@@ -67,6 +67,8 @@ public abstract class Core : Game
             base.Update(gameTime);
             return;
         }
+
+        Input.SampleFrame();
 
         // 60Hz fixed logic step
         const double timeStep = 1.0 / 60.0;

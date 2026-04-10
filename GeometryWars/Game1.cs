@@ -36,8 +36,6 @@ public sealed class Game1 : Core
     protected override void Update(GameTime gameTime)
     {
         Runtime.Performance.Update(gameTime);
-        Runtime.Input.Mouse.UpdatePositionOnly();
-
         base.Update(gameTime);
     }
 

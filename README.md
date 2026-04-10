@@ -39,6 +39,8 @@ Its job is to:
 
 Mutable runtime state is grouped into small service objects and exposed through [PlayContext](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Services/PlayContext.cs), which is passed into gameplay code.
 
+The shell samples raw input every rendered frame, but gameplay still runs on a fixed 60 Hz step. Button presses/releases are buffered so quick taps are still visible to the next logic tick.
+
 ## State Layer
 
 [PlayState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/States/PlayState.cs) represents the main gameplay state.
