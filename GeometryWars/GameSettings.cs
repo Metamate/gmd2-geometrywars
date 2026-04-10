@@ -11,7 +11,7 @@ public static class GameSettings
     public static class Performance
     {
         public const int MaxParticles = 1024 * 20;
-        public const int MaxGridPoints = 1600;
+        public const int MaxGridPoints = 1024 * 2;
         public const int MaxEntities = 200;
     }
 
@@ -69,7 +69,7 @@ public static class GameSettings
 
     public static class Physics
     {
-        public const float BulletGridForce = 0.5f;
+        public const float BulletGridForce = 1.0f;
         public const float BulletGridRadius = 80f;
         public const float ParticleGravityForce = 10000f;
         public const float ParticleOrbitalForce = 45f;
