@@ -41,6 +41,8 @@ public class ParticleManager<T> : IParticleSystem<T>
         }
     }
 
+    public void Clear() => _count = 0;
+
     public void CreateParticle(Texture2D texture, Vector2 position, Color tint, float duration, float scale, T state, float theta = 0)
     {
         CreateParticle(texture, position, tint, duration, new Vector2(scale), state, theta);

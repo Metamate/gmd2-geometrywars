@@ -20,6 +20,11 @@ public sealed class GameOverState : GameStateBase
         _session = session;
     }
 
+    public override void Exit()
+    {
+        _session.Shutdown();
+    }
+
     public override void Update()
     {
         _session.Grid.Update();

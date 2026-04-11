@@ -13,6 +13,7 @@ public sealed class BulletSpawner : IBulletSpawner
 {
     private readonly EntityWorld _world;
     private ObjectPool<Entity> _pool;
+    private bool _isShutdown;
 
     public BulletSpawner(EntityWorld world)
     {
@@ -30,6 +31,9 @@ public sealed class BulletSpawner : IBulletSpawner
 
     public void SpawnBullet(Vector2 position, Vector2 velocity)
     {
+        if (_isShutdown)
+            throw new InvalidOperationException("Bullet spawner cannot spawn after shutdown.");
+
         if (_pool == null)
             throw new InvalidOperationException("Bullet factory has not been configured.");
 
@@ -51,5 +55,14 @@ public sealed class BulletSpawner : IBulletSpawner
     {
         if (entity.HasComponent<BulletTag>())
             _pool?.Return(entity);
+    }
+
+    public void Shutdown()
+    {
+        if (_isShutdown)
+            return;
+
+        _world.EntityRemoved -= HandleEntityRemoved;
+        _isShutdown = true;
     }
 }

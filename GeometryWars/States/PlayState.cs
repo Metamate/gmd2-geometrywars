@@ -29,6 +29,12 @@ public sealed class PlayState : GameStateBase
         MediaPlayer.Play(_context.Assets.Music);
     }
 
+    public override void Exit()
+    {
+        _session?.Shutdown();
+        _session = null;
+    }
+
     public override void Update()
     {
         if (_context.Controller.WasPausePressed)
@@ -44,7 +50,9 @@ public sealed class PlayState : GameStateBase
         if (_session.Score.IsGameOver && !_session.IsPlayerRespawning)
         {
             _session.Score.SaveHighScore();
-            _game.SetState(new GameOverState(_game, _context, _session));
+            var completedSession = _session;
+            _session = null;
+            _game.SetState(new GameOverState(_game, _context, completedSession));
         }
     }
 

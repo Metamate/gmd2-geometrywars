@@ -20,6 +20,8 @@ public sealed class PlaySession
     public EnemyDirector Spawner { get; }
     public Entity Player { get; }
     private readonly RespawnState _playerRespawnState;
+    private bool _isShutdown;
+
     public bool IsPlayerRespawning => _playerRespawnState.IsRespawning;
 
     public PlaySession(PlayContext context, Rectangle viewportBounds)
@@ -52,11 +54,13 @@ public sealed class PlaySession
 
     public void Update()
     {
-        Score.Update();
-        Entities.Update();
-        Spawner.Update(!IsPlayerRespawning, () => Player.Position);
-        Grid.Update();
-        Particles.Update();
+        if (_isShutdown)
+            throw new InvalidOperationException("PlaySession cannot update after shutdown.");
+
+        UpdateSessionRules();
+        UpdateWorld();
+        UpdateSpawning();
+        UpdateVisualSystems();
     }
 
     private void HandlePlayerDied()
@@ -64,6 +68,40 @@ public sealed class PlaySession
         Entities.KillAllEnemies();
         Entities.KillAllBlackHoles();
         Spawner.Reset();
+    }
+
+    public void Shutdown()
+    {
+        if (_isShutdown)
+            return;
+
+        _playerRespawnState.Died -= HandlePlayerDied;
+        Entities.Clear();
+        BulletSpawner.Shutdown();
+        Particles.Clear();
+        _isShutdown = true;
+    }
+
+    private void UpdateSessionRules()
+    {
+        Score.Update();
+        Spawner.Update(!IsPlayerRespawning, () => Player.Position);
+    }
+
+    private void UpdateWorld()
+    {
+        Entities.Update();
+    }
+
+    private void UpdateSpawning()
+    {
+        Spawner.Update(!IsPlayerRespawning, () => Player.Position);
+    }
+
+    private void UpdateVisualSystems()
+    {
+        Grid.Update();
+        Particles.Update();
     }
 }
 
