@@ -40,6 +40,11 @@ internal sealed class CollisionSystem
                 {
                     a.Entity.OnCollision(b.Entity);
                     b.Entity.OnCollision(a.Entity);
+
+                    // Stop dispatching further pairs for an entity that was
+                    // consumed or disabled by this collision.
+                    if (a.Entity.IsExpired || !a.Collider.IsActive)
+                        break;
                 }
             }
         }
