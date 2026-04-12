@@ -100,6 +100,10 @@ Examples:
 
 This is an important teaching point: entities should emerge from composition rather than from deep inheritance trees.
 
+## Typed Definitions
+
+The project uses small typed definition records in [GameplayDefinitions.cs](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Definitions/GameplayDefinitions.cs) for content variants such as the player, bullets, enemy types, and black holes. They group related tuning values by gameplay object and keep balancing data out of component code while letting the factory compose entities from shared reusable definitions.
+
 ## Component Model
 
 All components inherit from [Component](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Components/Component.cs).

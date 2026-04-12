@@ -11,13 +11,15 @@ namespace GeometryWars.Components.Input;
 public sealed class ApplyMovementInput : Component
 {
     private readonly GameController _controller;
+    private readonly float _moveSpeed;
     private RespawnState _respawnState;
     private Rigidbody _rigidbody;
     private Transform _transform;
 
-    public ApplyMovementInput(GameController controller)
+    public ApplyMovementInput(GameController controller, float moveSpeed)
     {
         _controller = controller;
+        _moveSpeed = moveSpeed;
     }
 
     public override void OnStart(Entity owner)
@@ -32,7 +34,7 @@ public sealed class ApplyMovementInput : Component
         if (_respawnState?.IsRespawning == true)
             return;
 
-        _rigidbody.AddForce(GameSettings.Player.Speed * _controller.Movement);
+        _rigidbody.AddForce(_moveSpeed * _controller.Movement);
 
         if (!_controller.IsShooting && _rigidbody.Velocity.LengthSquared() > 0.01f)
             _transform.Orientation = _rigidbody.Velocity.ToAngle();

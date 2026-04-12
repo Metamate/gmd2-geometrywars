@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using GeometryWars.Definitions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -31,6 +32,19 @@ public sealed class GameAssets
     public SoundEffect GetRandomExplosion() => _explosions[Random.Shared.Next(_explosions.Length)];
     public SoundEffect GetRandomShot() => _shots[Random.Shared.Next(_shots.Length)];
     public SoundEffect GetRandomSpawn() => _spawns[Random.Shared.Next(_spawns.Length)];
+
+    public Texture2D GetTexture(SpriteId spriteId) => spriteId switch
+    {
+        SpriteId.Player => Player,
+        SpriteId.Seeker => Seeker,
+        SpriteId.Wanderer => Wanderer,
+        SpriteId.Bullet => Bullet,
+        SpriteId.BlackHole => BlackHole,
+        SpriteId.LineParticle => LineParticle,
+        SpriteId.Glow => Glow,
+        SpriteId.Pointer => Pointer,
+        _ => throw new ArgumentOutOfRangeException(nameof(spriteId), spriteId, "Unknown sprite id.")
+    };
 
     public void Load(ContentManager content)
     {

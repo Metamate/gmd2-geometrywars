@@ -1,6 +1,7 @@
 using System;
 using GMDCore.ECS.Components;
 using GMDCore.Physics;
+using GeometryWars.Definitions;
 using GMDCore.ECS;
 using GeometryWars.Services;
 using GeometryWars.Utils;
@@ -11,6 +12,7 @@ namespace GeometryWars.Components.AI;
 // Steers the owner in semi-random directions.
 public sealed class Wander : Component
 {
+    private readonly WanderEnemyDefinition _definition;
     private readonly FrameInfo _frame;
     private readonly Vector2 _spriteSize;
     private float _direction;
@@ -19,10 +21,11 @@ public sealed class Wander : Component
     private Transform _transform;
     private Rigidbody _rigidbody;
 
-    public Wander(FrameInfo frame, Vector2 spriteSize)
+    public Wander(FrameInfo frame, Vector2 spriteSize, WanderEnemyDefinition definition)
     {
         _frame = frame;
         _spriteSize = spriteSize;
+        _definition = definition;
         _direction = Random.Shared.NextFloat(0, MathHelper.TwoPi);
     }
 
@@ -36,9 +39,9 @@ public sealed class Wander : Component
     {
         if (_stepCounter-- <= 0)
         {
-            _stepCounter = GameSettings.Enemy.WandererStepsPerTick;
+            _stepCounter = _definition.StepsPerTick;
 
-            _direction += Random.Shared.NextFloat(-GameSettings.Enemy.WandererTurnRate, GameSettings.Enemy.WandererTurnRate);
+            _direction += Random.Shared.NextFloat(-_definition.TurnRate, _definition.TurnRate);
             _direction = MathHelper.WrapAngle(_direction);
 
             var bounds = _frame.Viewport.Bounds;
@@ -51,8 +54,8 @@ public sealed class Wander : Component
             }
         }
 
-        _rigidbody.AddForce(MathUtil.FromPolar(_direction, GameSettings.Enemy.WandererVelocity));
-        _transform.Orientation -= GameSettings.Enemy.WandererOrientationDecay;
+        _rigidbody.AddForce(MathUtil.FromPolar(_direction, _definition.Velocity));
+        _transform.Orientation -= _definition.OrientationDecay;
     }
 }
 

@@ -17,7 +17,6 @@ public static class GameSettings
 
     public static class Player
     {
-        public const float Speed = 8f;
         public const int StartingLives = 3;
         public const int RespawnFrames = 120;
         public const int GameOverFrames = 120;
@@ -25,29 +24,8 @@ public static class GameSettings
         public const int MaxMultiplier = 20;
     }
 
-    public static class Bullets
-    {
-        public const int ShotCooldown = 6;
-        public const float Speed = 20f;
-        public const float Spread = 0.04f;
-        public const float OffsetX = 25f;
-        public const float OffsetY = 8f;
-        public const float ColliderRadius = 10f;
-    }
-
     public static class Enemy
     {
-        public const int SpawnDelay = 60;
-        public const float Damping = 0.8f;
-        public const float WandererTurnRate = 0.1f;
-        public const float WandererVelocity = 0.4f;
-        public const float WandererOrientationDecay = 0.05f;
-        public const int WandererStepsPerTick = 6;
-
-        public const int SeekerPointValue = 2;
-        public const float SeekerAcceleration = 1f;
-        public const int WandererPointValue = 1;
-
         public static class Spawning
         {
             public const float ChanceStart = 60f;
@@ -59,10 +37,6 @@ public static class GameSettings
 
     public static class Hazards
     {
-        public const int BlackHoleHitpoints = 10;
-        public const float BlackHoleGravityRange = 250f;
-        public const float BlackHoleGravityForce = 2f;
-        public const float BlackHoleGridRange = 200f;
         public const float BlackHoleSpawnChance = 200f;
         public const int MaxBlackHoles = 5;
     }
@@ -81,14 +55,8 @@ public static class GameSettings
 
     public static class Visuals
     {
-        public const int BulletDeathParticles = 30;
-        public const int PlayerDeathParticles = 1200;
-        public const int EnemyDeathParticles = 120;
-        public const int BlackHoleHitParticles = 150;
         public const float DeathParticleSpeed = 18f;
         public const float DeathParticleLife = 190f;
         public const float DeathParticleSize = 1.5f;
-        public const float BlackHoleHitParticleMinSpeed = 8f;
-        public const float BlackHoleHitParticleMaxSpeed = 16f;
     }
 }

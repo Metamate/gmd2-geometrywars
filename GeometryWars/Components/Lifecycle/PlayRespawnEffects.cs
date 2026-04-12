@@ -1,5 +1,6 @@
 using System;
 using GMDCore.ECS.Components;
+using GeometryWars.Definitions;
 using GMDCore.ECS;
 using GMDCore.Particles;
 using GeometryWars.Systems;
@@ -12,6 +13,7 @@ namespace GeometryWars.Components.Lifecycle;
 // Plays the death burst and respawn shockwave around the owner.
 public sealed class PlayRespawnEffects : Component
 {
+    private readonly PlayerDefinition _definition;
     private readonly IParticleSystem<ParticleState> _particles;
     private readonly IGridField _grid;
     private readonly Texture2D _lineParticle;
@@ -26,17 +28,18 @@ public sealed class PlayRespawnEffects : Component
         _respawnState.Respawned += PlayRespawnAtOwner;
     }
 
-    public PlayRespawnEffects(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle)
+    public PlayRespawnEffects(IParticleSystem<ParticleState> particles, IGridField grid, Texture2D lineParticle, PlayerDefinition definition)
     {
         _particles = particles;
         _grid = grid;
         _lineParticle = lineParticle;
+        _definition = definition;
     }
 
     private void PlayDeath(Vector2 position)
     {
         Color yellow = new(0.8f, 0.8f, 0.4f);
-        for (int i = 0; i < GameSettings.Visuals.PlayerDeathParticles; i++)
+        for (int i = 0; i < _definition.DeathParticleCount; i++)
         {
             float speed = GameSettings.Visuals.DeathParticleSpeed * (1f - 1 / Random.Shared.NextFloat(1f, 10f));
             Color color = Color.Lerp(Color.White, yellow, Random.Shared.NextFloat(0, 1));
