@@ -60,8 +60,6 @@ public sealed record BlackHoleDefinition(
 
 public static class GameplayDefinitions
 {
-    // One shared definition object per gameplay variant keeps the balancing data
-    // grouped by content type instead of scattering it across global settings.
     public static PlayerDefinition Player { get; } = new(
         SpriteId.Player,
         MoveSpeed: 8f,
