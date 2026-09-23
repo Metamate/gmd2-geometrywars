@@ -13,10 +13,11 @@ The codebase is designed to support discussion around:
 
 ## Repository Layout
 
-The repository is intentionally split into two projects:
+The repository is intentionally split into two projects, plus a content builder:
 
 - `GMDCore` contains reusable engine-style code such as the game shell, input handling, the entity/component model, generic physics/collision primitives, particle infrastructure, and pooling.
-- `GeometryWars` contains the actual game: states, gameplay systems, entity recipe composition, assets, and Geometry Wars-specific components and rules.
+- `GeometryWars` contains the actual game: states, gameplay systems, entity recipe composition, and Geometry Wars-specific components and rules.
+- `Content` contains the game's raw assets (textures, fonts, sounds, shaders) and the C# rules that build them (see [Content](#content)).
 
 ## Architecture Overview
 
@@ -37,23 +38,23 @@ This means the code is intentionally split between:
 
 ## Runtime Layer
 
-[Game1](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Game1.cs) is the MonoGame application root.
+[Game1](GeometryWars/Game1.cs) is the MonoGame application root.
 
 Its job is to:
 - update frame timing, input, assets, audio, and performance tracking
 - own the active game state
 - coordinate drawing
 
-Mutable runtime state is grouped into small service objects and exposed through [PlayContext](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Services/PlayContext.cs), which is passed into gameplay code.
+Mutable runtime state is grouped into small service objects and exposed through [PlayContext](GeometryWars/Services/PlayContext.cs), which is passed into gameplay code.
 
 The shell samples raw input every rendered frame, but gameplay still runs on a fixed 60 Hz step. Button presses/releases are buffered so quick taps are still visible to the next logic tick.
 
 ## State Layer
 
-[PlayState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/States/PlayState.cs) represents the main gameplay state.
+[PlayState](GeometryWars/States/PlayState.cs) represents the main gameplay state.
 
 Its job is to:
-- create a new [PlaySession](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/PlaySession.cs)
+- create a new [PlaySession](GeometryWars/Systems/PlaySession.cs)
 - update pause/debug flow
 - switch to game-over state when a run ends
 - draw world and HUD separately
@@ -62,7 +63,7 @@ This keeps menu/state transitions outside the entity/component layer.
 
 ## Session Layer
 
-[PlaySession](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/PlaySession.cs) owns the mutable state for one run.
+[PlaySession](GeometryWars/Systems/PlaySession.cs) owns the mutable state for one run.
 
 It builds:
 - the score tracker
@@ -77,19 +78,19 @@ It builds:
 
 ## World Layer
 
-[EntityWorld](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityWorld.cs) coordinates:
+[EntityWorld](GeometryWars/Systems/EntityWorld.cs) coordinates:
 - entity registration and updates
 - collision handling
 - pending additions during update
 - deferred entity removal
 
-Supporting classes such as [EntityCatalog](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityCatalog.cs) and [CollisionSystem](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/CollisionSystem.cs) keep those responsibilities separated.
+Supporting classes such as [EntityCatalog](GeometryWars/Systems/EntityCatalog.cs) and [CollisionSystem](GeometryWars/Systems/CollisionSystem.cs) keep those responsibilities separated.
 
-Projectile pooling lives in [BulletSpawner](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/BulletSpawner.cs), so the world can stay focused on generic entity lifetime and update flow.
+Projectile pooling lives in [BulletSpawner](GeometryWars/Systems/BulletSpawner.cs), so the world can stay focused on generic entity lifetime and update flow.
 
 ## Entity Composition
 
-[EntityFactory](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityFactory.cs) defines the entity recipes.
+[EntityFactory](GeometryWars/Systems/EntityFactory.cs) defines the entity recipes.
 
 This is where you can read how an entity is assembled.
 
@@ -102,11 +103,11 @@ This is an important teaching point: entities should emerge from composition rat
 
 ## Typed Definitions
 
-The project uses small typed definition records in [GameplayDefinitions.cs](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Definitions/GameplayDefinitions.cs) for content variants such as the player, bullets, enemy types, and black holes. They group related tuning values by gameplay object and keep balancing data out of component code while letting the factory compose entities from shared reusable definitions.
+The project uses small typed definition records in [GameplayDefinitions.cs](GeometryWars/Definitions/GameplayDefinitions.cs) for content variants such as the player, bullets, enemy types, and black holes. They group related tuning values by gameplay object and keep balancing data out of component code while letting the factory compose entities from shared reusable definitions.
 
 ## Component Model
 
-All components inherit from [Component](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Components/Component.cs).
+All components inherit from [Component](GMDCore/ECS/Components/Component.cs).
 
 The lifecycle is callback-based:
 - `OnAdded`
@@ -119,7 +120,7 @@ The lifecycle is callback-based:
 - `Draw`
 - `OnRemoved`
 
-[Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Entity.cs) runs those phases in a fixed order every frame.
+[Entity](GMDCore/ECS/Entity.cs) runs those phases in a fixed order every frame.
 
 `OnRemoved` is intended for engine-level cleanup such as unregistering subscriptions when an entity leaves the world. It is not the same as a gameplay destruction event like `Destroyable.Destroyed`.
 
@@ -176,13 +177,13 @@ For a larger game, prefer this rule:
 The project uses small local events inside an entity's component graph, not a global event bus.
 
 Examples:
-- [Health](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Combat/Health.cs) publishes `Damaged` and `Depleted`
-- [RespawnState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/RespawnState.cs) publishes `Died` and `Respawned`
+- [Health](GeometryWars/Components/Combat/Health.cs) publishes `Damaged` and `Depleted`
+- [RespawnState](GeometryWars/Components/Lifecycle/RespawnState.cs) publishes `Died` and `Respawned`
 
 This allows reactive components such as:
-- [PlayHitParticlesOnDamage](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Visuals/PlayHitParticlesOnDamage.cs)
-- [DestroyWhenHealthDepleted](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/DestroyWhenHealthDepleted.cs)
-- [PlayRespawnEffects](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Components/Lifecycle/PlayRespawnEffects.cs)
+- [PlayHitParticlesOnDamage](GeometryWars/Components/Visuals/PlayHitParticlesOnDamage.cs)
+- [DestroyWhenHealthDepleted](GeometryWars/Components/Lifecycle/DestroyWhenHealthDepleted.cs)
+- [PlayRespawnEffects](GeometryWars/Components/Lifecycle/PlayRespawnEffects.cs)
 
 to react without tightly coupling everything together.
 
@@ -193,9 +194,9 @@ The intent is to show a simple use of events where they help, without making con
 Not every subsystem uses the same style on purpose.
 
 - `Entity` and gameplay components favor clarity and composition.
-- [Grid](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/Grid.cs) is a denser simulation-oriented subsystem that favors flat arrays and tight loops for better data locality.
-- [ParticleManager](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/Particles/ParticleManager.cs) is a specialized high-volume visual system rather than a normal entity/component workflow.
-- [GameAssets](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Services/GameAssets.cs) acts as a simple shared asset catalog, which is a lightweight example of a flyweight-style resource holder.
+- [Grid](GeometryWars/Systems/Grid.cs) is a denser simulation-oriented subsystem that favors flat arrays and tight loops for better data locality.
+- [ParticleManager](GMDCore/Particles/ParticleManager.cs) is a specialized high-volume visual system rather than a normal entity/component workflow.
+- [GameAssets](GeometryWars/Services/GameAssets.cs) acts as a simple shared asset catalog, which is a lightweight example of a flyweight-style resource holder.
 
 ## Design Guidelines For Students
 
@@ -215,11 +216,38 @@ When adding or changing gameplay code, prefer these rules:
 
 If you are new to the project, a good reading order is:
 
-1. [Game1](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Game1.cs)
-2. [PlayState](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/States/PlayState.cs)
-3. [PlaySession](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/PlaySession.cs)
-4. [EntityFactory](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GeometryWars/Systems/EntityFactory.cs)
-5. [Entity](C:/Users/jakik/projects/GMDPlayground/gmd2-geometrywars/GMDCore/ECS/Entity.cs)
+1. [Game1](GeometryWars/Game1.cs)
+2. [PlayState](GeometryWars/States/PlayState.cs)
+3. [PlaySession](GeometryWars/Systems/PlaySession.cs)
+4. [EntityFactory](GeometryWars/Systems/EntityFactory.cs)
+5. [Entity](GMDCore/ECS/Entity.cs)
 6. a few concrete components from `Components/`
 
 That gives the clearest top-down view of how the game fits together.
+
+## Content
+
+The game's raw assets are built by the **content builder** (MonoGame 3.8.5+):
+
+```text
+Content/
+├── Assets/                  # The raw assets: textures, fonts, sounds, shaders
+├── Builder/Builder.cs       # The rules for building the assets, in C#
+├── BuildContent.targets     # Runs the builder when the game project builds
+└── Content.csproj
+```
+
+There is no `.mgcb` file and no MGCB Editor. `Builder.cs` decides how each kind of asset is
+processed. The game project imports `BuildContent.targets`, so building the game also builds
+the assets into its output folder, where `Content.Load` finds them.
+
+To add an asset, put it in `Content/Assets` and, if no existing rule matches it, add a rule
+in `Builder.cs`.
+
+## Running
+
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
+
+```sh
+dotnet run --project GeometryWars
+```
