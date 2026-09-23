@@ -11,12 +11,28 @@ The codebase is designed to support discussion around:
 - simple event-driven decoupling
 - rendering and post-processing
 
+## Steps
+
+The game is built up in steps. Each step is a separate project that builds on the previous
+one, mostly by adding components to the entity recipes in `EntityFactory` and the systems
+they need. Compare two neighbouring steps (e.g. with a diff tool) to see exactly what changed.
+
+| Step | Topic | What's new |
+| --- | --- | --- |
+| `GeometryWars0` | Entities & components | The player ship, composed from components: sprite, rigidbody, movement input, clamp to screen |
+| `GeometryWars1` | Shooting & Object Pool | A weapon component and bullets reused from an object pool |
+| `GeometryWars2` | Enemies & collisions | Seeker and wanderer AI, the collision system, score, lives, respawning and game over |
+| `GeometryWars3` | Particles | A particle manager for thousands of short-lived particles: exhaust, explosions, bullet sparks |
+| `GeometryWars4` | Grid & black holes | The spring grid (data-oriented, flat arrays) and black holes that pull everything in |
+| `GeometryWars5` | Bloom | Post-processing shaders for the neon glow |
+| `GeometryWars6` | Audio | Music and sound effects (the finished game) |
+
 ## Repository Layout
 
-The repository is intentionally split into two projects, plus a content builder:
+The repository is intentionally split into a core library and the game, plus a content builder:
 
 - `GMDCore` contains reusable engine-style code such as the game shell, input handling, the entity/component model, generic physics/collision primitives, particle infrastructure, and pooling.
-- `GeometryWars` contains the actual game: states, gameplay systems, entity recipe composition, and Geometry Wars-specific components and rules.
+- `GeometryWars0`–`GeometryWars6` contain the actual game, built up step by step (see [Steps](#steps)): states, gameplay systems, entity recipe composition, and Geometry Wars-specific components and rules. `GeometryWars6` is the finished game, and the one this walkthrough describes.
 - `Content` contains the game's raw assets (textures, fonts, sounds, shaders) and the C# rules that build them (see [Content](#content)).
 
 ## Architecture Overview
@@ -38,23 +54,23 @@ This means the code is intentionally split between:
 
 ## Runtime Layer
 
-[Game1](GeometryWars/Game1.cs) is the MonoGame application root.
+[Game1](GeometryWars6/Game1.cs) is the MonoGame application root.
 
 Its job is to:
 - update frame timing, input, assets, audio, and performance tracking
 - own the active game state
 - coordinate drawing
 
-Mutable runtime state is grouped into small service objects and exposed through [PlayContext](GeometryWars/Services/PlayContext.cs), which is passed into gameplay code.
+Mutable runtime state is grouped into small service objects and exposed through [PlayContext](GeometryWars6/Services/PlayContext.cs), which is passed into gameplay code.
 
 The shell samples raw input every rendered frame, but gameplay still runs on a fixed 60 Hz step. Button presses/releases are buffered so quick taps are still visible to the next logic tick.
 
 ## State Layer
 
-[PlayState](GeometryWars/States/PlayState.cs) represents the main gameplay state.
+[PlayState](GeometryWars6/States/PlayState.cs) represents the main gameplay state.
 
 Its job is to:
-- create a new [PlaySession](GeometryWars/Systems/PlaySession.cs)
+- create a new [PlaySession](GeometryWars6/Systems/PlaySession.cs)
 - update pause/debug flow
 - switch to game-over state when a run ends
 - draw world and HUD separately
@@ -63,7 +79,7 @@ This keeps menu/state transitions outside the entity/component layer.
 
 ## Session Layer
 
-[PlaySession](GeometryWars/Systems/PlaySession.cs) owns the mutable state for one run.
+[PlaySession](GeometryWars6/Systems/PlaySession.cs) owns the mutable state for one run.
 
 It builds:
 - the score tracker
@@ -78,19 +94,19 @@ It builds:
 
 ## World Layer
 
-[EntityWorld](GeometryWars/Systems/EntityWorld.cs) coordinates:
+[EntityWorld](GeometryWars6/Systems/EntityWorld.cs) coordinates:
 - entity registration and updates
 - collision handling
 - pending additions during update
 - deferred entity removal
 
-Supporting classes such as [EntityCatalog](GeometryWars/Systems/EntityCatalog.cs) and [CollisionSystem](GeometryWars/Systems/CollisionSystem.cs) keep those responsibilities separated.
+Supporting classes such as [EntityCatalog](GeometryWars6/Systems/EntityCatalog.cs) and [CollisionSystem](GeometryWars6/Systems/CollisionSystem.cs) keep those responsibilities separated.
 
-Projectile pooling lives in [BulletSpawner](GeometryWars/Systems/BulletSpawner.cs), so the world can stay focused on generic entity lifetime and update flow.
+Projectile pooling lives in [BulletSpawner](GeometryWars6/Systems/BulletSpawner.cs), so the world can stay focused on generic entity lifetime and update flow.
 
 ## Entity Composition
 
-[EntityFactory](GeometryWars/Systems/EntityFactory.cs) defines the entity recipes.
+[EntityFactory](GeometryWars6/Systems/EntityFactory.cs) defines the entity recipes.
 
 This is where you can read how an entity is assembled.
 
@@ -103,7 +119,7 @@ This is an important teaching point: entities should emerge from composition rat
 
 ## Typed Definitions
 
-The project uses small typed definition records in [GameplayDefinitions.cs](GeometryWars/Definitions/GameplayDefinitions.cs) for content variants such as the player, bullets, enemy types, and black holes. They group related tuning values by gameplay object and keep balancing data out of component code while letting the factory compose entities from shared reusable definitions.
+The project uses small typed definition records in [GameplayDefinitions.cs](GeometryWars6/Definitions/GameplayDefinitions.cs) for content variants such as the player, bullets, enemy types, and black holes. They group related tuning values by gameplay object and keep balancing data out of component code while letting the factory compose entities from shared reusable definitions.
 
 ## Component Model
 
@@ -177,13 +193,13 @@ For a larger game, prefer this rule:
 The project uses small local events inside an entity's component graph, not a global event bus.
 
 Examples:
-- [Health](GeometryWars/Components/Combat/Health.cs) publishes `Damaged` and `Depleted`
-- [RespawnState](GeometryWars/Components/Lifecycle/RespawnState.cs) publishes `Died` and `Respawned`
+- [Health](GeometryWars6/Components/Combat/Health.cs) publishes `Damaged` and `Depleted`
+- [RespawnState](GeometryWars6/Components/Lifecycle/RespawnState.cs) publishes `Died` and `Respawned`
 
 This allows reactive components such as:
-- [PlayHitParticlesOnDamage](GeometryWars/Components/Visuals/PlayHitParticlesOnDamage.cs)
-- [DestroyWhenHealthDepleted](GeometryWars/Components/Lifecycle/DestroyWhenHealthDepleted.cs)
-- [PlayRespawnEffects](GeometryWars/Components/Lifecycle/PlayRespawnEffects.cs)
+- [PlayHitParticlesOnDamage](GeometryWars6/Components/Visuals/PlayHitParticlesOnDamage.cs)
+- [DestroyWhenHealthDepleted](GeometryWars6/Components/Lifecycle/DestroyWhenHealthDepleted.cs)
+- [PlayRespawnEffects](GeometryWars6/Components/Lifecycle/PlayRespawnEffects.cs)
 
 to react without tightly coupling everything together.
 
@@ -194,9 +210,9 @@ The intent is to show a simple use of events where they help, without making con
 Not every subsystem uses the same style on purpose.
 
 - `Entity` and gameplay components favor clarity and composition.
-- [Grid](GeometryWars/Systems/Grid.cs) is a denser simulation-oriented subsystem that favors flat arrays and tight loops for better data locality.
+- [Grid](GeometryWars6/Systems/Grid.cs) is a denser simulation-oriented subsystem that favors flat arrays and tight loops for better data locality.
 - [ParticleManager](GMDCore/Particles/ParticleManager.cs) is a specialized high-volume visual system rather than a normal entity/component workflow.
-- [GameAssets](GeometryWars/Services/GameAssets.cs) acts as a simple shared asset catalog, which is a lightweight example of a flyweight-style resource holder.
+- [GameAssets](GeometryWars6/Services/GameAssets.cs) acts as a simple shared asset catalog, which is a lightweight example of a flyweight-style resource holder.
 
 ## Design Guidelines For Students
 
@@ -216,10 +232,10 @@ When adding or changing gameplay code, prefer these rules:
 
 If you are new to the project, a good reading order is:
 
-1. [Game1](GeometryWars/Game1.cs)
-2. [PlayState](GeometryWars/States/PlayState.cs)
-3. [PlaySession](GeometryWars/Systems/PlaySession.cs)
-4. [EntityFactory](GeometryWars/Systems/EntityFactory.cs)
+1. [Game1](GeometryWars6/Game1.cs)
+2. [PlayState](GeometryWars6/States/PlayState.cs)
+3. [PlaySession](GeometryWars6/Systems/PlaySession.cs)
+4. [EntityFactory](GeometryWars6/Systems/EntityFactory.cs)
 5. [Entity](GMDCore/ECS/Entity.cs)
 6. a few concrete components from `Components/`
 
@@ -227,7 +243,7 @@ That gives the clearest top-down view of how the game fits together.
 
 ## Content
 
-The game's raw assets are built by the **content builder** (MonoGame 3.8.5+):
+All steps share the same raw assets, built by the **content builder** (MonoGame 3.8.5+):
 
 ```text
 Content/
@@ -238,7 +254,7 @@ Content/
 ```
 
 There is no `.mgcb` file and no MGCB Editor. `Builder.cs` decides how each kind of asset is
-processed. The game project imports `BuildContent.targets`, so building the game also builds
+processed. Each step project imports `BuildContent.targets`, so building a step also builds
 the assets into its output folder, where `Content.Load` finds them.
 
 To add an asset, put it in `Content/Assets` and, if no existing rule matches it, add a rule
@@ -249,5 +265,5 @@ in `Builder.cs`.
 Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```sh
-dotnet run --project GeometryWars
+dotnet run --project GeometryWars6
 ```

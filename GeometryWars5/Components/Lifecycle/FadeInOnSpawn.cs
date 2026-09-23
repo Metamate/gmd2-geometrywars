@@ -1,0 +1,53 @@
+using GMDCore.ECS.Components;
+using GeometryWars5.Components.Visuals;
+using GMDCore.ECS;
+using Microsoft.Xna.Framework;
+
+namespace GeometryWars5.Components.Lifecycle;
+
+// Handles the initial fade-in and sibling activation after the spawn window.
+public sealed class FadeInOnSpawn : Component
+{
+    private int _timeUntilStart;
+    private readonly int _spawnDelay;
+    private Sprite _sprite;
+
+    public FadeInOnSpawn(int spawnDelay)
+    {
+        _spawnDelay = spawnDelay;
+        _timeUntilStart = spawnDelay;
+    }
+
+    // OnStart runs after the full component set has been assembled, so we can
+    // safely gate sibling behavior until the spawn window completes.
+    public override void OnStart(Entity owner)
+    {
+        _sprite = owner.GetComponent<Sprite>();
+
+        foreach (var comp in owner.Components)
+        {
+            if (comp == this || comp is Sprite || comp is Transform)
+                continue;
+
+            comp.IsActive = false;
+        }
+    }
+
+    public override void PreUpdate(Entity owner)
+    {
+        if (_timeUntilStart <= 0) return;
+
+        _timeUntilStart--;
+
+        if (_sprite != null)
+            _sprite.Tint = Color.White * (1 - _timeUntilStart / (float)_spawnDelay);
+
+        if (_timeUntilStart <= 0)
+        {
+            foreach (var comp in owner.Components)
+                comp.IsActive = true;
+
+            IsActive = false;
+        }
+    }
+}

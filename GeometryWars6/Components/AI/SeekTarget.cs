@@ -1,0 +1,38 @@
+using System;
+using GMDCore.ECS.Components;
+using GMDCore.Physics;
+using GMDCore.ECS;
+using GeometryWars6.Utils;
+using Microsoft.Xna.Framework;
+
+namespace GeometryWars6.Components.AI;
+
+// Steers the owner toward a target position.
+public sealed class SeekTarget : Component
+{
+    private readonly Func<Vector2> _getTargetPosition;
+    private readonly float _acceleration;
+    
+    private Transform _transform;
+    private Rigidbody _rigidbody;
+
+    public SeekTarget(Func<Vector2> getTargetPosition, float acceleration)
+    {
+        _getTargetPosition = getTargetPosition;
+        _acceleration = acceleration;
+    }
+
+    public override void OnStart(Entity owner)
+    {
+        _transform = owner.Transform;
+        _rigidbody = owner.RequireComponent<Rigidbody>();
+    }
+
+    public override void Update(Entity owner)
+    {
+        _rigidbody.AddForce((_getTargetPosition() - _transform.Position).ScaleTo(_acceleration));
+
+        if (_rigidbody.Velocity.LengthSquared() > 0.01f)
+            _transform.Orientation = _rigidbody.Velocity.ToAngle();
+    }
+}
