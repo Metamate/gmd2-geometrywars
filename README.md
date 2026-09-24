@@ -27,6 +27,21 @@ they need. Compare two neighbouring steps (e.g. with a diff tool) to see exactly
 | `GeometryWars5` | Bloom | Post-processing shaders for the neon glow |
 | `GeometryWars6` | Audio | Music and sound effects (the finished game) |
 
+## New in GMDCore
+
+Compared with the core in [gmd2-pokemon](https://github.com/Metamate/gmd2-pokemon):
+
+- `ECS/` (new): entities made of components.
+- `Physics/`, `Collision/CollisionRegistry` (new): colliders, rigidbodies and collision pairs.
+- `Particles/` (new): a data-oriented particle system.
+- `Collections/ObjectPool` (new).
+- `Input/MouseInfo`, `Input/GamePadInfo` (new).
+- `Core`: runs game logic in fixed 60 Hz steps with an accumulator, so the game can render
+  as fast as it likes while the simulation stays stable.
+- `Input/InputManager`, `Input/KeyboardInfo`: input is sampled every frame and handed to
+  the game once per logic step, so quick taps are never lost.
+- `States/`: a `DrawHUD` pass after post-processing (bloom), and `Draw` is optional.
+
 ## Repository Layout
 
 The repository is intentionally split into a core library and the game, plus a content builder:
@@ -58,7 +73,7 @@ This means the code is intentionally split between:
 
 Its job is to:
 - update frame timing, input, assets, audio, and performance tracking
-- own the active game state
+- own the state stack (play and game-over states)
 - coordinate drawing
 
 Mutable runtime state is grouped into small service objects and exposed through [PlayContext](GeometryWars6/Services/PlayContext.cs), which is passed into gameplay code.
