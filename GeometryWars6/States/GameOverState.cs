@@ -1,4 +1,4 @@
-using GMDCore;
+using GMDCore.States;
 using GeometryWars6.Services;
 using GeometryWars6.Systems;
 using Microsoft.Xna.Framework;
@@ -25,16 +25,19 @@ public sealed class GameOverState : GameStateBase
         _session.Shutdown();
     }
 
-    public override void Update()
+    public override void Update(GameTime gameTime)
     {
         _session.Grid.Update();
         _session.Particles.Update();
 
         if (_context.Controller.WasConfirmPressed)
-            _game.SetState(new PlayState(_game, _context));
+        {
+            _game.StateStack.Pop();
+            _game.StateStack.Push(new PlayState(_game, _context));
+        }
     }
 
-    public override void DrawWorld(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
         _session.Grid.Draw(spriteBatch, _context.Assets.Pixel);

@@ -1,4 +1,5 @@
 using GMDCore;
+using GMDCore.States;
 using GeometryWars0.Input;
 using GeometryWars0.Services;
 using GeometryWars0.Systems;
@@ -15,12 +16,16 @@ public sealed class Game1 : Core
     private GameController Controller { get; }
     public PlayContext PlayContext { get; }
 
-    public Game1() : base(GameSettings.Window.Width, GameSettings.Window.Height)
+    public Game1() : base("Geometry Wars", GameSettings.Window.Width, GameSettings.Window.Height,
+               GameSettings.Window.Width, GameSettings.Window.Height)
     {
         Controller = new GameController(Input);
         PlayContext = new PlayContext(Frame, Controller, Assets, Performance);
         Graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
+        IsMouseVisible = false;
+        Window.AllowUserResizing = false;
+        StateStack = new StateStack();
     }
 
     protected override void Initialize()
@@ -29,13 +34,7 @@ public sealed class Game1 : Core
 
         Frame.Update(new GameTime(), GraphicsDevice.Viewport);
 
-        SetState(new PlayState(this, PlayContext));
-    }
-
-    protected override void Update(GameTime gameTime)
-    {
-        Performance.Update(gameTime);
-        base.Update(gameTime);
+        StateStack.Push(new PlayState(this, PlayContext));
     }
 
     protected override void LoadContent()
@@ -43,16 +42,19 @@ public sealed class Game1 : Core
         Assets.Load(Content);
     }
 
-    protected override void OnUpdateInput()
+    protected override void UpdateGame(GameTime gameTime)
     {
-        base.OnUpdateInput();
         Controller.Update();
+        Frame.Update(gameTime, GraphicsDevice.Viewport);
+        StateStack.Update(gameTime);
     }
 
-    protected override bool ShouldExit() => Controller.WasExitPressed;
-
-    protected override void RegisterServices(GameTime gameTime)
+    protected override void Draw(GameTime gameTime)
     {
-        Frame.Update(gameTime, GraphicsDevice.Viewport);
+        Performance.Update(gameTime);
+        GraphicsDevice.Clear(Color.Black);
+        StateStack.Draw(SpriteBatch);
+        base.Draw(gameTime);
+        StateStack.DrawHUD(SpriteBatch);
     }
 }

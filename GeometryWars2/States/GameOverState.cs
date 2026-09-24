@@ -1,4 +1,4 @@
-using GMDCore;
+using GMDCore.States;
 using GeometryWars2.Services;
 using GeometryWars2.Systems;
 using Microsoft.Xna.Framework;
@@ -25,10 +25,13 @@ public sealed class GameOverState : GameStateBase
         _session.Shutdown();
     }
 
-    public override void Update()
+    public override void Update(GameTime gameTime)
     {
         if (_context.Controller.WasConfirmPressed)
-            _game.SetState(new PlayState(_game, _context));
+        {
+            _game.StateStack.Pop();
+            _game.StateStack.Push(new PlayState(_game, _context));
+        }
     }
 
     public override void DrawHUD(SpriteBatch spriteBatch)

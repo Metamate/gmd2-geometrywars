@@ -1,4 +1,4 @@
-using GMDCore;
+using GMDCore.States;
 using GeometryWars1.Services;
 using GeometryWars1.Systems;
 using Microsoft.Xna.Framework;
@@ -32,7 +32,7 @@ public sealed class PlayState : GameStateBase
         _session = null;
     }
 
-    public override void Update()
+    public override void Update(GameTime gameTime)
     {
         if (_context.Controller.WasPausePressed)
             _paused = !_paused;
@@ -45,7 +45,7 @@ public sealed class PlayState : GameStateBase
         _session.Update();
     }
 
-    public override void DrawWorld(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
         _session.Entities.Draw(spriteBatch);

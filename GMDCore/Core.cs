@@ -1,112 +1,149 @@
-using System;
+﻿using System;
 using GMDCore.Input;
+using GMDCore.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace GMDCore;
 
-// Base game class that owns the state machine.
-//
-// Implementation Note: Fixed-Timestep Accumulator
-// We implement our own logic loop to allow uncapped rendering (VSync off)
-// while keeping gameplay simulation deterministic at 60Hz. This prevents
-// physics (like the spring grid) from breaking at high frame rates.
-public abstract class Core : Game
+public class Core : Game
 {
+    private readonly int _virtualWidth;
+    private readonly int _virtualHeight;
     protected GraphicsDeviceManager Graphics;
-    public SpriteBatch SpriteBatch { get; private set; }
-    public InputManager Input { get; } = new();
+    // Where the final virtual-resolution image should be drawn inside the window.
+    // If the window aspect ratio differs from the virtual one, this rectangle is
+    // centered and leaves black bars around it.
+    public static Rectangle DestinationRectangle { get; private set; }
+    public SpriteBatch SpriteBatch { get; set; }
+    public static InputManager Input { get; set; } = new();
+    public StateStack StateStack { get; protected set; }
 
-    private GameStateBase _activeState;
-    private double _accumulator;
-    private readonly GameTime _fixedGameTime = new();
+    // 1×1 white pixel texture for drawing solid-color rectangles.
+    public static Texture2D Pixel { get; private set; }
 
-    protected GameStateBase ActiveState => _activeState;
+    private static readonly TimeSpan MaxAccumulated = TimeSpan.FromSeconds(0.25);
+    private readonly GameTime _logicTime = new();
+    private TimeSpan _accumulator;
 
-    protected Core(int width, int height)
+    public Core(string title, int windowWidth, int windowHeight, int virtualWidth, int virtualHeight)
     {
+        _virtualWidth = virtualWidth;
+        _virtualHeight = virtualHeight;
         Graphics = new GraphicsDeviceManager(this)
         {
-            PreferredBackBufferWidth = width,
-            PreferredBackBufferHeight = height,
+            PreferredBackBufferWidth = windowWidth,
+            PreferredBackBufferHeight = windowHeight,
         };
         Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+        Window.Title = title;
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += (s, e) => UpdatePresentation();
     }
 
     protected override void Initialize()
     {
         SpriteBatch = new SpriteBatch(GraphicsDevice);
+        Pixel = new Texture2D(GraphicsDevice, 1, 1);
+        Pixel.SetData(new[] { Color.White });
+        UpdatePresentation();
         base.Initialize();
     }
 
-    public void SetState(GameStateBase newState)
+    // The engine owns the per-frame order: input first, then game logic.
+    // Derived games override UpdateGame instead of Update so they always see
+    // the newest input snapshot.
+    //
+    // Game logic runs in fixed steps of TargetElapsedTime (1/60 s by default), however
+    // often the game renders. With MonoGame's fixed timestep on (the default) that is
+    // exactly one step per frame. A game can turn it off to render as fast as possible
+    // and still keep a stable simulation.
+    protected sealed override void Update(GameTime gameTime)
     {
-        _activeState?.Exit();
-        _activeState = newState;
-        _activeState?.Enter();
-    }
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
 
-    protected virtual void RegisterServices(GameTime gameTime) { }
-
-    protected virtual void OnUpdateInput()
-    {
-        Input.AdvanceLogicTick();
-    }
-
-    // Override to provide a game-specific exit condition.
-    // ShouldExit() is called after OnUpdateInput(), so Input is current.
-    protected virtual bool ShouldExit()
-        => Input.Keyboard.IsKeyDown(Keys.Escape) ||
-           Input.GamePad.IsButtonDown(Buttons.Back);
-
-    protected override void Update(GameTime gameTime)
-    {
+        // Pause while the window is in the background.
         if (!IsActive)
         {
             base.Update(gameTime);
             return;
         }
 
+        // Sample input every frame, so a key press between two logic steps isn't lost.
         Input.SampleFrame();
 
-        // 60Hz fixed logic step
-        const double timeStep = 1.0 / 60.0;
-        _accumulator += gameTime.ElapsedGameTime.TotalSeconds;
+        _accumulator += gameTime.ElapsedGameTime;
 
-        // Prevent "spiral of death" if the simulation falls too far behind
-        if (_accumulator > 0.25) _accumulator = 0.25;
+        // If the game falls far behind, skip ahead instead of trying to catch up forever.
+        if (_accumulator > MaxAccumulated)
+            _accumulator = MaxAccumulated;
 
-        while (_accumulator >= timeStep)
+        while (_accumulator >= TargetElapsedTime)
         {
-            _fixedGameTime.ElapsedGameTime = TimeSpan.FromSeconds(timeStep);
-            _fixedGameTime.TotalGameTime += TimeSpan.FromSeconds(timeStep);
+            _logicTime.ElapsedGameTime = TargetElapsedTime;
+            _logicTime.TotalGameTime += TargetElapsedTime;
 
-            OnUpdateInput();
-            if (ShouldExit()) { Exit(); return; }
-            RegisterServices(_fixedGameTime);
-            _activeState?.Update();
+            Input.AdvanceLogicTick();
+            UpdateGame(_logicTime);
 
-            _accumulator -= timeStep;
+            _accumulator -= TargetElapsedTime;
         }
 
         base.Update(gameTime);
     }
 
-    // Runs MonoGame's DrawableGameComponent pipeline (for example BloomComponent).
-    // This is invoked after the world is rendered and before HUD/UI is drawn.
-    protected void DrawRegisteredComponents(GameTime gameTime) => base.Draw(gameTime);
+    protected virtual void UpdateGame(GameTime gameTime) { }
 
-    // Override to inject work right before the world is rendered
-    // (for example, redirecting draw output into a post-process render target).
-    protected virtual void OnBeforeDrawWorld() { }
+    // Standard draw setup for game states: draw in virtual coordinates with
+    // point sampling. Game1 handles scaling the final render target to the window.
+    public static void BeginDraw(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+    }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
-        OnBeforeDrawWorld();
-        _activeState?.DrawWorld(SpriteBatch);
-        DrawRegisteredComponents(gameTime);
-        _activeState?.DrawHUD(SpriteBatch);
+        base.Draw(gameTime);
+    }
+
+    // Recompute the centered destination rectangle that preserves the virtual
+    // aspect ratio inside the current window.
+    private void UpdatePresentation()
+    {
+        float screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
+        float screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
+        float currentWidth, currentHeight;
+
+        if (screenWidth / _virtualWidth > screenHeight / _virtualHeight)
+        {
+            float aspect = screenHeight / _virtualHeight;
+            currentWidth = aspect * _virtualWidth;
+            currentHeight = screenHeight;
+        }
+        else
+        {
+            float aspect = screenWidth / _virtualWidth;
+            currentWidth = screenWidth;
+            currentHeight = aspect * _virtualHeight;
+        }
+
+        DestinationRectangle = new Rectangle(
+            (int)(screenWidth / 2 - currentWidth / 2),
+            (int)(screenHeight / 2 - currentHeight / 2),
+            (int)currentWidth,
+            (int)currentHeight);
+
+        GraphicsDevice.Viewport = new()
+        {
+            X = DestinationRectangle.X,
+            Y = DestinationRectangle.Y,
+            Width = DestinationRectangle.Width,
+            Height = DestinationRectangle.Height,
+            MinDepth = 0,
+            MaxDepth = 1,
+        };
     }
 }
