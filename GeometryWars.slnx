@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="Content/Content.csproj" />
+  <Project Path="GMDCore/GMDCore.csproj" />
+  <Project Path="GeometryWars0/GeometryWars0.csproj" />
+  <Project Path="GeometryWars1/GeometryWars1.csproj" />
+  <Project Path="GeometryWars2/GeometryWars2.csproj" />
+  <Project Path="GeometryWars3/GeometryWars3.csproj" />
+  <Project Path="GeometryWars4/GeometryWars4.csproj" />
+  <Project Path="GeometryWars5/GeometryWars5.csproj" />
+  <Project Path="GeometryWars6/GeometryWars6.csproj" />
+</Solution>
